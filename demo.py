@@ -45,7 +45,8 @@ print("Production")
 sampler.run_mcmc(p0, 200)
 
 print("Triangle plot")
-fig = triangle.corner(sampler.flatchain, truths=m_true, labels=["x", "y", "z"])
+fig = triangle.corner(sampler.flatchain, truths=m_true,
+                      labels=["$m_0$", "$m_1$", "$m_2$"])
 fig.savefig("triangle.png")
 
 print("Traces")
