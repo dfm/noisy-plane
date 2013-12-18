@@ -6,7 +6,7 @@ from scipy.misc import logsumexp
 
 # Generate true values.
 N = 50
-m_true = [0.5, 1.0, 2.5]
+m_true = [0.5, 1.0, 0.1]
 x = 1 + 4*np.random.rand(N)
 y = 10 + 40*np.random.rand(N)
 z = m_true[0]+m_true[1]*x+m_true[2]*y
@@ -14,14 +14,14 @@ z = m_true[0]+m_true[1]*x+m_true[2]*y
 # Observational uncertainties.
 x_err = 0.01+0.01*np.random.rand(N)
 y_err = 1.0+1.0*np.random.rand(N)
-z_err = 0.5+0.1*np.random.rand(N)
+z_err = 0.01+0.05*np.random.rand(N)
 
 z_obs = z+z_err*np.random.randn(N)
 x_obs = x+x_err*np.random.randn(N)
 y_obs = y+y_err*np.random.randn(N)
 
 # Draw posterior samples.
-K = 1000
+K = 500
 x_samp = np.vstack([x0+xe*np.random.randn(K) for x0, xe in zip(x_obs, x_err)])
 y_samp = np.vstack([y0+ye*np.random.randn(K) for y0, ye in zip(y_obs, y_err)])
 
@@ -41,15 +41,15 @@ sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob)
 print("Burn-in")
 p0, lp, state = sampler.run_mcmc(p0, 100)
 sampler.reset()
-print("Production")
-sampler.run_mcmc(p0, 200)
+print("Production run")
+sampler.run_mcmc(p0, 500)
 
-print("Triangle plot")
+print("Making triangle plot")
 fig = triangle.corner(sampler.flatchain, truths=m_true,
                       labels=["$m_0$", "$m_1$", "$m_2$"])
 fig.savefig("triangle.png")
 
-print("Traces")
+print("Plotting traces")
 pl.figure()
 for i in range(ndim):
     pl.clf()
