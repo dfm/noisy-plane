@@ -5,6 +5,7 @@ import matplotlib.pyplot as pl
 from scipy.misc import logsumexp
 
 def model(m, x, y):
+    print y
     return m[0] * x + np.log10(m[1]) + m[2]*np.log10(y - m[3])
 
 def log_errorbar(y, errp, errm):
@@ -38,12 +39,6 @@ z = np.random.uniform(0.4,1.2,len(y))
 zerr = np.ones_like(z) * 0.05
 l = z < 0.4
 
-# Resample those points that are less than 0.4
-while l.sum() > 0:
-    z[l] = np.random.uniform(0.4,1.2,l.sum())
-    zerr[l] = np.ones_like(z[l]) * 0.005
-    l = z < 0.4
-
 m_true = [0.5189,  0.7725, 0.601, 0.4]
 y = model(m_true, np.log10(x), z) #+ np.random.randn(len(age)) # Fake y data
 
@@ -55,36 +50,58 @@ y = np.log10(y)
 xerr = log_errorbar(x, xerrp, xerrm)
 yerr = log_errorbar(y, yerrp, yerrm)
 
+
 # Make up uncertainties for now.
 N = len(x)
 xerr = 0.01+0.01*np.random.rand(N)
 yerr = 0.01+0.01*np.random.rand(N)
 zerr = 0.01+0.01*np.random.rand(N)
 
-# Generate true values.
-N = 50
-x = 1 + 4*np.random.rand(N)
-y = 10 + 40*np.random.rand(N)
-z = model(m_true, x, y)
+# # Generate true values.
+# N = 50
+# x = 1 + 4*np.random.rand(N)
+# y = 0.3 + np.random.rand(N)
+# z = model(m_true, x, y)
 
-# observational uncertainties.
-x_err = 0.01+0.01*np.random.rand(N)
-y_err = 1.0+1.0*np.random.rand(N)
-z_err = 0.01+0.05*np.random.rand(N)
+# # observational uncertainties.
+# x_err = 0.01+0.01*np.random.rand(N)
+# y_err = 1.0+1.0*np.random.rand(N)
+# z_err = 0.01+0.05*np.random.rand(N)
 
-z_obs = z+z_err*np.random.randn(N)
-x_obs = x+x_err*np.random.randn(N)
-y_obs = y+y_err*np.random.randn(N)
+# z_obs = z+z_err*np.random.randn(N)
+# x_obs = x+x_err*np.random.randn(N)
+# y_obs = y+y_err*np.random.randn(N)
+ 
+# Resample those points that are less than 0.4
+while l.sum() > 0:
+    z[l] = np.random.uniform(0.4,1.2,l.sum())
+    zerr[l] = np.ones_like(z[l]) * 0.005
+    l = z < 0.4
+
+# print x_obs[:5]
+# print y_obs[:5]
+# print z_obs[:5]
+# print xerr[:5]
+# print yerr[:5]
+# print zerr[:5]
+
+print x[:5] # t
+print y[:5] # P
+print z[:5] # B-V
+print xerr[:5]
+print yerr[:5]
+
+raw_input('enter')
 
 # Draw posterior samples.
 K = 500
-x_samp = np.vstack([x0+xe*np.random.randn(K) for x0, xe in zip(x_obs, x_err)])
-y_samp = np.vstack([y0+ye*np.random.randn(K) for y0, ye in zip(y_obs, y_err)])
+x_samp = np.vstack([x0+xe*np.random.randn(K) for x0, xe in zip(x, xerr)])
+y_samp = np.vstack([y0+ye*np.random.randn(K) for y0, ye in zip(y, yerr)])
 
 # Define the marginalized likelihood function.
 def lnlike(m):
     z_pred = model(m, x_samp, y_samp)
-    chi2 = -0.5*((z_obs[:, None] - z_pred)/z_err[:, None])**2
+    chi2 = -0.5*((z[:, None] - z_pred)/zerr[:, None])**2
     return np.sum(np.logaddexp.reduce(chi2, axis=1))
 #     return np.sum(logsumexp(chi2, axis=1))
 
@@ -116,15 +133,9 @@ fig.savefig("triangle.png")
 
 print("Plotting traces")
 pl.figure()
-for i in range(ndim):
-    pl.clf()
-    pl.plot(sampler.chain[:, :, i].T)
-    pl.savefig("{0}.png".format(i))
-
-pl.figure()
 labels = ['n', 'a', 'b', 'c']
-for j in range(len(m_true)):
-    pl.subplot(len(m_true),1,j)
+for j in range(ndim):
+    pl.subplot(ndim,1,j)
     [pl.plot(sampler.chain[i, :, j], 'k-', \
         alpha = 0.2) for i in range(nwalkers)]
     pl.axhline(m_true[j], color = 'r')
