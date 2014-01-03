@@ -37,31 +37,18 @@ y_samp = np.vstack([y0+ye*np.random.randn(K) for y0, ye in zip(y_obs, y_err)])
 def lnlike(m):
     z_pred = model(m, x_samp, y_samp)
     chi2 = -0.5*((z_obs[:, None] - z_pred)/z_err[:, None])**2
-    return np.sum(logsumexp(chi2))
-
-# Flat priors
-# def lnprior(m): 
-#     p = 0.5
-#     if m_true[0]-p < m[0] < m_true[0]+p and m_true[1]-p < m[1] < m_true[1]+p \
-#     and m_true[2]-p < m[2] < m_true[2]+p: 
-#         return 0.0
-#     return -np.inf
+    return np.sum(np.logaddexp.reduce(chi2, axis=1))
 
 def lnprior(m):
-#     print np.any(m>1.), m   
-    if np.any(1.<m)==False and np.any(m<0.)==False:
+    if np.any(m<0.)==False and np.any(1.<m)==False:
         return 0.0
     return -np.inf
         
 def lnprob(m):
     lp = lnprior(m)
-#     print m, lp
     if not np.isfinite(lp):
         return -np.inf
     return lp + lnlike(m)
-
-# def lnprob(m):
-#     return lnlike(m)
 
 # Sample the posterior probability for m.
 nwalkers, ndim = 32, len(m_true)
@@ -73,10 +60,9 @@ sampler.reset()
 print("Production run")
 sampler.run_mcmc(p0, 500)
 
-
 print("Making triangle plot")
 # fig = triangle.corner(sampler.flatchain, truths=m_true,
-#                       labels=["$m_0$", "$m_1$", "$m_2$", "$m_3$"])
+#                       labels=["$n$", "$a$", "$b$", "$c$"])
 fig = triangle.corner(sampler.flatchain, truths=m_true,
                       labels=["$m_0$", "$m_1$", "$m_2$"])
 fig.savefig("triangle.png")
@@ -98,4 +84,3 @@ mcmc_result = map(lambda v: (v[1], v[2]-v[1], v[1]-v[0]),
 print 'initial values', m_true
 mcmc_result = np.array(mcmc_result)[:,0]
 print 'mcmc result', mcmc_result
-
