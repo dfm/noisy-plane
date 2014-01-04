@@ -5,7 +5,6 @@ import matplotlib.pyplot as pl
 from scipy.misc import logsumexp
 
 def model(m, x, y):
-    print y
     return m[0] * x + np.log10(m[1]) + m[2]*np.log10(y - m[3])
 
 def log_errorbar(y, errp, errm):
@@ -26,30 +25,28 @@ period = data[1]
 a = (period > 1.) * (logg > 4.) * (mass < 1.3)
 
 # Assign variable names
-x = data[1][a]
-xerrp = data[2][a]
-xerrm = data[2][a]
-y = data[3][a]*1000 # Convert to Myr
-yerrp = data[4][a]*1000
-yerrm = data[5][a]*1000
+z = data[1][a]
+zerrp = data[2][a]
+zerrm = data[2][a]
+x = data[3][a]*1000 # Convert to Myr
+xerrp = data[4][a]*1000
+xerrm = data[5][a]*1000
 
 # Fake data
-x = np.random.uniform(2,60,len(y)) # Fake x data
-z = np.random.uniform(0.4,1.2,len(y))
-zerr = np.ones_like(z) * 0.05
-l = z < 0.4
-
-m_true = [0.5189,  0.7725, 0.601, 0.4]
-y = model(m_true, np.log10(x), z) #+ np.random.randn(len(age)) # Fake y data
+z = np.random.uniform(2,60,len(z)) # Fake z data
+y = np.random.uniform(0.4,1.2,len(z))
+yerr = np.ones_like(y) * 0.05
+l = y < 0.4
 
 # Take logs
 x = np.log10(x)
-y = np.log10(y)
+
+m_true = [0.5189,  0.7725, 0.601, 0.4]
+z = model(m_true, x, y) #+ np.random.randn(len(age)) # Fake z data
 
 # Calculate logarithmic errorbars
 xerr = log_errorbar(x, xerrp, xerrm)
-yerr = log_errorbar(y, yerrp, yerrm)
-
+zerr = log_errorbar(z, zerrp, zerrm)
 
 # Make up uncertainties for now.
 N = len(x)
@@ -57,39 +54,18 @@ xerr = 0.01+0.01*np.random.rand(N)
 yerr = 0.01+0.01*np.random.rand(N)
 zerr = 0.01+0.01*np.random.rand(N)
 
-# # Generate true values.
-# N = 50
-# x = 1 + 4*np.random.rand(N)
-# y = 0.3 + np.random.rand(N)
-# z = model(m_true, x, y)
-
-# # observational uncertainties.
-# x_err = 0.01+0.01*np.random.rand(N)
-# y_err = 1.0+1.0*np.random.rand(N)
-# z_err = 0.01+0.05*np.random.rand(N)
-
-# z_obs = z+z_err*np.random.randn(N)
-# x_obs = x+x_err*np.random.randn(N)
-# y_obs = y+y_err*np.random.randn(N)
- 
 # Resample those points that are less than 0.4
 while l.sum() > 0:
-    z[l] = np.random.uniform(0.4,1.2,l.sum())
-    zerr[l] = np.ones_like(z[l]) * 0.005
-    l = z < 0.4
+    y[l] = np.random.uniform(0.4,1.2,l.sum())
+    yerr[l] = np.ones_like(y[l]) * 0.005
+    l = y < 0.4
 
-# print x_obs[:5]
-# print y_obs[:5]
-# print z_obs[:5]
-# print xerr[:5]
-# print yerr[:5]
-# print zerr[:5]
-
-print x[:5] # t
-print y[:5] # P
-print z[:5] # B-V
-print xerr[:5]
-print yerr[:5]
+print 10**x[:5], 't'
+print y[:5], 'B-V'
+print 10**z[:5], 'P'
+print xerr[:5], 't_err'
+print yerr[:5], "bv_err"
+print zerr[:5], "P_err"
 
 raw_input('enter')
 
@@ -101,9 +77,31 @@ y_samp = np.vstack([y0+ye*np.random.randn(K) for y0, ye in zip(y, yerr)])
 # Define the marginalized likelihood function.
 def lnlike(m):
     z_pred = model(m, x_samp, y_samp)
+    sr = 1.0/(zerr[:, None]**2) * (z[:, None]-z_pred)**2
+#     print np.shape(z_pred), np.shape(z[:, None])
+#     print np.shape(sr), 'sr'
+    l = np.isfinite(sr)
+    N = l.sum()
     chi2 = -0.5*((z[:, None] - z_pred)/zerr[:, None])**2
-    return np.sum(np.logaddexp.reduce(chi2, axis=1))
-#     return np.sum(logsumexp(chi2, axis=1))
+#     arr = np.shape(chi2)
+#     print arr, 'arr'
+#     ar = np.ndarray(arr, dtype = bool)
+#     print np.shape(ar), 'ar'
+    chi2[np.isnan(chi2)] = 0.
+#     newchi2 = chi2[np.isfinite(chi2, ar)] # this is shorter than before
+#     print np.shape(newchi2)
+#     chi2 = np.reshape(newchi2, arr)
+#     print np.shape(chi2)
+    return float(N) * np.sum(np.logaddexp.reduce(chi2, axis=1))
+
+# def lnlike(m):
+#     scaled_residuals = 1.0/(zerr[:, None]**2) * (z[:,None]-model(m, x_samp, y_samp))**2
+#     l = np.isfinite(scaled_residuals)
+#     N = l.sum()
+#     logL = - 0.5 * float(N) * np.log(2 * np.pi) \
+#       - np.log(yerr[l]).sum() \
+#       - 0.5 * np.logsumexp(scaled_residuals[l])
+#     return logL
 
 def lnprior(m):
     if np.any(m<0.)==False and np.any(1.<m)==False:
