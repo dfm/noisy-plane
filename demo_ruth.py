@@ -31,9 +31,9 @@ period = data[1]
 a = (period > 1.) * (logg > 4.) * (mass < 1.3)
 
 # Assign variable names
-z = data[1][a]
-zerrp = data[2][a]
-zerrm = data[2][a]
+x = data[1][a]
+xerrp = data[2][a]
+xerrm = data[2][a]
 z = data[3][a]*1000 # Convert to Myr
 zerrp = data[4][a]*1000
 zerrm = data[5][a]*1000
