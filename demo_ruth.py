@@ -9,6 +9,9 @@ from scipy.misc import logsumexp
 #     n, a, b, c = m
 #     return n * x + np.log10(a) + b*np.log10(y - c)
 
+# def model(m, x, y): # now model computes log(t) from log(p) and bv
+#     return 1./m[0] * ( x - np.log10(m[1]) - m[2]*np.log10(y - m[3]))
+
 def model(m, x, y):
     return m[0]+m[1]*x+m[2]*y
 
@@ -29,17 +32,43 @@ z_obs = z+z_err*np.random.randn(N)
 x_obs = x+x_err*np.random.randn(N)
 y_obs = y+y_err*np.random.randn(N)
 
+# # Switch x and z
+# x2 = x; xerr2 = xerr
+# x = z; xerr = zerr
+# z = x2; zerr = xerr2
+
 # Draw posterior samples.
 K = 500
 x_samp = np.vstack([x0+xe*np.random.randn(K) for x0, xe in zip(x_obs, x_err)])
 y_samp = np.vstack([y0+ye*np.random.randn(K) for y0, ye in zip(y_obs, y_err)])
 
+# # Define the marginalized likelihood function.
+# def lnlike(m):
+#     z_pred = model(m, x_samp, y_samp)
+#     chi2 = -0.5*((z_obs[:, None] - z_pred)/z_err[:, None])**2
+#     return np.sum(np.logaddexp.reduce(chi2, axis=1))
+
+# def lnlike(m):
+#     scaled_residuals = 1.0/(z_err[:, None]**2) * (z[:, None]-model(m, x_samp, y_samp))**2
+#     l = np.isfinite(scaled_residuals)
+#     N = l.sum()
+#     z_err[np.isfinite(z_err)] = 0.
+#     scaled_residuals[np.isfinite(scaled_residuals)] = 0.
+#     logL = - 0.5 * float(N) * np.log(2 * np.pi) \
+#       - np.log(z_err[:, None]).sum() \
+#       - 0.5 * scaled_residuals.sum()
+#     return logL
+ 
 # Define the marginalized likelihood function.
 def lnlike(m):
     z_pred = model(m, x_samp, y_samp)
-    chi2 = -0.5*((z_obs[:, None] - z_pred)/z_err[:, None])**2
-    return np.sum(np.logaddexp.reduce(chi2, axis=1))
-
+    sr = 1.0/(z_err[:, None]**2) * (z[:, None]-z_pred)**2
+    l = np.isfinite(sr)
+    chi2 = -0.5*((z[:, None] - z_pred)/z_err[:, None])**2
+    chi2[np.isnan(chi2)] = 0.
+    print np.sum(np.logaddexp.reduce(chi2, axis=1))/float(N)
+    return np.sum(np.logaddexp.reduce(chi2, axis=1))/float(N)
+ 
 def lnprior(m):
     if np.any(m<0.)==False and np.any(1.<m)==False:
         return 0.0
