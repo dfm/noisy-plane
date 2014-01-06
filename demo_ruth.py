@@ -1,11 +1,17 @@
+# get working with noisy data
+# get working with real data
+# Change the model and change z to age, x to period and y to colour
 import emcee
 import triangle
 import numpy as np
 import matplotlib.pyplot as pl
 from scipy.misc import logsumexp
 
-def model(m, x, y):
-    return m[0] * x + np.log10(m[1]) + m[2]*np.log10(y - m[3])
+# def model(m, x, y):
+#     return m[0] * x + np.log10(m[1]) + m[2]*np.log10(y - m[3])
+
+def model(m, x, y): # now model computes log(t) from log(p) and bv
+    return 1./m[0] * ( x - np.log10(m[1]) - m[2]*np.log10(y - m[3]))
 
 def log_errorbar(y, errp, errm):
     plus = y + errp
@@ -28,9 +34,9 @@ a = (period > 1.) * (logg > 4.) * (mass < 1.3)
 z = data[1][a]
 zerrp = data[2][a]
 zerrm = data[2][a]
-x = data[3][a]*1000 # Convert to Myr
-xerrp = data[4][a]*1000
-xerrm = data[5][a]*1000
+z = data[3][a]*1000 # Convert to Myr
+zerrp = data[4][a]*1000
+zerrm = data[5][a]*1000
 
 # make up colours
 y = np.random.uniform(0.4,1.2,len(z))
@@ -38,21 +44,21 @@ yerr = np.ones_like(y) * 0.05
 l = y < 0.4
 
 # Take logs
-x = np.log10(x)
+z = np.log10(z)
 # z = np.log10(z) # remove this line if using fake data
 
 m_true = [0.5189,  0.7725, 0.601, 0.4]
 z = model(m_true, x, y) #+ np.random.randn(len(age)) # Fake z data
 
 # Calculate logarithmic errorbars
-xerr = log_errorbar(x, xerrp, xerrm)
 zerr = log_errorbar(z, zerrp, zerrm)
+xerr = log_errorbar(x, xerrp, xerrm)
 
 # # Make up uncertainties for now
-N = len(x)
-xerr = 0.01+0.01*np.random.rand(N)
-yerr = 0.01+0.01*np.random.rand(N)
+N = len(z)
 zerr = 0.01+0.01*np.random.rand(N)
+yerr = 0.01+0.01*np.random.rand(N)
+xerr = 0.01+0.01*np.random.rand(N)
 
 # Resample those points that are less than 0.4
 while l.sum() > 0:
@@ -60,12 +66,12 @@ while l.sum() > 0:
     yerr[l] = np.ones_like(y[l]) * 0.005
     l = y < 0.4
 
-print 10**x[:5], 't'
+print 10**z[:5], 't'
 print y[:5], 'B-V'
-print 10**z[:5], 'P'
-print xerr[:5], 't_err'
+print 10**x[:5], 'P'
+print zerr[:5], 't_err'
 print yerr[:5], "bv_err"
-print zerr[:5], "P_err"
+print xerr[:5], "P_err"
 
 raw_input('enter')
 
