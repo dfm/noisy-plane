@@ -7,11 +7,11 @@ import numpy as np
 import matplotlib.pyplot as pl
 from scipy.misc import logsumexp
 
-# def model(m, x, y):
-#     return m[0] * x + np.log10(m[1]) + m[2]*np.log10(y - m[3])
+def model(m, x, y):
+    return m[0] * x + np.log10(m[1]) + m[2]*np.log10(y - m[3])
 
-def model(m, x, y): # now model computes log(t) from log(p) and bv
-    return 1./m[0] * ( x - np.log10(m[1]) - m[2]*np.log10(y - m[3]))
+# def model(m, x, y): # now model computes log(t) from log(p) and bv
+#     return 1./m[0] * ( x - np.log10(m[1]) - m[2]*np.log10(y - m[3]))
 
 def log_errorbar(y, errp, errm):
     plus = y + errp
@@ -44,11 +44,12 @@ yerr = np.ones_like(y) * 0.05
 l = y < 0.4
 
 # Take logs
-z = np.log10(z)
-# z = np.log10(z) # remove this line if using fake data
+x = np.log10(x)
+z = np.log10(z) # remove this line if using fake data
 
 m_true = [0.5189,  0.7725, 0.601, 0.4]
-z = model(m_true, x, y) #+ np.random.randn(len(age)) # Fake z data
+# z = model(m_true, x, y) #+ np.random.randn(len(age)) # Fake z data
+x = model(m_true, z, y) #+ np.random.randn(len(age)) # Fake x data
 
 # Calculate logarithmic errorbars
 zerr = log_errorbar(z, zerrp, zerrm)
@@ -65,6 +66,11 @@ while l.sum() > 0:
     y[l] = np.random.uniform(0.4,1.2,l.sum())
     yerr[l] = np.ones_like(y[l]) * 0.005
     l = y < 0.4
+
+# switching x and z - necessary if using the first model
+x2 = x; xerr2 = xerr
+x = z; xerr = zerr
+z = x2; zerr = xerr2
 
 print 10**z[:5], 't'
 print y[:5], 'B-V'
@@ -101,14 +107,14 @@ def lnprob(m):
     return lp + lnlike(m)
 
 # Sample the posterior probability for m.
-nwalkers, ndim = 32, len(m_true)
-p0 = [m_true+1e-4*np.random.rand(ndim) for i in range(nwalkers)]
+nwalkers, ndim = 100, len(m_true)
+p0 = [m_true+1e-2*np.random.rand(ndim) for i in range(nwalkers)]
 sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob)
 print("Burn-in")
 p0, lp, state = sampler.run_mcmc(p0, 100)
 sampler.reset()
 print("Production run")
-sampler.run_mcmc(p0, 500)
+sampler.run_mcmc(p0, 600)
 
 print("Making triangle plot")
 fig = triangle.corner(sampler.flatchain, truths=m_true,
