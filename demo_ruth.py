@@ -87,7 +87,7 @@ def lnlike(m):
     N = (np.isfinite(sr)).sum()
     chi2 = -0.5*((z[:, None] - z_pred)/zerr[:, None])**2
     chi2[np.isnan(chi2)] = 0.
-    return float(N) * np.sum(np.logaddexp.reduce(chi2, axis=1))
+    return np.sum(np.logaddexp.reduce(chi2, axis=1))/float(N)
 
 def lnprior(m):
     if np.any(m<0.)==False and np.any(1.<m)==False:
