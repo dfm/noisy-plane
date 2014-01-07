@@ -42,32 +42,33 @@ K = 500
 x_samp = np.vstack([x0+xe*np.random.randn(K) for x0, xe in zip(x_obs, x_err)])
 y_samp = np.vstack([y0+ye*np.random.randn(K) for y0, ye in zip(y_obs, y_err)])
 
-# # Define the marginalized likelihood function.
+# Dan's original lhf
 # def lnlike(m):
 #     z_pred = model(m, x_samp, y_samp)
 #     chi2 = -0.5*((z_obs[:, None] - z_pred)/z_err[:, None])**2
+#     print np.sum(np.logaddexp.reduce(chi2, axis=1))
 #     return np.sum(np.logaddexp.reduce(chi2, axis=1))
 
-# def lnlike(m):
-#     scaled_residuals = 1.0/(z_err[:, None]**2) * (z[:, None]-model(m, x_samp, y_samp))**2
-#     l = np.isfinite(scaled_residuals)
-#     N = l.sum()
-#     z_err[np.isfinite(z_err)] = 0.
-#     scaled_residuals[np.isfinite(scaled_residuals)] = 0.
-#     logL = - 0.5 * float(N) * np.log(2 * np.pi) \
-#       - np.log(z_err[:, None]).sum() \
-#       - 0.5 * scaled_residuals.sum()
-#     return logL
- 
-# Define the marginalized likelihood function.
+# Suzanne's lhf
 def lnlike(m):
-    z_pred = model(m, x_samp, y_samp)
-    sr = 1.0/(z_err[:, None]**2) * (z[:, None]-z_pred)**2
+    sr = 1.0/(z_err[:, None]**2) * (z[:, None]-model(m, x_samp, y_samp))**2
     l = np.isfinite(sr)
-    chi2 = -0.5*((z[:, None] - z_pred)/z_err[:, None])**2
-    chi2[np.isnan(chi2)] = 0.
-    print np.sum(np.logaddexp.reduce(chi2, axis=1))/float(N)
-    return np.sum(np.logaddexp.reduce(chi2, axis=1))/float(N)
+    N = l.sum()
+    z_err[np.isnan(z_err)] = 0.
+    sr[np.isnan(sr)] = 0.
+    logL = - 0.5 * float(N) * np.log(2 * np.pi) \
+      - np.log(z_err[:, None]).sum() \
+      - 0.5 * sr.sum()
+    return logL
+ 
+# def lnlike(m):
+#     z_pred = model(m, x_samp, y_samp)
+#     sr = 1.0/(z_err[:, None]**2) * (z[:, None]-z_pred)**2
+#     N = np.array(((np.isfinite(sr)).sum(axis = 1)), dtype = float)
+#     N[N==0.] = 1.
+#     chi2 = -0.5*((z[:, None] - z_pred)/z_err[:, None])**2
+#     chi2[np.isnan(chi2)] = 0.
+#     return np.sum(np.logaddexp.reduce(chi2, axis=1)/N)
  
 def lnprior(m):
     if np.any(m<0.)==False and np.any(1.<m)==False:
