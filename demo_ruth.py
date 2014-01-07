@@ -90,10 +90,11 @@ y_samp = np.vstack([y0+ye*np.random.randn(K) for y0, ye in zip(y, yerr)])
 def lnlike(m):
     z_pred = model(m, x_samp, y_samp)
     sr = 1.0/(zerr[:, None]**2) * (z[:, None]-z_pred)**2
-    N = (np.isfinite(sr)).sum()
+    N = np.array(((np.isfinite(sr)).sum(axis = 1)), dtype = float)
+    N[N==0.] = 1. 
     chi2 = -0.5*((z[:, None] - z_pred)/zerr[:, None])**2
     chi2[np.isnan(chi2)] = 0.
-    return np.sum(np.logaddexp.reduce(chi2, axis=1))/float(N)
+    return np.sum(np.logaddexp.reduce(chi2, axis=1)/N)
 
 def lnprior(m):
     if np.any(m<0.)==False and np.any(1.<m)==False:
@@ -114,7 +115,7 @@ print("Burn-in")
 p0, lp, state = sampler.run_mcmc(p0, 100)
 sampler.reset()
 print("Production run")
-sampler.run_mcmc(p0, 600)
+sampler.run_mcmc(p0, 500)
 
 print("Making triangle plot")
 fig = triangle.corner(sampler.flatchain, truths=m_true,
