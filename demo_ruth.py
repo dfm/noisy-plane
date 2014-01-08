@@ -60,7 +60,7 @@ y_samp = np.vstack([y0+ye*np.random.randn(K) for y0, ye in zip(y_obs, y_err)])
 #     print - 0.5 * np.logaddexp.reduce(sr, axis = 1), np.shape(0.5 * np.logaddexp.reduce(sr, axis = 1))
 #     logL = - 0.5 * float(N) * np.log(2 * np.pi) \
 #       - sum(np.log(z_err[:, None])) \
-#       - 0.5 * np.logaddexp.reduce(sr, axis = 1)
+#       - 0.5 * sum(sr)
 #     print logL 
 #     return logL
  
@@ -68,20 +68,17 @@ def lnlike(m):
     z_pred = model(m, x_samp, y_samp)
     sr = 1.0/(z_err[:, None]**2) * (z[:, None]-z_pred)**2
     N = np.array(((np.isfinite(sr)).sum(axis = 1)), dtype = float)
-#     print N
+    #FIXME: will N ever be less than 50? if not, don't worry!
+#     raw_input('enter')
     chi2 = -0.5*((z[:, None] - z_pred)/z_err[:, None])**2
-#     chi2[np.isnan(chi2)] = 0.
-    print np.shape(chi2)
-    print len(chi2[0,:]), type(chi2[0,:])
-    print chi2[0,:]
-    chi2[i,:] = [chi2[i,:][np.isfinite(chi2[i,:])] for i in range(len(x_samp))] # remove NaNs
-    print np.shape(chi2)
-    print len(chi2[0,:]), type(chi2[0,:])
-    print chi2[0,:]
-    print type(chi2)
-    raw_input('enter')
-    print (np.logaddexp.reduce(chi2, axis=1))
-    return np.sum(np.logaddexp.reduce(chi2, axis=1))
+    chi2[np.isnan(chi2)] = 0.
+#     chi2[i,:] = [chi2[i,:][np.isfinite(chi2[i,:])] for i in range(len(x_samp))] # remove NaNs
+#     raw_input('enter')
+#     print - 0.5 * len(N) * np.log(2*np.pi) - sum(np.log(z_err[:, None]))\
+#         - 0.5 * np.sum(np.logaddexp.reduce(chi2, axis=1))
+
+    return - 0.5 * len(N) * np.log(2*np.pi) - sum(np.log(z_err[:, None]))\
+        - 0.5 * np.sum(np.logaddexp.reduce(chi2, axis=1))
  
 def lnprior(m):
     if np.any(m<0.)==False and np.any(1.<m)==False:
