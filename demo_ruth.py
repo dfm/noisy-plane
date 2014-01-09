@@ -79,6 +79,25 @@ print zerr[:5], 't_err'
 print yerr[:5], "bv_err"
 print xerr[:5], "P_err"
 
+# define dependencies of t on P, P on BV and t on BV)
+
+pl.close(1)
+pl.figure(1)
+pl.subplot(3,1,1)
+pl.errorbar(10**z, 10**x, xerr=zerr, yerr=xerr, fmt='k.')
+pl.xlabel("t")
+pl.ylabel("P")
+pl.subplot(3,1,2)
+pl.errorbar(x, y, xerr=xerr, yerr=yerr, fmt='k.')
+pl.xlabel("P")
+pl.ylabel("BV")
+pl.subplot(3,1,3)
+pl.errorbar(10**z, y, xerr=zerr, yerr=yerr, fmt = 'k.')
+pl.xlabel("t")
+pl.ylabel("BV")
+pl.show()
+
+
 raw_input('enter')
 
 # Draw posterior samples.
