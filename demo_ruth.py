@@ -7,11 +7,11 @@ import numpy as np
 import matplotlib.pyplot as pl
 from scipy.misc import logsumexp
 
-def model(m, x, y):
-    return m[0] * x + np.log10(m[1]) + m[2]*np.log10(y - m[3])
+# def model(m, x, y):
+#     return m[0] * x + np.log10(m[1]) + m[2]*np.log10(y - m[3])
 
-# def model(m, x, y): # now model computes log(t) from log(p) and bv
-#     return 1./m[0] * ( x - np.log10(m[1]) - m[2]*np.log10(y - m[3]))
+def model(m, x, y): # now model computes log(t) from log(p) and bv
+    return 1./m[0] * ( x - np.log10(m[1]) - m[2]*np.log10(y - m[3]))
 
 def log_errorbar(y, errp, errm):
     plus = y + errp
