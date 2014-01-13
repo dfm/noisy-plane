@@ -9,16 +9,16 @@ from scipy.misc import logsumexp
 #     n, a, b, c = m
 #     return n * x + np.log10(a) + b*np.log10(y - c)
 
-# def model(m, x, y): # now model computes log(t) from log(p) and bv
-#     return 1./m[0] * ( x - np.log10(m[1]) - m[2]*np.log10(y - m[3]))
+def model(m, x, y): # now model computes log(t) from log(p) and bv
+    return 1./m[0] * ( x - np.log10(m[1]) - m[2]*np.log10(y - m[3]))
 
-def model(m, x, y):
-    return m[0]+m[1]*x+m[2]*y
+# def model(m, x, y):
+#     return m[0]+m[1]*x+m[2]*y
 
 # Generate true values.
 N = 50
-m_true = [0.5, 0.6, 0.1]
-# m_true = [0.5189,  0.7725, 0.601, 0.4]
+# m_true = [0.5, 0.6, 0.1]
+m_true = [0.5189,  0.7725, 0.601, 0.4]
 x = 1 + 4*np.random.rand(N)
 y = 10 + 40*np.random.rand(N)
 z = model(m_true, x, y)
@@ -75,9 +75,9 @@ def lnlike(m):
 # #     raw_input('enter')
 # #     print - 0.5 * len(N) * np.log(2*np.pi) - sum(np.log(z_err[:, None]))\
 # #         - 0.5 * np.sum(np.logaddexp.reduce(chi2, axis=1))
-
-    return - 0.5 * len(N) * np.log(2*np.pi) - sum(np.log(z_err[:, None]))\
-        - 0.5 * np.sum(np.logaddexp.reduce(chi2, axis=1))
+# 
+#     return - 0.5 * len(N) * np.log(2*np.pi) - sum(np.log(z_err[:, None]))\
+#         - 0.5 * np.sum(np.logaddexp.reduce(chi2, axis=1))
  
 def lnprior(m):
     if np.any(m<0.)==False and np.any(1.<m)==False:
@@ -101,10 +101,10 @@ print("Production run")
 sampler.run_mcmc(p0, 500)
 
 print("Making triangle plot")
-# fig = triangle.corner(sampler.flatchain, truths=m_true,
-#                       labels=["$n$", "$a$", "$b$", "$c$"])
 fig = triangle.corner(sampler.flatchain, truths=m_true,
-                      labels=["$m_0$", "$m_1$", "$m_2$"])
+                      labels=["$n$", "$a$", "$b$", "$c$"])
+# fig = triangle.corner(sampler.flatchain, truths=m_true,
+#                       labels=["$m_0$", "$m_1$", "$m_2$"])
 fig.savefig("triangle.png")
 
 print("Plotting traces")
