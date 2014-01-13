@@ -43,11 +43,10 @@ x_samp = np.vstack([x0+xe*np.random.randn(K) for x0, xe in zip(x_obs, x_err)])
 y_samp = np.vstack([y0+ye*np.random.randn(K) for y0, ye in zip(y_obs, y_err)])
 
 # Dan's original lhf
-# def lnlike(m):
-#     z_pred = model(m, x_samp, y_samp)
-#     chi2 = -0.5*((z_obs[:, None] - z_pred)/z_err[:, None])**2
-#     print np.sum(np.logaddexp.reduce(chi2, axis=1))
-#     return np.sum(np.logaddexp.reduce(chi2, axis=1))
+def lnlike(m):
+    z_pred = model(m, x_samp, y_samp)
+    chi2 = -0.5*((z_obs[:, None] - z_pred)/z_err[:, None])**2
+    return np.sum(np.logaddexp.reduce(chi2, axis=1))
 
 # # Suzanne's lhf
 # def lnlike(m):
@@ -64,18 +63,18 @@ y_samp = np.vstack([y0+ye*np.random.randn(K) for y0, ye in zip(y_obs, y_err)])
 #     print logL 
 #     return logL
  
-def lnlike(m):
-    z_pred = model(m, x_samp, y_samp)
-    sr = 1.0/(z_err[:, None]**2) * (z[:, None]-z_pred)**2
-    N = np.array(((np.isfinite(sr)).sum(axis = 1)), dtype = float)
-    #FIXME: will N ever be less than 50? if not, don't worry!
-#     raw_input('enter')
-    chi2 = -0.5*((z[:, None] - z_pred)/z_err[:, None])**2
-    chi2[np.isnan(chi2)] = 0.
-#     chi2[i,:] = [chi2[i,:][np.isfinite(chi2[i,:])] for i in range(len(x_samp))] # remove NaNs
-#     raw_input('enter')
-#     print - 0.5 * len(N) * np.log(2*np.pi) - sum(np.log(z_err[:, None]))\
-#         - 0.5 * np.sum(np.logaddexp.reduce(chi2, axis=1))
+# def lnlike(m):
+#     z_pred = model(m, x_samp, y_samp)
+#     sr = 1.0/(z_err[:, None]**2) * (z[:, None]-z_pred)**2
+#     N = np.array(((np.isfinite(sr)).sum(axis = 1)), dtype = float)
+#     #FIXME: will N ever be less than 50? if not, don't worry!
+# #     raw_input('enter')
+#     chi2 = -0.5*((z[:, None] - z_pred)/z_err[:, None])**2
+#     chi2[np.isnan(chi2)] = 0.
+# #     chi2[i,:] = [chi2[i,:][np.isfinite(chi2[i,:])] for i in range(len(x_samp))] # remove NaNs
+# #     raw_input('enter')
+# #     print - 0.5 * len(N) * np.log(2*np.pi) - sum(np.log(z_err[:, None]))\
+# #         - 0.5 * np.sum(np.logaddexp.reduce(chi2, axis=1))
 
     return - 0.5 * len(N) * np.log(2*np.pi) - sum(np.log(z_err[:, None]))\
         - 0.5 * np.sum(np.logaddexp.reduce(chi2, axis=1))
