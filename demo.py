@@ -4,12 +4,16 @@ import numpy as np
 import matplotlib.pyplot as pl
 from scipy.misc import logsumexp
 
+def model(par, x, y):
+        return par[0] + par[1] * x + par[2] * y
+
 # Generate true values.
 N = 50
 m_true = [0.5, 1.0, 0.1]
 x = 1 + 4*np.random.rand(N)
 y = 10 + 40*np.random.rand(N)
-z = m_true[0]+m_true[1]*x+m_true[2]*y
+z = model(m_true, x, y)
+# z = m_true[0]+m_true[1]*x+m_true[2]*y
 
 # Observational uncertainties.
 x_err = 0.01+0.01*np.random.rand(N)
@@ -27,7 +31,8 @@ y_samp = np.vstack([y0+ye*np.random.randn(K) for y0, ye in zip(y_obs, y_err)])
 
 # Define the marginalized likelihood function.
 def lnlike(m):
-    z_pred = m[0]+m[1]*x_samp+m[2]*y_samp
+#     z_pred = m[0]+m[1]*x_samp+m[2]*y_samp
+    z_pred = model(m, x_samp, y_samp)
     chi2 = -0.5*((z_obs[:, None] - z_pred)/z_err[:, None])**2
     return np.sum(np.logaddexp.reduce(chi2, axis = 1))
 
