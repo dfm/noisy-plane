@@ -19,13 +19,13 @@ def model(m, x, y): # now model computes log(t) from log(p) and bv
 N = 50
 # m_true = [0.5, 0.6, 0.1]
 m_true = [0.5189,  0.7725, 0.601, 0.4]
-x = 1 + 4*np.random.rand(N)
-y = 10 + 40*np.random.rand(N)
+x = 1 + 2*np.random.rand(N)
+y = 0.4+np.random.rand(N)
 z = model(m_true, x, y)
 
 # observational uncertainties.
 x_err = 0.01+0.01*np.random.rand(N)
-y_err = 1.0+1.0*np.random.rand(N)
+y_err = 0.01+0.01*np.random.rand(N)
 z_err = 0.01+0.05*np.random.rand(N)
 
 z_obs = z+z_err*np.random.randn(N)
@@ -46,6 +46,7 @@ y_samp = np.vstack([y0+ye*np.random.randn(K) for y0, ye in zip(y_obs, y_err)])
 def lnlike(m):
     z_pred = model(m, x_samp, y_samp)
     chi2 = -0.5*((z_obs[:, None] - z_pred)/z_err[:, None])**2
+    chi2[np.isnan(chi2)] = -np.inf
     return np.sum(np.logaddexp.reduce(chi2, axis=1))
 
 # # Suzanne's lhf
