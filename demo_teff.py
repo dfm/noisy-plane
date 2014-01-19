@@ -1,6 +1,4 @@
-# get working with noisy data
-# get working with real data
-# Change the model and change z to age, x to period and y to colour
+# Version with fake data
 import emcee
 import triangle
 import numpy as np
@@ -8,113 +6,81 @@ import matplotlib.pyplot as pl
 from scipy.misc import logsumexp
 
 # def model(m, x, y):
-#     return m[0] * x + np.log10(m[1]) + m[2]*np.log10(y - m[3])
+#     n, a, b, c = m
+#     return n * x + np.log10(a) + b*np.log10(y - c)
 
 def model(m, x, y): # now model computes log(t) from log(p) and bv
     return 1./m[0] * ( x - np.log10(m[1]) - m[2]*np.log10(y - m[3]))
 
-def log_errorbar(y, errp, errm):
-    plus = y + errp
-    minus = y - errm
-    log_err = np.log10(plus/minus) / 2.
-    l = minus < 0 # Make sure ages don't go below zero!
-    log_err[l] = np.log10(plus[l]/y[l])
-    return log_err
+# def model(m, x, y):
+#     return m[0]+m[1]*x+m[2]*y
 
-# Load data
-data = np.genfromtxt('/Users/angusr/Python/Gyro/data/matched_data.txt').T
-mass = data[6]
-logg = data[9]
-period = data[1]
-
-# Remove subgiants, Kraft break stars and stars with period < 1
-a = (period > 1.) * (logg > 4.) * (mass < 1.3)
-
-# Assign variable names
-x = data[1][a]
-xerrp = data[2][a]
-xerrm = data[2][a]
-z = data[3][a]*1000 # Convert to Myr
-zerrp = data[4][a]*1000
-zerrm = data[5][a]*1000
-
-# make up colours
-y = np.random.uniform(0.4,1.2,len(z))
-yerr = np.ones_like(y) * 0.05
-l = y < 0.4
-
-# Take logs
-x = np.log10(x)
-z = np.log10(z) # remove this line if using fake data
-
+# Generate true values.
+N = 50
+# m_true = [0.5, 0.6, 0.1]
 m_true = [0.5189,  0.7725, 0.601, 0.4]
-# z = model(m_true, x, y) #+ np.random.randn(len(age)) # Fake z data
-x = model(m_true, z, y) #+ np.random.randn(len(age)) # Fake x data
+x = 0.5 + 1.5*np.random.rand(N)
+y = 0.4 + np.random.rand(N) #colour
+# y =  
+z = model(m_true, x, y)
 
-# Calculate logarithmic errorbars
-zerr = log_errorbar(z, zerrp, zerrm)
-xerr = log_errorbar(x, xerrp, xerrm)
+# observational uncertainties.
+x_err = 0.01+0.01*np.random.rand(N)
+y_err = 0.01+0.01*np.random.rand(N)
+z_err = 0.01+0.05*np.random.rand(N)
 
-# # Make up uncertainties for now
-N = len(z)
-zerr = 0.01+0.01*np.random.rand(N)
-yerr = 0.01+0.01*np.random.rand(N)
-xerr = 0.01+0.01*np.random.rand(N)
+z_obs = z+z_err*np.random.randn(N)
+x_obs = x+x_err*np.random.randn(N)
+y_obs = y+y_err*np.random.randn(N)
 
-# Resample those points that are less than 0.4
-while l.sum() > 0:
-    y[l] = np.random.uniform(0.4,1.2,l.sum())
-    yerr[l] = np.ones_like(y[l]) * 0.005
-    l = y < 0.4
-
-# switching x and z - necessary if using the first model
-x2 = x; xerr2 = xerr
-x = z; xerr = zerr
-z = x2; zerr = xerr2
-
-print 10**z[:5], 't'
-print y[:5], 'B-V'
-print 10**x[:5], 'P'
-print zerr[:5], 't_err'
-print yerr[:5], "bv_err"
-print xerr[:5], "P_err"
-
-# define dependencies of t on P, P on BV and t on BV)
-
-pl.close(1)
-pl.figure(1)
-# pl.subplot(3,1,1)
-pl.errorbar(10**x, 10**z, xerr=xerr, yerr=zerr, fmt='k.')
-pl.plot(10**x, 10**(model(m_true,x,y)), 'r-') 
-pl.xlabel("t")
-pl.ylabel("P")
-# pl.subplot(3,1,2)
-# pl.errorbar(x, y, xerr=xerr, yerr=yerr, fmt='k.')
-# pl.xlabel("P")
-# pl.ylabel("BV")
-# pl.subplot(3,1,3)
-# pl.errorbar(10**z, y, xerr=zerr, yerr=yerr, fmt = 'k.')
-# pl.xlabel("t")
-# pl.ylabel("BV")
-pl.show()
-
-raw_input('enter')
+# # Switch x and z
+# x2 = x; xerr2 = xerr
+# x = z; xerr = zerr
+# z = x2; zerr = xerr2
 
 # Draw posterior samples.
 K = 500
-x_samp = np.vstack([x0+xe*np.random.randn(K) for x0, xe in zip(x, xerr)])
-y_samp = np.vstack([y0+ye*np.random.randn(K) for y0, ye in zip(y, yerr)])
+x_samp = np.vstack([x0+xe*np.random.randn(K) for x0, xe in zip(x_obs, x_err)])
+y_samp = np.vstack([y0+ye*np.random.randn(K) for y0, ye in zip(y_obs, y_err)])
 
-# Define the marginalized likelihood function.
+# Dan's original lhf
 def lnlike(m):
     z_pred = model(m, x_samp, y_samp)
-    sr = 1.0/(zerr[:, None]**2) * (z[:, None]-z_pred)**2
-    N = np.array(((np.isfinite(sr)).sum(axis = 1)), dtype = float)
-    N[N==0.] = 1. 
-    chi2 = -0.5*((z[:, None] - z_pred)/zerr[:, None])**2
-    chi2[np.isnan(chi2)] = 0.
-    return np.sum(np.logaddexp.reduce(chi2, axis=1)/N)
+    chi2 = -0.5*((z_obs[:, None] - z_pred)/z_err[:, None])**2
+    chi2[np.isnan(chi2)] = -np.inf
+    return np.sum(np.logaddexp.reduce(chi2, axis=1))
 
+# # Suzanne's lhf
+# def lnlike(m):
+#     sr = 1.0/(z_err[:, None]**2) * (z[:, None]-model(m, x_samp, y_samp))**2
+#     N = np.array(((np.isfinite(sr)).sum(axis = 1)), dtype = float)
+#     z_err[np.isnan(z_err)] = 0.
+#     sr[np.isnan(sr)] = 0.
+#     print - 0.5 * float(N) * np.log(2 * np.pi)
+#     print - sum(np.log(z_err[:, None])), np.shape(sum(np.log(z_err[:, None])))
+#     print - 0.5 * np.logaddexp.reduce(sr, axis = 1), np.shape(0.5 * np.logaddexp.reduce(sr, axis = 1))
+#     logL = - 0.5 * float(N) * np.log(2 * np.pi) \
+#       - sum(np.log(z_err[:, None])) \
+#       - 0.5 * sum(sr)
+#     print logL 
+#     return logL
+ 
+# def lnlike(m):
+#     z_pred = model(m, x_samp, y_samp)
+#     sr = 1.0/(z_err[:, None]**2) * (z[:, None]-z_pred)**2
+#     N = np.array(((np.isfinite(sr)).sum(axis = 1)), dtype = float)
+#     #FIXME: will N ever be less than 50? if not, don't worry!
+# #     raw_input('enter')
+#     chi2 = -0.5*((z[:, None] - z_pred)/z_err[:, None])**2
+#     chi2[np.isnan(chi2)] = 0.
+# #     chi2[i,:] = [chi2[i,:][np.isfinite(chi2[i,:])] for i in range(len(x_samp))] # remove NaNs
+# #     raw_input('enter')
+# #     print - 0.5 * len(N) * np.log(2*np.pi) - sum(np.log(z_err[:, None]))\
+# #         - 0.5 * np.sum(np.logaddexp.reduce(chi2, axis=1))
+# 
+#     return - 0.5 * len(N) * np.log(2*np.pi) - sum(np.log(z_err[:, None]))\
+#         - 0.5 * np.sum(np.logaddexp.reduce(chi2, axis=1))
+ 
 def lnprior(m):
     if np.any(m<0.)==False and np.any(1.<m)==False:
         return 0.0
@@ -127,8 +93,8 @@ def lnprob(m):
     return lp + lnlike(m)
 
 # Sample the posterior probability for m.
-nwalkers, ndim = 100, len(m_true)
-p0 = [m_true+1e-2*np.random.rand(ndim) for i in range(nwalkers)]
+nwalkers, ndim = 32, len(m_true)
+p0 = [m_true+1e-4*np.random.rand(ndim) for i in range(nwalkers)]
 sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob)
 print("Burn-in")
 p0, lp, state = sampler.run_mcmc(p0, 100)
@@ -139,18 +105,16 @@ sampler.run_mcmc(p0, 500)
 print("Making triangle plot")
 fig = triangle.corner(sampler.flatchain, truths=m_true,
                       labels=["$n$", "$a$", "$b$", "$c$"])
+# fig = triangle.corner(sampler.flatchain, truths=m_true,
+#                       labels=["$m_0$", "$m_1$", "$m_2$"])
 fig.savefig("triangle.png")
 
 print("Plotting traces")
 pl.figure()
-labels = ['n', 'a', 'b', 'c']
-for j in range(ndim):
-    pl.subplot(ndim,1,j)
-    [pl.plot(sampler.chain[i, :, j], 'k-', \
-        alpha = 0.2) for i in range(nwalkers)]
-    pl.axhline(m_true[j], color = 'r')
-    pl.ylabel('%s' %labels[j])
-pl.savefig('traces')
+for i in range(ndim):
+    pl.clf()
+    pl.plot(sampler.chain[:, :, i].T)
+    pl.savefig("{0}.png".format(i))
 
 # Flatten chain
 samples = sampler.chain[:, 50:, :].reshape((-1, ndim))
