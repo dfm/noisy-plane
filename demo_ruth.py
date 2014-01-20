@@ -1,55 +1,27 @@
-# get working with noisy data
-# get working with real data
-# Change the model and change z to age, x to period and y to colour
+# x is log(period) (in days), y is colour/teff, z is log(age) (in Myr)
+
 import emcee
 import triangle
 import numpy as np
 import matplotlib.pyplot as pl
 from scipy.misc import logsumexp
 
-# def model(m, x, y):
-#     return m[0] * x + np.log10(m[1]) + m[2]*np.log10(y - m[3])
-
 def model(m, x, y): # now model computes log(t) from log(p) and bv
-    return 1./m[0] * ( x - np.log10(m[1]) - m[2]*np.log10(y - m[3]))
+    return 1./m[0]*x + m[1] - m[2]*np.log10(y - m[3]))
 
-def log_errorbar(y, errp, errm):
-    plus = y + errp
-    minus = y - errm
-    log_err = np.log10(plus/minus) / 2.
-    l = minus < 0 # Make sure ages don't go below zero!
-    log_err[l] = np.log10(plus[l]/y[l])
-    return log_err
+# make up log periods
+x = np.random.uniform(0.5,2,50)
+xerr = np.log10(np.ones_like(x)*0.5)
 
-# Load data
-data = np.genfromtxt('/Users/angusr/Python/Gyro/data/matched_data.txt').T
-mass = data[6]
-logg = data[9]
-period = data[1]
+# make up Teffs
+y = np.random.uniform(5000,6000,len(x))
+yerr = np.ones_like(y)*5.
+l = y > 7000
 
-# Remove subgiants, Kraft break stars and stars with period < 1
-a = (period > 1.) * (logg > 4.) * (mass < 1.3)
-
-# Assign variable names
-x = data[1][a]
-xerrp = data[2][a]
-xerrm = data[2][a]
-z = data[3][a]*1000 # Convert to Myr
-zerrp = data[4][a]*1000
-zerrm = data[5][a]*1000
-
-# make up colours
-y = np.random.uniform(0.4,1.2,len(z))
-yerr = np.ones_like(y) * 0.05
-l = y < 0.4
-
-# Take logs
-x = np.log10(x)
-z = np.log10(z) # remove this line if using fake data
-
+# generate fake ages
 m_true = [0.5189,  0.7725, 0.601, 0.4]
-# z = model(m_true, x, y) #+ np.random.randn(len(age)) # Fake z data
-x = model(m_true, z, y) #+ np.random.randn(len(age)) # Fake x data
+z = model(m_true, x, y)
+zerr = np.log10(np.ones_like(z)*5.)
 
 # Calculate logarithmic errorbars
 zerr = log_errorbar(z, zerrp, zerrm)
@@ -85,7 +57,7 @@ pl.close(1)
 pl.figure(1)
 # pl.subplot(3,1,1)
 pl.errorbar(10**x, 10**z, xerr=xerr, yerr=zerr, fmt='k.')
-pl.plot(10**x, 10**(model(m_true,x,y)), 'r-') 
+pl.plot(10**x, 10**(model(m_true,x,y)), 'r-')
 pl.xlabel("t")
 pl.ylabel("P")
 # pl.subplot(3,1,2)
@@ -110,7 +82,7 @@ def lnlike(m):
     z_pred = model(m, x_samp, y_samp)
     sr = 1.0/(zerr[:, None]**2) * (z[:, None]-z_pred)**2
     N = np.array(((np.isfinite(sr)).sum(axis = 1)), dtype = float)
-    N[N==0.] = 1. 
+    N[N==0.] = 1.
     chi2 = -0.5*((z[:, None] - z_pred)/zerr[:, None])**2
     chi2[np.isnan(chi2)] = 0.
     return np.sum(np.logaddexp.reduce(chi2, axis=1)/N)
@@ -119,7 +91,7 @@ def lnprior(m):
     if np.any(m<0.)==False and np.any(1.<m)==False:
         return 0.0
     return -np.inf
-        
+
 def lnprob(m):
     lp = lnprior(m)
     if not np.isfinite(lp):
