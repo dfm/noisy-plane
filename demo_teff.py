@@ -1,19 +1,25 @@
-# Version with fake data
 import emcee
 import triangle
 import numpy as np
 import matplotlib.pyplot as pl
 from scipy.misc import logsumexp
 
-# def model(m, x, y):
-#     n, a, b, c = m
-#     return n * x + np.log10(a) + b*np.log10(y - c)
-
 def model(m, x, y): # now model computes log(t) from log(p) and bv
     return 1./m[0] * ( x - np.log10(m[1]) - m[2]*np.log10(y - m[3]))
 
-# def model(m, x, y):
-#     return m[0]+m[1]*x+m[2]*y
+# make up log periods
+x = np.random.uniform(0.5,2,50)
+xerr = np.log10(np.ones_like(x)*0.5)
+
+# make up Teffs
+y = np.random.uniform(5000,6000,len(x))
+yerr = np.ones_like(y)*5.
+l = y > 7000
+
+# generate fake ages
+m_true = [0.5189,  0.7725, 0.601, 0.4]
+z = model(m_true, x, y)
+zerr = np.log10(np.ones_like(z)*5.)
 
 # Generate true values.
 N = 50
@@ -21,7 +27,7 @@ N = 50
 m_true = [0.5189,  0.7725, 0.601, 0.4]
 x = 0.5 + 1.5*np.random.rand(N)
 y = 0.4 + np.random.rand(N) #colour
-# y =  
+# y =
 z = model(m_true, x, y)
 
 # observational uncertainties.
@@ -62,9 +68,9 @@ def lnlike(m):
 #     logL = - 0.5 * float(N) * np.log(2 * np.pi) \
 #       - sum(np.log(z_err[:, None])) \
 #       - 0.5 * sum(sr)
-#     print logL 
+#     print logL
 #     return logL
- 
+
 # def lnlike(m):
 #     z_pred = model(m, x_samp, y_samp)
 #     sr = 1.0/(z_err[:, None]**2) * (z[:, None]-z_pred)**2
@@ -77,15 +83,15 @@ def lnlike(m):
 # #     raw_input('enter')
 # #     print - 0.5 * len(N) * np.log(2*np.pi) - sum(np.log(z_err[:, None]))\
 # #         - 0.5 * np.sum(np.logaddexp.reduce(chi2, axis=1))
-# 
+#
 #     return - 0.5 * len(N) * np.log(2*np.pi) - sum(np.log(z_err[:, None]))\
 #         - 0.5 * np.sum(np.logaddexp.reduce(chi2, axis=1))
- 
+
 def lnprior(m):
     if np.any(m<0.)==False and np.any(1.<m)==False:
         return 0.0
     return -np.inf
-        
+
 def lnprob(m):
     lp = lnprior(m)
     if not np.isfinite(lp):
