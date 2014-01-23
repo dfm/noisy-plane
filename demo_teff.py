@@ -9,20 +9,25 @@ from matplotlib import cm
 # def model(m, x, y): # now model computes log(t) from log(p) and bv
 #     return 1./m[0] * ( x - np.log10(m[1]) - m[2]*np.log10(y - m[3]))
 
-# def model(m, x, y):
-#     return m[0] * x + np.log10(m[1]) + m[2]*np.log10(y - m[3])
+# Barnes model - computes log(P) from log(t) and b-v
+def model(m, x, y):
+    return m[0] * x + np.log10(m[1]) + m[2]*np.log10(y - m[3])
 
-def model(m, x, y): # model computes log(t) from log(p) and teff
-    return (x - m[0]*np.log10(y - m[1]))/(m[2]*(y - m[1])) + m[3]
+# def model(m, x, y): # model computes log(t) from log(p) and teff
+#     return (x - m[0]*np.log10(m[1] - y))/(m[2]*(m[1] - y)) + m[3]
+# #     return (x - m[0]*np.log10(y - m[1]))/(m[2]*(y - m[1])) + m[3]
 
 # Generate true values.
 N = 50
 m_true = [0.5189,  0.7725, 0.601, 0.4]
-x = np.random.uniform(0.5, 1.8, N)
-y = np.random.uniform(0.4,1.2,N)
-z = model(m_true, x, y) #age
-print 10**z[:5], 'age'
-print 10**x[:5], 'period'
+# m_true = [0.5, 6000, 0.5, 1.]
+x = np.random.uniform(3., 4., N) # log(t)
+# x = np.random.uniform(0.5, 1.8, N) # log(P)
+y = np.random.uniform(0.4,1.2,N) # color
+# y = np.random.uniform(5000,6000,N)
+z = model(m_true, x, y) # log(P)
+print 10**z[:5], 'period'
+print 10**x[:5], 'age'
 print y[:5], 'color'
 
 # observational uncertainties.
@@ -37,9 +42,9 @@ y_obs = y+y_err*np.random.randn(N)
 pl.close(1)
 fig = pl.figure(1)
 ax = fig.gca(projection = '3d')
-ax.set_xlabel('Period')
+ax.set_xlabel('age')
 ax.set_ylabel('Teff')
-ax.set_zlabel('Age')
+ax.set_zlabel('period')
 x_surf = np.arange(min(x), max(x), 0.01)                # generate a mesh
 y_surf = np.arange(min(y), max(y), 0.01)
 x_surf, y_surf = np.meshgrid(x_surf, y_surf)
@@ -54,29 +59,27 @@ period = data[1]
 a = (period > 1.)
 
 # Assign variable names
-x = data[1][a]
-xerrp = data[2][a]
-xerrm = data[2][a]
-z = data[3][a]*1000 # Convert to Myr
-zerrp = data[4][a]*1000
-zerrm = data[5][a]*1000
+z = data[1][a] # period
+zerrp = data[2][a]
+zerrm = data[2][a]
+x = data[3][a]*1000 # age Convert to Myr
+xerrp = data[4][a]*1000
+xerrm = data[5][a]*1000
 
 # make up colours
 y = np.random.uniform(0.4,1.2,len(z))
 yerr = np.ones_like(y) * 0.05
 
-print z[:5], 'age'
-print x[:5], 'period'
+print z[:5], 'period'
+print x[:5], 'age'
 print y[:5], 'color'
 
-# pl.close(2)
-# fig = pl.figure(2)
-ax = fig.gca(projection = '3d')
 ax.scatter(x, y, z, color = 'b')
-ax.set_xlabel('Period')
+ax.set_zlabel('Period')
 ax.set_ylabel('Teff')
-ax.set_zlabel('Age')
+ax.set_xlabel('Age')
 pl.show()
+
 raw_input('enter')
 
 # Draw posterior samples.
