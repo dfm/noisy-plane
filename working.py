@@ -7,9 +7,6 @@ from scipy.misc import logsumexp
 def model(m, x, y): # now model computes log(t) from log(p) and bv
     return 1./m[0] * ( x - np.log10(m[1]) - m[2]*np.log10(y - m[3]))
 
-# def model(m, x, y): # model computes log(t) from log(p) and teff
-#     return (x - m[0]*np.log10(y - m[1]))/(m[2]*(y - m[1])) + m[3]
-
 # Generate true values.
 N = 50
 m_true = [0.5189,  0.7725, 0.601, 0.4]
@@ -25,8 +22,6 @@ z_err = 0.01+0.05*np.random.rand(N)
 z_obs = z+z_err*np.random.randn(N)
 x_obs = x+x_err*np.random.randn(N)
 y_obs = y+y_err*np.random.randn(N)
-
-
 
 # Draw posterior samples.
 K = 500
