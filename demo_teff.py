@@ -13,6 +13,10 @@ from matplotlib import cm
 def model(m, x, y):
     return m[0] * x + np.log10(m[1]) + m[2]*np.log10(y - m[3])
 
+# Teff model - computes log(P) from log(t) and teff
+def tmodel(m, x, y):
+    return m[0] * x + np.log10(m[1])+ m[2]*np.log10((m[3] - y))
+
 # def model(m, x, y): # model computes log(t) from log(p) and teff
 #     return (x - m[0]*np.log10(m[1] - y))/(m[2]*(m[1] - y)) + m[3]
 # #     return (x - m[0]*np.log10(y - m[1]))/(m[2]*(y - m[1])) + m[3]
@@ -20,15 +24,15 @@ def model(m, x, y):
 # Generate true values.
 N = 50
 m_true = [0.5189,  0.7725, 0.601, 0.4]
-# m_true = [0.5, 6000, 0.5, 1.]
+tm_true = [0.5189, 0.7725, 0.601, 6000./15000.]
 x = np.random.uniform(3., 4., N) # log(t)
 # x = np.random.uniform(0.5, 1.8, N) # log(P)
 y = np.random.uniform(0.4,1.2,N) # color
-# y = np.random.uniform(5000,6000,N)
-z = model(m_true, x, y) # log(P)
+ty = np.random.uniform(6000./15000.,5000./3333.3,N)[::-1] # Teff
+z = tmodel(tm_true, x, ty) # log(P)
 print 10**z[:5], 'period'
 print 10**x[:5], 'age'
-print y[:5], 'color'
+print y[:5], 'teff'
 
 # observational uncertainties.
 x_err = 0.01+0.01*np.random.rand(N)
@@ -45,11 +49,16 @@ ax = fig.gca(projection = '3d')
 ax.set_xlabel('age')
 ax.set_ylabel('Teff')
 ax.set_zlabel('period')
-x_surf = np.arange(min(x), max(x), 0.01)                # generate a mesh
-y_surf = np.arange(min(y), max(y), 0.01)
+x_surf = np.arange(min(x), max(x), .1)                # generate a mesh
+tx_surf = np.arange(min(x), max(x), .1)                # generate a mesh
+ty_surf = np.arange(min(ty), max(ty), .01)
+y_surf = np.arange(min(y), max(y), .1)
 x_surf, y_surf = np.meshgrid(x_surf, y_surf)
+tx_surf, ty_surf = np.meshgrid(tx_surf, ty_surf)
+tz_surf = tmodel(tm_true, tx_surf, ty_surf)
 z_surf = model(m_true, x_surf, y_surf)
-ax.plot_surface(10**x_surf, y_surf, 10**z_surf, cmap = cm.hot, alpha = 0.2);    # plot a 3d surface plot
+ax.plot_surface(10**tx_surf, ty_surf, 10**tz_surf, cmap = cm.hot, alpha = 0.2)
+ax.plot_surface(10**x_surf, y_surf, 10**z_surf, cmap = cm.cool, alpha = 0.2)
 
 # Load data
 data = np.genfromtxt('/Users/angusr/Python/Gyro/data/matched_data.txt').T
