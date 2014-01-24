@@ -6,14 +6,9 @@ from scipy.misc import logsumexp
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 
-# def model(m, x, y): # now model computes log(t) from log(p) and bv
-#     return 1./m[0] * ( x - np.log10(m[1]) - m[2]*np.log10(y - m[3]))
-
-# def model(m, x, y):
-#     return m[0] * x + np.log10(m[1]) + m[2]*np.log10(y - m[3])
-
-def model(m, x, y): # model computes log(t) from log(p) and teff
-    return (x - m[0]*np.log10(y - m[1]))/(m[2]*(y - m[1])) + m[3]
+# Barnes model - computes log(P) from log(t) and b-v
+def model(m, x, y):
+    return m[0] * x + np.log10(m[1]) + m[2]*np.log10(y - m[3])
 
 # Generate true values.
 N = 50
@@ -40,7 +35,7 @@ ax = fig.gca(projection = '3d')
 ax.set_xlabel('Period')
 ax.set_ylabel('Teff')
 ax.set_zlabel('Age')
-x_surf = np.arange(min(x), max(x), 0.01)                # generate a mesh
+x_surf = np.arange(min(z), max(z), 0.01)                # generate a mesh
 y_surf = np.arange(min(y), max(y), 0.01)
 x_surf, y_surf = np.meshgrid(x_surf, y_surf)
 z_surf = model(m_true, x_surf, y_surf)
