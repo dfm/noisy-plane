@@ -6,22 +6,55 @@ from scipy.misc import logsumexp
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 
-def model(m, x, y): # now model computes log(t) from log(p) and bv
-    return 1./m[0] * ( x - np.log10(m[1]) - m[2]*np.log10(y - m[3]))
+# def model(m, x, y): # now model computes log(t) from log(p) and bv
+#     return 1./m[0] * ( x - np.log10(m[1]) - m[2]*np.log10(y - m[3]))
 
-# def model(m, x, y):
-#     return m[0] * x + np.log10(m[1]) + m[2]*np.log10(y - m[3])
+# def model_data(m, x, y): # now model computes log(t) from log(p) and bv
+#     z = np.ones_like(x)
+#     for i in range(len(y)):
+#         if y[i] > k_break:
+#             z[i] = 1./m[0]*(x[i] - np.log10(m[1]) - \
+#                     m[2]*np.log10(y[i] - m[3]))
+#         elif y[i] < k_break:
+#             z[i] = np.random.uniform(2., 4.)
+#     return z
+
+# def model(m, x, y): # now model computes log(t) from log(p) and bv
+#     z = np.ones_like(x)
+#     for i in range(len(y)):
+#         for j in range(len(y[i])):
+#             if y[i][j] > k_break: z[i][j] = 1./m[0] * ( x[i][j] - np.log10(m[1]) - \
+#                         m[2]*np.log10(y[i][j] - m[3]))
+#             elif y[i][j] < k_break:
+#                 z[i][j] = np.random.uniform(2., 8.)
+#     return z
+
+def model(m, x, y): # now model computes log(t) from log(p) and bv
+    z = np.ones_like(y)
+    a = y > k_break
+    b = y < k_break
+    z[a] = 1./m[0] * ( x[a] - np.log10(m[1]) - \
+                m[2]*np.log10(y[a] - m[3]))
+     z[b] = np.random.uniform(2., 4., len(z[b]))
+#     z[b] = np.random.uniform(2., 4., len(z[b]))
+    return z
+
+# def model(m, x, y): # now model computes log(t) from log(p) and bv
+#     return 1./m[0]*(x - np.log10(m[1]) -  m[2]*np.log10(y - m[3]))
 
 # def model(m, x, y): # model computes log(t) from log(p) and teff
 #     return (x - m[0]*np.log10(y - m[1]))/(m[2]*(y - m[1])) + m[3]
 
 # Generate true values.
 N = 50
+k_break = 0.6
 m_true = [0.5189,  0.7725, 0.601, 0.4]
+# m_true = [0.5189,  0.7725, 0.601, 0.4, 3.5, 0.5] # Added extra params for mean and variance of age dist.
 x = np.random.uniform(0.5, 1.8, N) # log period
-y = np.random.uniform(0.4,1.2,N)
+y = np.random.uniform(0.2, 1.2,N)
 z = model(m_true, x, y) #age
 print 10**z[:5], 'age'
+print min(z), max(z)
 print 10**x[:5], 'period'
 print y[:5], 'color'
 
@@ -33,6 +66,27 @@ z_err = 0.01+0.01*np.random.rand(N)
 z_obs = z+z_err*np.random.randn(N)
 x_obs = x+x_err*np.random.randn(N)
 y_obs = y+y_err*np.random.randn(N)
+
+# plot fake data
+pl.clf()
+a = y > k_break
+b = y < k_break
+pl.subplot(2,1,1)
+xs = np.linspace(min(x), max(x), num=500)
+ys = np.linspace(min(y), max(y), num=500)
+zs = model(m_true, xs, ys)
+pl.errorbar(y[a], (10**z[a]), xerr = y_err[a], yerr = 10**z_err[a], fmt = 'k.')
+pl.errorbar(y[b], (10**z[b]), xerr = y_err[b], yerr = 10**z_err[b], fmt = 'r.')
+pl.plot(ys, zs, 'b-')
+pl.ylabel('age')
+pl.xlabel('colour')
+pl.subplot(2,1,2)
+pl.errorbar(10**x[a], (10**z[a]), xerr = x_err[a], yerr = z_err[a], fmt = 'k.')
+pl.errorbar(10**x[b], (10**z[b]), xerr = x_err[b], yerr = z_err[b], fmt = 'r.')
+pl.plot(xs, zs, 'b-')
+pl.ylabel('age')
+pl.xlabel('period')
+pl.savefig("fakedata")
 
 # pl.close(1)
 # fig = pl.figure(1)
@@ -62,7 +116,7 @@ y_obs = y+y_err*np.random.randn(N)
 # zerrm = data[5][a]*1000
 
 # # make up colours
-# y = np.random.uniform(0.4,1.2,len(z))
+# y = np.random.uniform(k_break,1.2,len(z))
 # yerr = np.ones_like(y) * 0.05
 
 # print z[:5], 'age'
@@ -77,7 +131,6 @@ y_obs = y+y_err*np.random.randn(N)
 # ax.set_ylabel('Teff')
 # ax.set_zlabel('Age')
 # pl.show()
-raw_input('enter')
 
 # Draw posterior samples.
 K = 500
