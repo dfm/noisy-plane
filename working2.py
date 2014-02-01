@@ -6,37 +6,37 @@ from scipy.misc import logsumexp
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 
-# Set the value of the Kraft break (for generating fake data set)
-# k_break = 0.6
-
 def plot(x, y, z, xerr, yerr, zerr, m):
     pl.clf()
-#     a = y > k_break
-#     b = y < k_break
     a = y > m[3]
     b = y < m[3]
+
     pl.subplot(2,1,1)
     xs = np.linspace(min(x), max(x), num=500)
     ys = np.linspace(m[3], max(y), num=500)
-#     ys = np.linspace(0.6, max(y), num=500)
     zs = model(m_true, xs, ys)
     pl.errorbar(y[a], (10**z[a]), xerr = y_err[a], yerr = 10**z_err[a], fmt = 'k.')
-    pl.errorbar(y[b], (10**z[b]), xerr = y_err[b], yerr = 10**z_err[b], fmt = 'r.')
+#     pl.errorbar(y, (10**z), xerr = y_err, yerr = 10**z_err, fmt = 'k.')
+#     pl.errorbar(y[b], (10**z[b]), xerr = y_err[b], yerr = 10**z_err[b], fmt = 'r.')
     pl.plot(ys, 10**zs, 'b-')
     pl.ylabel('age')
     pl.xlabel('colour')
+
     pl.subplot(2,1,2)
+#     pl.errorbar(10**x, (10**z), xerr = x_err, yerr = z_err, fmt = 'k.')
     pl.errorbar(10**x[a], (10**z[a]), xerr = x_err[a], yerr = z_err[a], fmt = 'k.')
-    pl.errorbar(10**x[b], (10**z[b]), xerr = x_err[b], yerr = z_err[b], fmt = 'r.')
+#     pl.errorbar(10**x[b], (10**z[b]), xerr = x_err[b], yerr = z_err[b], fmt = 'r.')
     pl.plot(10**xs, 10**zs, 'b-')
     pl.ylabel('age')
     pl.xlabel('period')
     pl.savefig("fakedata")
 
+# Generate some fake data set
 def fake_data(m_true, N):
-    x = np.random.uniform(0.5, 1.8, N) # log period
-    y = np.random.uniform(0.2, 1.2,N)
-    z = model(m_true, x, y) #age
+    x = np.random.uniform(0.5, 1.8, N) # log(period)
+#     y = np.random.uniform(0.2, 1.2,N) # colour
+    y = np.random.uniform(0.6, 1.2,N) # colour
+    z = model(m_true, x, y) # log(age)
 
     print 10**z[:5], 'age'
     print min(z), max(z)
@@ -55,26 +55,36 @@ def fake_data(m_true, N):
 
     return x, y, z, x_obs, y_obs, z_obs, x_err, y_err, z_err
 
-def model(m, x, y): # now model computes log(t) from log(p) and bv
-    z = np.ones_like(y)
+def model(m, x, y):
+#     a = y > m[3] # select only stars above Kraft break
+#     return 1./m[0]*(x[a] - np.log10(m[1]) - m[2]*np.log10(y[a] - m[3]))
+    return 1./m[0]*(x - np.log10(m[1]) - m[2]*np.log10(y - m[3]))
+
+# def model(m, x, y): # now model computes log(t) from log(p) and bv
+#     z = np.ones_like(y)
 #     a = y > k_break
 #     b = y < k_break
-    a = y > m[3]
-    b = y < m[3]
-    z[a] = 1./m[0] * ( x[a] - np.log10(m[1]) - \
-                m[2]*np.log10(y[a] - m[3]))
-    z[b] = np.random.normal(3.5, 0.2, len(z[b]))
-#     z[b] = np.random.normal(m[4], m[5], len(z[b]))
-    return z
+#     a = y > m[3]
+#     b = y < m[3]
+#     z[a] = 1./m[0] * ( x[a] - np.log10(m[1]) - \
+#                 m[2]*np.log10(y[a] - m[3]))
+#     z[b] = np.random.normal(3.5, 0.2, len(z[b]))
+# #     z[b] = np.random.normal(m[4], m[5], len(z[b]))
+#     return z
 
 # Create fake data
 m_true = [0.5189,  0.7725, 0.601, 0.4]
-# m_true = [0.5189,  0.7725, 0.601, 0.4, 3.5, 0.5] # Added extra params for mean and variance of age dist.
-x, y, z, x_obs, y_obs, z_obs, x_err, y_err, z_err = fake_data(m_true, 100)
+# m_true = [0.5189,  0.7725, 0.601, 0.4, 3.5, 0.5]
+# Added extra params for mean and variance of age dist and P.
+x, y, z, x_obs, y_obs, z_obs, x_err, y_err, z_err = fake_data(m_true, 500)
+
+pl.clf()
+pl.plot(x, z, 'k.')
+pl.savefig("test")
 
 # plot fake data
-# plot(x_obs, y_obs, z_obs, x_err, y_err, z_err)
 plot(x_obs, y_obs, z_obs, x_err, y_err, z_err, m_true)
+raw_input('enter')
 
 # Draw posterior samples.
 K = 500
@@ -86,7 +96,6 @@ def lnlike(m):
     z_pred = model(m, x_samp, y_samp)
     chi2 = -0.5*((z_obs[:, None] - z_pred)/z_err[:, None])**2
     chi2[np.isnan(chi2)] = -np.inf
-#     print np.sum(np.logaddexp.reduce(chi2, axis=1))
     return np.sum(np.logaddexp.reduce(chi2, axis=1))
 
 def lnprior(m):
@@ -134,47 +143,3 @@ mcmc_result = map(lambda v: (v[1], v[2]-v[1], v[1]-v[0]),
 print 'initial values', m_true
 mcmc_result = np.array(mcmc_result)[:, 0]
 print 'mcmc result', mcmc_result
-
-# pl.close(1)
-# fig = pl.figure(1)
-# ax = fig.gca(projection = '3d')
-# ax.set_xlabel('Period')
-# ax.set_ylabel('Teff')
-# ax.set_zlabel('Age')
-# x_surf = np.arange(min(x), max(x), 0.01)                # generate a mesh
-# y_surf = np.arange(min(y), max(y), 0.01)
-# x_surf, y_surf = np.meshgrid(x_surf, y_surf)
-# z_surf = model(m_true, x_surf, y_surf)
-# ax.plot_surface(10**x_surf, y_surf, 10**z_surf, cmap = cm.hot, alpha = 0.2);    # plot a 3d surface plot
-
-# # Load data
-# data = np.genfromtxt('/Users/angusr/Python/Gyro/data/matched_data.txt').T
-# period = data[1]
-
-# # remove stars with period < 1
-# a = (period > 1.)
-
-# # Assign variable names
-# x = data[1][a]
-# xerrp = data[2][a]
-# xerrm = data[2][a]
-# z = data[3][a]*1000 # Convert to Myr
-# zerrp = data[4][a]*1000
-# zerrm = data[5][a]*1000
-
-# # make up colours
-# y = np.random.uniform(k_break,1.2,len(z))
-# yerr = np.ones_like(y) * 0.05
-
-# print z[:5], 'age'
-# print x[:5], 'period'
-# print y[:5], 'color'
-
-# pl.close(2)
-# fig = pl.figure(2)
-# ax = fig.gca(projection = '3d')
-# ax.scatter(x, y, z, color = 'b')
-# ax.set_xlabel('Period')
-# ax.set_ylabel('Teff')
-# ax.set_zlabel('Age')
-# pl.show()

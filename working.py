@@ -29,17 +29,17 @@ z_obs = z+z_err*np.random.randn(N)
 x_obs = x+x_err*np.random.randn(N)
 y_obs = y+y_err*np.random.randn(N)
 
-pl.close(1)
-fig = pl.figure(1)
-ax = fig.gca(projection = '3d')
-ax.set_xlabel('Period')
-ax.set_ylabel('Teff')
-ax.set_zlabel('Age')
-x_surf = np.arange(min(z), max(z), 0.01)                # generate a mesh
-y_surf = np.arange(min(y), max(y), 0.01)
-x_surf, y_surf = np.meshgrid(x_surf, y_surf)
-z_surf = model(m_true, x_surf, y_surf)
-ax.plot_surface(10**x_surf, y_surf, 10**z_surf, cmap = cm.hot, alpha = 0.2);    # plot a 3d surface plot
+# pl.close(1)
+# fig = pl.figure(1)
+# ax = fig.gca(projection = '3d')
+# ax.set_xlabel('Period')
+# ax.set_ylabel('Teff')
+# ax.set_zlabel('Age')
+# x_surf = np.arange(min(z), max(z), 0.01)                # generate a mesh
+# y_surf = np.arange(min(y), max(y), 0.01)
+# x_surf, y_surf = np.meshgrid(x_surf, y_surf)
+# z_surf = model(m_true, x_surf, y_surf)
+# ax.plot_surface(10**x_surf, y_surf, 10**z_surf, cmap = cm.hot, alpha = 0.2)
 
 # Load data
 data = np.genfromtxt('/Users/angusr/Python/Gyro/data/matched_data.txt').T
@@ -64,8 +64,6 @@ print z[:5], 'age'
 print x[:5], 'period'
 print y[:5], 'color'
 
-# pl.close(2)
-# fig = pl.figure(2)
 ax = fig.gca(projection = '3d')
 ax.scatter(x, y, z, color = 'b')
 ax.set_xlabel('Period')

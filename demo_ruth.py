@@ -1,4 +1,3 @@
-# Version with fake data
 import emcee
 import triangle
 import numpy as np
