@@ -21,6 +21,15 @@ def plot(x, y, z, xerr, yerr, zerr, m):
     zp = pmodel(m_true, xs)
     zc = cmodel(m_true, ys)
 
+    # Load data
+    data = np.genfromtxt('/Users/angusr/Python/Gyro/data/matched_data.txt').T
+    period = data[1]
+    # remove stars with period < 1
+    l = (period > 1.)
+    # Assign variable names
+    period = np.log10(data[1][l])
+    age = np.log10(data[3][l]*1000) # Convert to Myr
+
     pl.clf()
     pl.subplot(2,1,1)
     pl.errorbar(y[a], (z[a]), xerr = y_err[a], yerr = z_err[a], fmt = 'k.')
@@ -32,6 +41,7 @@ def plot(x, y, z, xerr, yerr, zerr, m):
     pl.subplot(2,1,2)
     pl.errorbar(x[a], (z[a]), xerr = x_err[a], yerr = z_err[a], fmt = 'k.')
     pl.errorbar(x[b], (z[b]), xerr = x_err[b], yerr = z_err[b], fmt = 'r.')
+    pl.plot(period, age, 'mo')
     pl.plot(xs, zp, 'b-')
     pl.ylabel('age')
     pl.xlabel('period')
