@@ -13,9 +13,12 @@ import plotting
 def model(m, x, y):
     return 1./m[0]*(x - np.log10(m[1]) - m[2]*np.log10(y))
 
-print "creating fake data set"
+# fake data
 m_true = [0.5189,  0.7725, 0.601]
-x, y, z, x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.fake_data(m_true, 100, mod =True)
+# x, y, z, x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.fake_data(m_true, 100)
+
+# load real data
+x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.load()
 
 print "plotting data"
 plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, m_true, "fakedata")
@@ -49,6 +52,7 @@ def lnprob(m):
 nll = lambda *args: -lnlike(*args)
 result = op.fmin(nll, m_true)
 print result
+plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, result, "ml_result")
 
 print lnlike(m_true)
 raw_input('enter')
@@ -85,3 +89,6 @@ mcmc_result = map(lambda v: (v[1], v[2]-v[1], v[1]-v[0]),
 print 'initial values', m_true
 mcmc_result = np.array(mcmc_result)[:, 0]
 print 'mcmc result', mcmc_result
+
+# plotting result
+plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, mcmc_result, "mcmc_result")

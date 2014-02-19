@@ -1,14 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as pl
+from mpl_toolkits.mplot3d import Axes3D
 
-def plt(x, y, z, xerr, yerr, zerr, m, fname):
-    a = y > 0.4
-    b = y < 0.4
-
-    xs = np.linspace(min(x), max(x), num=500)
-    ys = np.linspace(min(y), max(y), num=500)
-    zs = model(m, xs, ys)
-
+def load():
     # load data
     data = np.genfromtxt('/users/angusr/python/gyro/data/data.txt').T
     cols = np.genfromtxt("/users/angusr/python/gyro/data/colours.txt")
@@ -18,24 +12,58 @@ def plt(x, y, z, xerr, yerr, zerr, m, fname):
     age = np.log10(data[13][l]*1000) # convert to myr
     bv = cols[1][l]
 
+    # for now replace nans with means
+    bv[np.isnan(bv)] = np.mean(bv[np.isfinite(bv)])
+    age[age == -np.inf] = np.mean(age[np.isfinite(age)])
+
+    # make up observational uncertainties
+    N = len(period)
+    p_err = 0.01+0.01*np.random.rand(N)
+    bv_err = 0.01+0.01*np.random.rand(N)
+    a_err = 0.01+0.01*np.random.rand(N)
+
+    return period, bv, age, p_err, bv_err, a_err
+
+def plt(x, y, z, xerr, yerr, zerr, m, fname):
+#     a = y > 0.4
+#     b = y < 0.4
+
+    xs = np.linspace(min(x), max(x), num=500)
+    ys = np.linspace(min(y), max(y), num=500)
+    zs = model(m, xs, ys)
+
+    period, bv, age, p_err, bv_err, a_err = load()
+
     pl.clf()
-    pl.subplot(2,1,1)
-    pl.errorbar(y[a], (10**z[a]), xerr = yerr[a], yerr = zerr[a], fmt = 'k.')
-    pl.errorbar(y[b], (10**z[b]), xerr = yerr[b], yerr = zerr[b], fmt = 'r.')
+    pl.subplot(3,1,1)
+#     pl.errorbar(y[a], (10**z[a]), xerr = yerr[a], yerr = zerr[a], fmt = 'k.')
+#     pl.errorbar(y[b], (10**z[b]), xerr = yerr[b], yerr = zerr[b], fmt = 'r.')
+    pl.errorbar(y, (10**z), xerr = yerr, yerr = zerr, fmt = 'k.', capsize = 0)
     pl.plot(bv, 10**age, 'c.')
     pl.plot(ys, 10**zs, 'b-')
     pl.ylabel('age')
     pl.xlabel('colour')
 
-    pl.subplot(2,1,2)
-    pl.errorbar(10**z[a], (10**x[a]), xerr = zerr[a], yerr = xerr[a], fmt = 'k.')
-    pl.errorbar(10**z[b], (10**x[b]), xerr = zerr[b], yerr = xerr[b], fmt = 'r.')
+    pl.subplot(3,1,2)
+#     pl.errorbar(10**z[a], (10**x[a]), xerr = zerr[a], yerr = xerr[a], fmt = 'k.')
+#     pl.errorbar(10**z[b], (10**x[b]), xerr = zerr[b], yerr = xerr[b], fmt = 'r.')
+    pl.errorbar(10**z, (10**x), xerr = zerr, yerr = xerr, fmt = 'k.', capsize = 0)
     pl.plot(10**age, 10**period, 'c.')
     pl.plot(10**zs, 10**xs, 'b-')
     pl.xlabel('age')
     pl.ylabel('period')
+
+    pl.subplot(3,1,3)
+#     pl.errorbar(y[a], (10**x[a]), xerr = zerr[a], yerr = xerr[a], fmt = 'k.')
+#     pl.errorbar(y[b], (10**x[b]), xerr = zerr[b], yerr = xerr[b], fmt = 'r.')
+    pl.errorbar(y, (10**x), xerr = zerr, yerr = xerr, fmt = 'k.', capsize = 0)
+    pl.plot(bv, 10**period, 'c.')
+    pl.plot(ys, 10**xs, 'b-')
+    pl.xlabel('colour')
+    pl.ylabel('period')
     pl.savefig("%s"%fname)
-    return
+
+    plot3d(x, y, z, period, bv, age)
 
 def model(m, x, y):
 #     return 1./m[0]*(x - np.log10(m[1]) - m[2]*np.log10(y - m[3]))
@@ -44,21 +72,20 @@ def model(m, x, y):
 # generative model
 def g_model(m, x, y): # model computes log(t) from log(p) and bv
     z = np.ones_like(y)
-    a = y > 0.4
-    b = y < 0.4
+    cutoff = 0.2
+    a = y > cutoff
+    b = y < cutoff
     z[a] = 1./m[0] * (x[a] - np.log10(m[1]) - m[2]*np.log10(y[a]))
-    z[b] = np.random.normal(3.5, 0.2, len(z[b]))
+    mu = model(m, 1., cutoff)
+    z[b] = np.random.normal(mu, 0.1, len(z[b]))
     return z
 
 # Generate some fake data set
-def fake_data(m_true, N, mod):
+def fake_data(m_true, N):
 
     x = np.random.uniform(0.5, 1.8, N) # log(period)
     y = np.random.uniform(0.2, 1.,N) # colour
-    if mod == True:
-        z = model(m_true, x, y) # log(age)
-    else:
-        z = g_model(m_true, x, y) # log(age)
+    z = g_model(m_true, x, y) # log(age)
 
     # observational uncertainties.
     x_err = 0.01+0.01*np.random.rand(N)
@@ -70,3 +97,14 @@ def fake_data(m_true, N, mod):
     x_obs = x+x_err*np.random.randn(N)
     y_obs = y+y_err*np.random.randn(N)
     return x, y, z, x_obs, y_obs, z_obs, x_err, y_err, z_err
+
+def plot3d(x1, y1, z1, x2, y2, z2):
+    fig = pl.figure()
+    ax = fig.gca(projection='3d')
+    ax.scatter(x1, y1, z1, c = 'k', marker = 'o')
+    ax.scatter(x2, y2, z2, c = 'r', marker = 'o')
+    ax.set_xlabel('Rotational period (days)')
+    ax.set_ylabel('B-V')
+    ax.set_zlabel('Age (Gyr)')
+    pl.show()
+    pl.savefig('3d')
