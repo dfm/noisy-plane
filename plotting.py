@@ -51,11 +51,14 @@ def g_model(m, x, y): # model computes log(t) from log(p) and bv
     return z
 
 # Generate some fake data set
-def fake_data(m_true, N):
+def fake_data(m_true, N, mod):
 
     x = np.random.uniform(0.5, 1.8, N) # log(period)
     y = np.random.uniform(0.2, 1.,N) # colour
-    z = g_model(m_true, x, y) # log(age)
+    if mod == True:
+        z = model(m_true, x, y) # log(age)
+    else:
+        z = g_model(m_true, x, y) # log(age)
 
     # observational uncertainties.
     x_err = 0.01+0.01*np.random.rand(N)

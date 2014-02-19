@@ -15,7 +15,7 @@ def model(m, x, y):
 
 print "creating fake data set"
 m_true = [0.5189,  0.7725, 0.601]
-x, y, z, x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.fake_data(m_true, 100)
+x, y, z, x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.fake_data(m_true, 100, mod =True)
 
 print "plotting data"
 plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, m_true, "fakedata")
@@ -34,7 +34,7 @@ def lnlike(m):
 
 # Flat priors
 def lnprior(m):
-    if np.any(m[:3] < 0.) == False  and np.any(1. < m) == False:
+    if np.any(m < 0.) == False and np.any(1. < m) == False:
         return 0.0
     return -np.inf
 
