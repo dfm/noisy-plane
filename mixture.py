@@ -15,8 +15,6 @@ def g_model(m, x, y): # model computes log(t) from log(p) and bv
     z = np.ones_like(y)
     a = y > m[3]
     b = y < m[3]
-#     z[a] = 1./m[0] * ( x[a] - np.log10(m[1]) - \
-#                 m[2]*np.log10(y[a] - m[3]))
     z[a] = 1./m[0] * (x[a] - np.log10(m[1]) - m[2]*np.log10(y[a]))
     z[b] = np.random.normal(3.5, 0.2, len(z[b]))
     return z
@@ -26,7 +24,6 @@ def fake_data(m_true, N):
 
     x = np.random.uniform(0.5, 1.8, N) # log(period)
     y = np.random.uniform(0.2, 1.,N) # colour
-#     y = np.random.uniform(0.6, 1.2,N) # colour
     z = g_model(m_true, x, y) # log(age)
 
     # observational uncertainties.
@@ -41,7 +38,6 @@ def fake_data(m_true, N):
     return x, y, z, x_obs, y_obs, z_obs, x_err, y_err, z_err
 
 def model(m, x, y):
-#     return 1./m[0]*(x - np.log10(m[1]) - m[2]*np.log10(y - m[3]))
     return 1./m[0]*(x - np.log10(m[1]) - m[2]*np.log10(y))
 
 # Create fake data: n, a, b, c
