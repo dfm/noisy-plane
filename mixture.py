@@ -18,52 +18,53 @@ def plot(x, y, z, xerr, yerr, zerr, m):
     xs = np.linspace(min(x), max(x), num=500)
     ys = np.linspace(m[3], max(y), num=500)
     zs = model(m_true, xs, ys)
-    zp = pmodel(m_true, xs)
-    zc = cmodel(m_true, ys)
 
     # Load data
-    data = np.genfromtxt('/Users/angusr/Python/Gyro/data/matched_data.txt').T
+    data = np.genfromtxt('/Users/angusr/Python/Gyro/data/data.txt').T
+    cols = np.genfromtxt("/Users/angusr/Python/Gyro/data/colours.txt")
     period = data[1]
-    # remove stars with period < 1
     l = (period > 1.)
-    # Assign variable names
     period = np.log10(data[1][l])
-    age = np.log10(data[3][l]*1000) # Convert to Myr
+    age = np.log10(data[13][l]*1000) # Convert to Myr
+    bv = cols[1][l]
 
     pl.clf()
     pl.subplot(2,1,1)
-    pl.errorbar(y[a], (z[a]), xerr = y_err[a], yerr = z_err[a], fmt = 'k.')
-    pl.errorbar(y[b], (z[b]), xerr = y_err[b], yerr = z_err[b], fmt = 'r.')
-    pl.plot(ys, zc, 'b-')
+    pl.errorbar(y[a], (10**z[a]), xerr = y_err[a], yerr = z_err[a], fmt = 'k.')
+    pl.errorbar(y[b], (10**z[b]), xerr = y_err[b], yerr = z_err[b], fmt = 'r.')
+    pl.plot(bv, 10**age, 'c.')
+#     zs = cmodel(m_true, ys)
+    pl.plot(ys, 10**zs, 'b-')
     pl.ylabel('age')
     pl.xlabel('colour')
 
     pl.subplot(2,1,2)
-    pl.errorbar(x[a], (z[a]), xerr = x_err[a], yerr = z_err[a], fmt = 'k.')
-    pl.errorbar(x[b], (z[b]), xerr = x_err[b], yerr = z_err[b], fmt = 'r.')
-    pl.plot(period, age, 'mo')
-    pl.plot(xs, zp, 'b-')
-    pl.ylabel('age')
-    pl.xlabel('period')
+    pl.errorbar(10**z[a], (10**x[a]), xerr = z_err[a], yerr = x_err[a], fmt = 'k.')
+    pl.errorbar(10**z[b], (10**x[b]), xerr = z_err[b], yerr = x_err[b], fmt = 'r.')
+    pl.plot(10**age, 10**period, 'c.')
+#     zs = pmodel(m_true, xs)
+    pl.plot(10**zs, 10**xs, 'b-')
+    pl.xlabel('age')
+    pl.ylabel('period')
     pl.savefig("fakedata")
+
 
 # generative model
 def g_model(m, x, y): # model computes log(t) from log(p) and bv
     z = np.ones_like(y)
-#     a = y > m[3]
-#     b = y < m[3]
+    a = y > m[3]
+    b = y < m[3]
 #     z[a] = 1./m[0] * ( x[a] - np.log10(m[1]) - \
 #                 m[2]*np.log10(y[a] - m[3]))
-#     z[b] = np.random.normal(3.5, 0.2, len(z[b]))
-    z = 1./m[0] * ( x - np.log10(m[1]) - \
-                m[2]*np.log10(y - m[3]))
+    z[a] = 1./m[0] * (x[a] - np.log10(m[1]) - m[2]*np.log10(y[a]))
+    z[b] = np.random.normal(3.5, 0.2, len(z[b]))
     return z
 
 # Generate some fake data set
 def fake_data(m_true, N):
 
     x = np.random.uniform(0.5, 1.8, N) # log(period)
-    y = np.random.uniform(0.2, 1.2,N) # colour
+    y = np.random.uniform(0.2, 1.,N) # colour
 #     y = np.random.uniform(0.6, 1.2,N) # colour
     z = g_model(m_true, x, y) # log(age)
 
@@ -79,13 +80,15 @@ def fake_data(m_true, N):
     return x, y, z, x_obs, y_obs, z_obs, x_err, y_err, z_err
 
 def model(m, x, y):
-    return 1./m[0]*(x - np.log10(m[1]) - m[2]*np.log10(y - m[3]))
+#     return 1./m[0]*(x - np.log10(m[1]) - m[2]*np.log10(y - m[3]))
+    return 1./m[0]*(x - np.log10(m[1]) - m[2]*np.log10(y))
 
 def pmodel(m, x): # calculate only the period - age relation
     return 1./m[0]*(x - np.log10(m[1])) # don't know if I need the constant?
 
 def cmodel(m, y): # calculate only the colour - age relation
-    return 1./m[0]*(-np.log10(m[1]) - m[2]*np.log10(y-m[3]))
+#     return 1./m[0]*(-np.log10(m[1]) - m[2]*np.log10(y-m[3]))
+    return 1./m[0]*(-np.log10(m[1]) - m[2]*np.log10(y))
 
 # Create fake data: n, a, b, c
 m_true = [0.5189,  0.7725, 0.601, 0.4]
