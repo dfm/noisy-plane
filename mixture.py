@@ -33,21 +33,19 @@ def plot(x, y, z, xerr, yerr, zerr, m):
     pl.errorbar(y[a], (10**z[a]), xerr = y_err[a], yerr = z_err[a], fmt = 'k.')
     pl.errorbar(y[b], (10**z[b]), xerr = y_err[b], yerr = z_err[b], fmt = 'r.')
     pl.plot(bv, 10**age, 'c.')
-#     zs = cmodel(m_true, ys)
     pl.plot(ys, 10**zs, 'b-')
     pl.ylabel('age')
     pl.xlabel('colour')
+#     zs = cmodel(m_true, ys)
 
     pl.subplot(2,1,2)
     pl.errorbar(10**z[a], (10**x[a]), xerr = z_err[a], yerr = x_err[a], fmt = 'k.')
     pl.errorbar(10**z[b], (10**x[b]), xerr = z_err[b], yerr = x_err[b], fmt = 'r.')
     pl.plot(10**age, 10**period, 'c.')
-#     zs = pmodel(m_true, xs)
     pl.plot(10**zs, 10**xs, 'b-')
     pl.xlabel('age')
     pl.ylabel('period')
     pl.savefig("fakedata")
-
 
 # generative model
 def g_model(m, x, y): # model computes log(t) from log(p) and bv
@@ -82,13 +80,6 @@ def fake_data(m_true, N):
 def model(m, x, y):
 #     return 1./m[0]*(x - np.log10(m[1]) - m[2]*np.log10(y - m[3]))
     return 1./m[0]*(x - np.log10(m[1]) - m[2]*np.log10(y))
-
-def pmodel(m, x): # calculate only the period - age relation
-    return 1./m[0]*(x - np.log10(m[1])) # don't know if I need the constant?
-
-def cmodel(m, y): # calculate only the colour - age relation
-#     return 1./m[0]*(-np.log10(m[1]) - m[2]*np.log10(y-m[3]))
-    return 1./m[0]*(-np.log10(m[1]) - m[2]*np.log10(y))
 
 # Create fake data: n, a, b, c
 m_true = [0.5189,  0.7725, 0.601, 0.4]
