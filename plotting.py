@@ -41,3 +41,30 @@ def plt(x, y, z, xerr, yerr, zerr, m):
 def model(m, x, y):
 #     return 1./m[0]*(x - np.log10(m[1]) - m[2]*np.log10(y - m[3]))
     return 1./m[0]*(x - np.log10(m[1]) - m[2]*np.log10(y))
+
+# generative model
+def g_model(m, x, y): # model computes log(t) from log(p) and bv
+    z = np.ones_like(y)
+    a = y > 0.4
+    b = y < 0.4
+    z[a] = 1./m[0] * (x[a] - np.log10(m[1]) - m[2]*np.log10(y[a]))
+    z[b] = np.random.normal(3.5, 0.2, len(z[b]))
+    return z
+
+# Generate some fake data set
+def fake_data(m_true, N):
+
+    x = np.random.uniform(0.5, 1.8, N) # log(period)
+    y = np.random.uniform(0.2, 1.,N) # colour
+    z = g_model(m_true, x, y) # log(age)
+
+    # observational uncertainties.
+    x_err = 0.01+0.01*np.random.rand(N)
+    y_err = 0.01+0.01*np.random.rand(N)
+    z_err = 0.01+0.01*np.random.rand(N)
+
+    # add noise
+    z_obs = z+z_err*np.random.randn(N)
+    x_obs = x+x_err*np.random.randn(N)
+    y_obs = y+y_err*np.random.randn(N)
+    return x, y, z, x_obs, y_obs, z_obs, x_err, y_err, z_err
