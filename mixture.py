@@ -8,44 +8,7 @@ from scipy.misc import logsumexp
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 import scipy.optimize as op
-
-def plot(x, y, z, xerr, yerr, zerr, m):
-    a = y > m[3]
-    b = y < m[3]
-#     a = y > 0.6
-#     b = y < 0.6
-
-    xs = np.linspace(min(x), max(x), num=500)
-    ys = np.linspace(m[3], max(y), num=500)
-    zs = model(m_true, xs, ys)
-
-    # Load data
-    data = np.genfromtxt('/Users/angusr/Python/Gyro/data/data.txt').T
-    cols = np.genfromtxt("/Users/angusr/Python/Gyro/data/colours.txt")
-    period = data[1]
-    l = (period > 1.)
-    period = np.log10(data[1][l])
-    age = np.log10(data[13][l]*1000) # Convert to Myr
-    bv = cols[1][l]
-
-    pl.clf()
-    pl.subplot(2,1,1)
-    pl.errorbar(y[a], (10**z[a]), xerr = y_err[a], yerr = z_err[a], fmt = 'k.')
-    pl.errorbar(y[b], (10**z[b]), xerr = y_err[b], yerr = z_err[b], fmt = 'r.')
-    pl.plot(bv, 10**age, 'c.')
-    pl.plot(ys, 10**zs, 'b-')
-    pl.ylabel('age')
-    pl.xlabel('colour')
-#     zs = cmodel(m_true, ys)
-
-    pl.subplot(2,1,2)
-    pl.errorbar(10**z[a], (10**x[a]), xerr = z_err[a], yerr = x_err[a], fmt = 'k.')
-    pl.errorbar(10**z[b], (10**x[b]), xerr = z_err[b], yerr = x_err[b], fmt = 'r.')
-    pl.plot(10**age, 10**period, 'c.')
-    pl.plot(10**zs, 10**xs, 'b-')
-    pl.xlabel('age')
-    pl.ylabel('period')
-    pl.savefig("fakedata")
+import plotting
 
 # generative model
 def g_model(m, x, y): # model computes log(t) from log(p) and bv
@@ -86,7 +49,7 @@ m_true = [0.5189,  0.7725, 0.601, 0.4]
 x, y, z, x_obs, y_obs, z_obs, x_err, y_err, z_err = fake_data(m_true, 100)
 
 print "plotting data"
-plot(x_obs, y_obs, z_obs, x_err, y_err, z_err, m_true)
+plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, m_true)
 
 # Draw posterior samples.
 K = 500
