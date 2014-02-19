@@ -1,14 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as pl
 
-def plt(x, y, z, xerr, yerr, zerr, m):
+def plt(x, y, z, xerr, yerr, zerr, m, fname):
     a = y > 0.4
     b = y < 0.4
 
-    m_true = [0.5189,  0.7725, 0.601, 0.4]
     xs = np.linspace(min(x), max(x), num=500)
     ys = np.linspace(min(y), max(y), num=500)
-    zs = model(m_true, xs, ys)
+    zs = model(m, xs, ys)
 
     # load data
     data = np.genfromtxt('/users/angusr/python/gyro/data/data.txt').T
@@ -35,7 +34,7 @@ def plt(x, y, z, xerr, yerr, zerr, m):
     pl.plot(10**zs, 10**xs, 'b-')
     pl.xlabel('age')
     pl.ylabel('period')
-    pl.savefig("fakedata")
+    pl.savefig("%s"%fname)
     return
 
 def model(m, x, y):

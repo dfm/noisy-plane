@@ -10,42 +10,15 @@ from matplotlib import cm
 import scipy.optimize as op
 import plotting
 
-# # generative model
-# def g_model(m, x, y): # model computes log(t) from log(p) and bv
-#     z = np.ones_like(y)
-#     a = y > 0.4
-#     b = y < 0.4
-#     z[a] = 1./m[0] * (x[a] - np.log10(m[1]) - m[2]*np.log10(y[a]))
-#     z[b] = np.random.normal(3.5, 0.2, len(z[b]))
-#     return z
-#
-# # Generate some fake data set
-# def fake_data(m_true, N):
-#
-#     x = np.random.uniform(0.5, 1.8, N) # log(period)
-#     y = np.random.uniform(0.2, 1.,N) # colour
-#     z = g_model(m_true, x, y) # log(age)
-#
-#     # observational uncertainties.
-#     x_err = 0.01+0.01*np.random.rand(N)
-#     y_err = 0.01+0.01*np.random.rand(N)
-#     z_err = 0.01+0.01*np.random.rand(N)
-#
-#     # add noise
-#     z_obs = z+z_err*np.random.randn(N)
-#     x_obs = x+x_err*np.random.randn(N)
-#     y_obs = y+y_err*np.random.randn(N)
-#     return x, y, z, x_obs, y_obs, z_obs, x_err, y_err, z_err
-
 def model(m, x, y):
     return 1./m[0]*(x - np.log10(m[1]) - m[2]*np.log10(y))
 
-# Create fake data: n, a, b, c
+print "creating fake data set"
 m_true = [0.5189,  0.7725, 0.601]
 x, y, z, x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.fake_data(m_true, 100)
 
 print "plotting data"
-plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, m_true)
+plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, m_true, "fakedata")
 
 # Draw posterior samples.
 K = 500
@@ -65,11 +38,17 @@ def lnprior(m):
         return 0.0
     return -np.inf
 
+# posterior
 def lnprob(m):
     lp = lnprior(m)
     if not np.isfinite(lp):
         return -np.inf
     return lp + lnlike(m)
+
+# Calculate maximum-likelihood values
+nll = lambda *args: -lnlike(*args)
+result = op.fmin(nll, m_true)
+print result
 
 print lnlike(m_true)
 raw_input('enter')
