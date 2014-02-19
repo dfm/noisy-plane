@@ -13,8 +13,8 @@ import plotting
 # generative model
 def g_model(m, x, y): # model computes log(t) from log(p) and bv
     z = np.ones_like(y)
-    a = y > m[3]
-    b = y < m[3]
+    a = y > 0.4
+    b = y < 0.4
     z[a] = 1./m[0] * (x[a] - np.log10(m[1]) - m[2]*np.log10(y[a]))
     z[b] = np.random.normal(3.5, 0.2, len(z[b]))
     return z
@@ -41,7 +41,7 @@ def model(m, x, y):
     return 1./m[0]*(x - np.log10(m[1]) - m[2]*np.log10(y))
 
 # Create fake data: n, a, b, c
-m_true = [0.5189,  0.7725, 0.601, 0.4]
+m_true = [0.5189,  0.7725, 0.601]
 x, y, z, x_obs, y_obs, z_obs, x_err, y_err, z_err = fake_data(m_true, 100)
 
 print "plotting data"

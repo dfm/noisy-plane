@@ -2,14 +2,12 @@ import numpy as np
 import matplotlib.pyplot as pl
 
 def plt(x, y, z, xerr, yerr, zerr, m):
-    a = y > m[3]
-    b = y < m[3]
-#     a = y > 0.6
-#     b = y < 0.6
+    a = y > 0.4
+    b = y < 0.4
 
     m_true = [0.5189,  0.7725, 0.601, 0.4]
     xs = np.linspace(min(x), max(x), num=500)
-    ys = np.linspace(m[3], max(y), num=500)
+    ys = np.linspace(min(y), max(y), num=500)
     zs = model(m_true, xs, ys)
 
     # load data
