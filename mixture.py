@@ -15,10 +15,10 @@ def model(m, x, y):
 
 # fake data
 m_true = [0.5189,  0.7725, 0.601]
-# x, y, z, x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.fake_data(m_true, 100)
+x, y, z, x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.fake_data(m_true, 100)
 
 # load real data
-x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.load()
+# x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.load()
 
 print "plotting data"
 plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, m_true, "fakedata")
