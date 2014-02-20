@@ -13,14 +13,15 @@ import plotting
 def model(m, x, y):
     return 1./m[0]*(x - np.log10(m[1]) - m[2]*np.log10(y))
 
+print "loading real data"
 xr, yr, zr, xer, yer, zer = plotting.load()
 
-# fake data
+print "generating fake data"
 m_true = [0.5189,  0.7725, 0.601]
 x, y, z, x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.fake_data(m_true, 100)
 
 # replacing values slowly
-rp = 2
+rp = 10
 x_obs[:rp] = xr[:rp]
 y_obs[:rp] = yr[:rp]
 z_obs[:rp] = zr[:rp]
@@ -28,11 +29,11 @@ x_err[:rp] = xer[:rp]
 y_err[:rp] = yer[:rp]
 z_err[:rp] = zer[:rp]
 
-# print 10**(z_obs[:2*rp])
+print 10**(z_obs[:2*rp])
 # print max(z_obs), "max"
 # print max(10**(z_obs))
 
-# load real data
+# print "loading real data"
 # x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.load()
 
 print "plotting data"
@@ -43,7 +44,9 @@ K = 500
 x_samp = np.vstack([x0+xe*np.random.randn(K) for x0, xe in zip(x_obs, x_err)])
 y_samp = np.vstack([y0+ye*np.random.randn(K) for y0, ye in zip(y_obs, y_err)])
 
-# # check there are no values < 0
+print "check there are no values < 0"
+elf = y_samp < 0
+print sum(elf)
 # for i in y_samp:
 #     for j in i:
 #         if j<0.0:
@@ -102,7 +105,7 @@ print("Plotting traces")
 pl.figure()
 for i in range(ndim):
     pl.clf()
-    pl.plot(sampler.chain[:, :, i].T, 'k-', alpha=0.5)
+    pl.plot(sampler.chain[:, :, i].T, 'k-', alpha=0.2)
     pl.savefig("{0}.png".format(i))
 
 # Flatten chain
