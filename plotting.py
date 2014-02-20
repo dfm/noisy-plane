@@ -37,7 +37,6 @@ def plt(x, y, z, xerr, yerr, zerr, m, fname):
 
     period, bv, age, p_err, bv_err, a_err = load()
     print 10**x[:2], "real age, plotted"
-    print 10**(max(x))
 
     pl.clf()
     pl.subplot(3,1,1)

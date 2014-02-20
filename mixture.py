@@ -20,22 +20,20 @@ m_true = [0.5189,  0.7725, 0.601]
 x, y, z, x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.fake_data(m_true, 100)
 
 # replacing values slowly
-# rp = 2
-# x_obs[:rp] = xr[:rp]
-# y_obs[:rp] = yr[:rp]
-# z_obs[:rp] = zr[:rp]
-# x_err[:rp] = xer[:rp]
-# y_err[:rp] = yer[:rp]
-# z_err[:rp] = zer[:rp]
+rp = 2
+x_obs[:rp] = xr[:rp]
+y_obs[:rp] = yr[:rp]
+z_obs[:rp] = zr[:rp]
+x_err[:rp] = xer[:rp]
+y_err[:rp] = yer[:rp]
+z_err[:rp] = zer[:rp]
 
 # print 10**(z_obs[:2*rp])
 # print max(z_obs), "max"
 # print max(10**(z_obs))
-# print zobs[
 
 # load real data
 # x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.load()
-# print z_obs[:100]
 
 print "plotting data"
 plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, m_true, "fakedata")
@@ -79,10 +77,10 @@ def lnprob(m):
 # Calculate maximum-likelihood values
 nll = lambda *args: -lnlike(*args)
 result = op.fmin(nll, m_true)
-print result
+print "ml result = ", result
 plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, result, "ml_result")
 
-print lnlike(m_true)
+print "lnlike = ", lnlike(m_true)
 raw_input('enter')
 
 # Sample the posterior probability for m.
@@ -104,7 +102,7 @@ print("Plotting traces")
 pl.figure()
 for i in range(ndim):
     pl.clf()
-    pl.plot(sampler.chain[:, :, i].T)
+    pl.plot(sampler.chain[:, :, i].T, 'k-', alpha=0.5)
     pl.savefig("{0}.png".format(i))
 
 # Flatten chain
