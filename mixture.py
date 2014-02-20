@@ -21,7 +21,7 @@ m_true = [0.5189,  0.7725, 0.601]
 x, y, z, x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.fake_data(m_true, 100)
 
 # replacing values slowly
-rp = 50
+rp = 100
 x_obs[:rp] = xr[:rp]
 y_obs[:rp] = yr[:rp]
 z_obs[:rp] = zr[:rp]
@@ -31,9 +31,6 @@ z_err[:rp] = zer[:rp]
 
 print 10**(z_obs[:2*rp])
 print (max(10**(z_obs[:2*rp]))), "Gyr"
-
-# print max(z_obs), "max"
-# print max(10**(z_obs))
 
 # print "loading real data"
 # x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.load()
