@@ -73,7 +73,7 @@ def plt(x, y, z, xerr, yerr, zerr, m, fname):
     pl.ylabel('period')
     pl.savefig("%s"%fname)
 
-    plot3d(x, y, z, period, bv, age, m)
+#     plot3d(x, y, z, period, bv, age, m)
 
 def model(m, x, y):
 #     return 1./m[0]*(x - np.log10(m[1]) - m[2]*np.log10(y - m[3]))
@@ -115,8 +115,8 @@ def fake_data(m_true, N):
     y_obs = y+y_err*np.random.randn(N)
     return x, y, z, x_obs, y_obs, z_obs, x_err, y_err, z_err
 
-def plot3d(x1, y1, z1, x2, y2, z2, m):
-    fig = pl.figure(1)
+def plot3d(x1, y1, z1, x2, y2, z2, m, fig):
+    fig = pl.figure(fig)
     ax = fig.gca(projection='3d')
     ax.scatter(x1, y1, z1, c = 'k', marker = 'o')
     ax.scatter(x2, y2, z2, c = 'r', marker = 'o')

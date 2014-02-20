@@ -18,10 +18,10 @@ xr, yr, zr, xer, yer, zer = plotting.load()
 
 print "generating fake data"
 m_true = [0.5189,  0.7725, 0.601]
-x, y, z, x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.fake_data(m_true, 100)
+x, y, z, x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.fake_data(m_true, 144)
 
 # replacing values slowly
-rp = 100
+rp = 140
 x_obs[:rp] = xr[:rp]
 y_obs[:rp] = yr[:rp]
 z_obs[:rp] = zr[:rp]
@@ -37,6 +37,7 @@ print (max(10**(z_obs[:2*rp]))), "Gyr"
 
 print "plotting data"
 plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, m_true, "fakedata")
+plotting.plot3d(x_obs, y_obs, z_obs, x_obs, y_obs, z_obs, m_true, 1)
 
 # Draw posterior samples.
 K = 500
@@ -69,6 +70,7 @@ nll = lambda *args: -lnlike(*args)
 result = op.fmin(nll, m_true)
 print "ml result = ", result
 plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, result, "ml_result")
+plotting.plot3d(x_obs, y_obs, z_obs, x_obs, y_obs, z_obs, result, 2)
 
 print "lnlike = ", lnlike(m_true)
 raw_input('enter')
@@ -81,7 +83,7 @@ print("Burn-in")
 p0, lp, state = sampler.run_mcmc(p0, 100)
 sampler.reset()
 print("Production run")
-sampler.run_mcmc(p0, 500)
+sampler.run_mcmc(p0, 700)
 
 print("Making triangle plot")
 fig_labels = ["$n$", "$a$", "$b$", "$c$", "$\mu_{age}$", "$\sigma_{age}$", "$P$"]
@@ -109,3 +111,4 @@ print 'mcmc result', mcmc_result
 
 # plotting result
 plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, mcmc_result, "mcmc_result")
+plotting.plot3d(x_obs, y_obs, z_obs, x_obs, y_obs, z_obs, mcmc_result, 3)
