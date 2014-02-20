@@ -32,12 +32,11 @@ def plt(x, y, z, xerr, yerr, zerr, m, fname):
 #     b = y < 0.4
 
     xs = np.linspace(min(x), max(x), num=500)
-    ys = np.linspace(0, max(y), num=500)
-    print min(y)
+    ys = np.linspace(0.1, max(y), num=500)
+    print "min(y) = ", min(y)
     zs = model(m, xs, ys)
 
     period, bv, age, p_err, bv_err, a_err = load()
-    print 10**x[:2], "real age, plotted"
 
     pl.clf()
     pl.subplot(3,1,1)

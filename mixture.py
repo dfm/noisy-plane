@@ -21,7 +21,7 @@ m_true = [0.5189,  0.7725, 0.601]
 x, y, z, x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.fake_data(m_true, 100)
 
 # replacing values slowly
-rp = 10
+rp = 50
 x_obs[:rp] = xr[:rp]
 y_obs[:rp] = yr[:rp]
 z_obs[:rp] = zr[:rp]
@@ -30,6 +30,8 @@ y_err[:rp] = yer[:rp]
 z_err[:rp] = zer[:rp]
 
 print 10**(z_obs[:2*rp])
+print (max(10**(z_obs[:2*rp]))), "Gyr"
+
 # print max(z_obs), "max"
 # print max(10**(z_obs))
 
@@ -44,13 +46,7 @@ K = 500
 x_samp = np.vstack([x0+xe*np.random.randn(K) for x0, xe in zip(x_obs, x_err)])
 y_samp = np.vstack([y0+ye*np.random.randn(K) for y0, ye in zip(y_obs, y_err)])
 
-print "check there are no values < 0"
-elf = y_samp < 0
-print sum(elf)
-# for i in y_samp:
-#     for j in i:
-#         if j<0.0:
-#             print j
+print "no. colours < 0:", sum(sum(y_samp<0))
 
 # lhf
 def lnlike(m):
@@ -58,12 +54,6 @@ def lnlike(m):
     chi2 = -0.5*((z_obs[:, None] - z_pred)/z_err[:, None])**2
     chi2[np.isnan(chi2)] = -np.inf
     return np.sum(np.logaddexp.reduce(chi2, axis=1))
-
-# # Flat priors
-# def lnprior(m):
-#     if np.any(m < 0.) == False and np.any(1. < m) == False:
-#         return 0.0
-#     return -np.inf
 
 # Gaussian priors
 def lnprior(m):
@@ -77,7 +67,7 @@ def lnprob(m):
         return -np.inf
     return lp + lnlike(m)
 
-# Calculate maximum-likelihood values
+print "Calculating maximum-likelihood values"
 nll = lambda *args: -lnlike(*args)
 result = op.fmin(nll, m_true)
 print "ml result = ", result
@@ -105,7 +95,8 @@ print("Plotting traces")
 pl.figure()
 for i in range(ndim):
     pl.clf()
-    pl.plot(sampler.chain[:, :, i].T, 'k-', alpha=0.2)
+    pl.plot(m_true[i], "k-")
+    pl.plot(sampler.chain[:, :, i].T, 'k-', alpha=0.3)
     pl.savefig("{0}.png".format(i))
 
 # Flatten chain
