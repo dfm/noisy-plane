@@ -13,12 +13,29 @@ import plotting
 def model(m, x, y):
     return 1./m[0]*(x - np.log10(m[1]) - m[2]*np.log10(y))
 
+xr, yr, zr, xer, yer, zer = plotting.load()
+
 # fake data
 m_true = [0.5189,  0.7725, 0.601]
-# x, y, z, x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.fake_data(m_true, 100)
+x, y, z, x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.fake_data(m_true, 100)
+
+# replacing values slowly
+# rp = 2
+# x_obs[:rp] = xr[:rp]
+# y_obs[:rp] = yr[:rp]
+# z_obs[:rp] = zr[:rp]
+# x_err[:rp] = xer[:rp]
+# y_err[:rp] = yer[:rp]
+# z_err[:rp] = zer[:rp]
+
+# print 10**(z_obs[:2*rp])
+# print max(z_obs), "max"
+# print max(10**(z_obs))
+# print zobs[
 
 # load real data
-x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.load()
+# x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.load()
+# print z_obs[:100]
 
 print "plotting data"
 plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, m_true, "fakedata")
@@ -27,6 +44,12 @@ plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, m_true, "fakedata")
 K = 500
 x_samp = np.vstack([x0+xe*np.random.randn(K) for x0, xe in zip(x_obs, x_err)])
 y_samp = np.vstack([y0+ye*np.random.randn(K) for y0, ye in zip(y_obs, y_err)])
+
+# # check there are no values < 0
+# for i in y_samp:
+#     for j in i:
+#         if j<0.0:
+#             print j
 
 # lhf
 def lnlike(m):
@@ -44,6 +67,7 @@ def lnlike(m):
 # Gaussian priors
 def lnprior(m):
     return -0.5*(m[0]+0.5)**2 -0.5*(m[1]+0.5)**2 -0.5*(m[2]+0.5)**2
+#     return -0.5*(m[0]+1.)**2 -0.5*(m[1]+1.)**2 -0.5*(m[2]+1.)**2
 
 # posterior
 def lnprob(m):
