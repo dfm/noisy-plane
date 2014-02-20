@@ -15,10 +15,10 @@ def model(m, x, y):
 
 # fake data
 m_true = [0.5189,  0.7725, 0.601]
-x, y, z, x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.fake_data(m_true, 100)
+# x, y, z, x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.fake_data(m_true, 100)
 
 # load real data
-# x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.load()
+x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.load()
 
 print "plotting data"
 plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, m_true, "fakedata")
@@ -35,11 +35,15 @@ def lnlike(m):
     chi2[np.isnan(chi2)] = -np.inf
     return np.sum(np.logaddexp.reduce(chi2, axis=1))
 
-# Flat priors
+# # Flat priors
+# def lnprior(m):
+#     if np.any(m < 0.) == False and np.any(1. < m) == False:
+#         return 0.0
+#     return -np.inf
+
+# Gaussian priors
 def lnprior(m):
-    if np.any(m < 0.) == False and np.any(1. < m) == False:
-        return 0.0
-    return -np.inf
+    return -0.5*(m[0]+0.5)**2 -0.5*(m[1]+0.5)**2 -0.5*(m[2]+0.5)**2
 
 # posterior
 def lnprob(m):
