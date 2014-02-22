@@ -10,17 +10,13 @@ from matplotlib import cm
 import scipy.optimize as op
 import plotting
 
-# def model(m, x, y):
-#     return 1./m[0]*(x - np.log10(m[1]) - m[2]*np.log10(y))
-
 def model(m, x, y):
-    return 1./m[0]*(x - np.log10(m[1]) - m[2]*y)
+    return 1./m[0]*(x - np.log10(m[1]) - m[2]*np.log10(y))
 
 print "loading real data"
 xr, yr, zr, xer, yer, zer = plotting.load()
 
 print "generating fake data"
-# m_true = [0.5189,  0.7725, 0.601]
 m_true = [0.5189,  0.7725, 0.601]
 x, y, z, x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.fake_data(m_true, 144)
 
@@ -32,6 +28,10 @@ z_obs[:rp] = zr[:rp]
 x_err[:rp] = xer[:rp]
 y_err[:rp] = yer[:rp]
 z_err[:rp] = zer[:rp]
+# x_err = xer
+# y_err = yer
+# z_err = zer
+
 
 print 10**(z_obs[:2*rp])
 print 10**(x_obs[:2*rp])
@@ -56,7 +56,6 @@ def lnlike(m):
 
 # Gaussian priors
 def lnprior(m):
-#     return -0.5*(m[0]+1.)**2 -0.5*(m[1]+1.)**2 -0.5*(m[2]+1.)**2
     return -0.5*(m[0]+1.)**2 -0.5*(m[1]+1.)**2 -0.5*(m[2]+1.)**2
 
 # posterior
@@ -76,14 +75,14 @@ print "lnlike = ", lnlike(m_true)
 raw_input('enter')
 
 # Sample the posterior probability for m.
-nwalkers, ndim = 32, len(m_true)
+nwalkers, ndim = 64, len(m_true)
 p0 = [m_true+1e-4*np.random.rand(ndim) for i in range(nwalkers)]
 sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob)
 print("Burn-in")
 p0, lp, state = sampler.run_mcmc(p0, 100)
 sampler.reset()
 print("Production run")
-sampler.run_mcmc(p0, 500)
+sampler.run_mcmc(p0, 2000)
 
 print("Making triangle plot")
 fig_labels = ["$n$", "$a$", "$b$", "$c$", "$\mu_{age}$", "$\sigma_{age}$", "$P$"]
