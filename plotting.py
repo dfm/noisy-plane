@@ -5,12 +5,13 @@ from mpl_toolkits.mplot3d import Axes3D
 def load():
     # load data
     data = np.genfromtxt('/users/angusr/python/gyro/data/data.txt').T
-    cols = np.genfromtxt("/users/angusr/python/gyro/data/colours.txt")
+#     cols = np.genfromtxt("/users/angusr/python/gyro/data/colours.txt")
     xr = data[1]
     l = (xr > 1.)
     xr = np.log10(data[1][l])
     zr = np.log10(data[13][l]*1000) # convert to myr
-    yr = cols[1][l]
+#     yr = cols[1][l]
+    yr = np.log10(data[3][l])
 
     # for now replace nans with means
     yr[np.isnan(yr)] = np.mean(yr[np.isfinite(yr)])
@@ -18,9 +19,9 @@ def load():
 
     # make up observational uncertainties
     N = len(xr)
-    xr_err = 0.1+0.1*np.random.rand(N)
-    yr_err = 0.01+0.01*np.random.rand(N)
-    zr_err = 0.1+0.1*np.random.rand(N)
+    xr_err = 0.1+0.1*np.random.rand(N) # xr is log period
+    yr_err = 0.1+0.1*np.random.rand(N) # yr is log teff
+    zr_err = 0.1+0.1*np.random.rand(N) #zr is log age
 
     return xr, yr, zr, xr_err, yr_err, zr_err
 
@@ -38,10 +39,12 @@ def plt(x, y, z, xerr, yerr, zerr, m, fname):
     pl.subplot(3,1,1)
 #     pl.errorbar(y[a], (10**z[a]), xerr = yerr[a], yerr = zerr[a], fmt = 'k.')
 #     pl.errorbar(y[b], (10**z[b]), xerr = yerr[b], yerr = zerr[b], fmt = 'r.')
-    pl.errorbar(y, (10**z), xerr = yerr, yerr = 10**zerr, fmt = 'k.', capsize = 0, ecolor='0.5')
+#     pl.errorbar(y, (10**z), xerr = yerr, yerr = 10**zerr, fmt = 'k.', capsize = 0, ecolor='0.5') # use with colours
+    pl.errorbar(10**y, (10**z), xerr = 10**yerr, yerr = 10**zerr, fmt = 'k.', capsize = 0, ecolor='0.5') # use with teff
 #     pl.errorbar(y, z, xerr = yerr, yerr = zerr, fmt = 'k.', capsize = 0, ecolor='0.5')
 #     pl.plot(yr, 10**zr, 'c.')
-    pl.plot(ys, 10**zs, 'b-')
+#     pl.plot(ys, 10**zs, 'b-')
+    pl.plot(10**ys, 10**zs, 'b-')
 #     pl.plot(ys, zs, 'b-')
     pl.ylabel('age')
     pl.xlabel('colour')
@@ -60,18 +63,22 @@ def plt(x, y, z, xerr, yerr, zerr, m, fname):
     pl.subplot(3,1,3)
 #     pl.errorbar(y[a], (10**x[a]), xerr = zerr[a], yerr = xerr[a], fmt = 'k.')
 #     pl.errorbar(y[b], (10**x[b]), xerr = zerr[b], yerr = xerr[b], fmt = 'r.')
-    pl.errorbar(y, (10**x), xerr = yerr, yerr = 10**xerr, fmt = 'k.', capsize = 0, ecolor='0.5')
+#     pl.errorbar(y, (10**x), xerr = yerr, yerr = 10**xerr, fmt = 'k.', capsize = 0, ecolor='0.5')
+    pl.errorbar(10**y, (10**x), xerr = 10**yerr, yerr = 10**xerr, fmt = 'k.', capsize = 0, ecolor='0.5')
 #     pl.errorbar(y, x, xerr = yerr, yerr = xerr, fmt = 'k.', capsize = 0, ecolor='0.5')
 #     pl.plot(yr, 10**xr, 'c.')
-    pl.plot(ys, 10**xs, 'b-')
+#     pl.plot(ys, 10**xs, 'b-')
+    pl.plot(10**ys, 10**xs, 'b-')
 #     pl.plot(ys, xs, 'b-')
     pl.xlabel('colour')
     pl.ylabel('period')
     pl.savefig("%s"%fname)
 
 def model(m, x, y):
-#     return 1./m[0]*(x - np.log10(m[1]) - m[2]*np.log10(y - m[3]))
     return 1./m[0]*(x - np.log10(m[1]) - m[2]*np.log10(y))
+
+def tmodel(m, x, y):
+    return 1./m[0]*(x - np.log10(m[1]) - m[2]*y)
 
 # generative model
 def g_model(m, x, y): # model computes log(t) from log(p) and bv
