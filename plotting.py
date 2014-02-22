@@ -115,11 +115,11 @@ def fake_data(m_true, N):
     y_obs = y+y_err*np.random.randn(N)
     return x, y, z, x_obs, y_obs, z_obs, x_err, y_err, z_err
 
-def plot3d(x1, y1, z1, x2, y2, z2, m, fig):
+def plot3d(x1, y1, z1, x2, y2, z2, m, fig, colour, sv):
     fig = pl.figure(fig)
     ax = fig.gca(projection='3d')
-    ax.scatter(x1, y1, z1, c = 'k', marker = 'o')
-    ax.scatter(x2, y2, z2, c = 'r', marker = 'o')
+    ax.scatter(x1, y1, z1, c = colour, marker = 'o')
+    ax.scatter(x2, y2, z2, c = colour, marker = 'o')
     x_surf=np.arange(min(x1), max(x1), 0.01)
     y_surf=np.arange(min(y1), max(y1), 0.01)
     x_surf, y_surf = np.meshgrid(x_surf, y_surf)
@@ -131,4 +131,4 @@ def plot3d(x1, y1, z1, x2, y2, z2, m, fig):
     ax.set_ylabel('B-V')
     ax.set_zlabel('Age (Gyr)')
     pl.show()
-    pl.savefig('3d')
+    pl.savefig(sv)

@@ -21,7 +21,7 @@ m_true = [0.5189,  0.7725, 0.601]
 x, y, z, x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.fake_data(m_true, 144)
 
 # replacing values slowly
-rp = 140
+rp = 130
 x_obs[:rp] = xr[:rp]
 y_obs[:rp] = yr[:rp]
 z_obs[:rp] = zr[:rp]
@@ -38,7 +38,7 @@ print (max(10**(z_obs[:2*rp]))), "Gyr"
 
 print "plotting data"
 plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, m_true, "fakedata")
-plotting.plot3d(x_obs, y_obs, z_obs, x_obs, y_obs, z_obs, m_true, 1)
+plotting.plot3d(x_obs, y_obs, z_obs, x_obs, y_obs, z_obs, m_true, 1, 'k', "3dorig")
 
 # Draw posterior samples.
 K = 500
@@ -57,7 +57,7 @@ def lnlike(m):
 # Gaussian priors
 def lnprior(m):
 #     return -0.5*(m[0]+0.5)**2 -0.5*(m[1]+0.5)**2 -0.5*(m[2]+0.5)**2
-    return -0.5*(m[0]+.1)**2 -0.5*(m[1]+1.)**2 -0.5*(m[2]+1.)**2
+    return -0.5*(m[0]+1.)**2 -0.5*(m[1]+1.)**2 -0.5*(m[2]+1.)**2
 
 # posterior
 def lnprob(m):
@@ -71,7 +71,7 @@ nll = lambda *args: -lnlike(*args)
 result = op.fmin(nll, m_true)
 print "ml result = ", result
 plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, result, "ml_result")
-plotting.plot3d(x_obs, y_obs, z_obs, x_obs, y_obs, z_obs, result, 2)
+plotting.plot3d(x_obs, y_obs, z_obs, x_obs, y_obs, z_obs, result, 2, 'b', "3dml")
 
 print "lnlike = ", lnlike(m_true)
 raw_input('enter')
@@ -112,4 +112,4 @@ print 'mcmc result', mcmc_result
 
 # plotting result
 plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, mcmc_result, "mcmc_result")
-plotting.plot3d(x_obs, y_obs, z_obs, x_obs, y_obs, z_obs, mcmc_result, 3)
+plotting.plot3d(x_obs, y_obs, z_obs, x_obs, y_obs, z_obs, mcmc_result, 3, 'r', "3dmcmc")
