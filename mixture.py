@@ -30,6 +30,7 @@ y_err[:rp] = yer[:rp]
 z_err[:rp] = zer[:rp]
 
 print 10**(z_obs[:2*rp])
+print 10**(x_obs[:2*rp])
 print (max(10**(z_obs[:2*rp]))), "Gyr"
 
 # print "loading real data"
@@ -55,8 +56,8 @@ def lnlike(m):
 
 # Gaussian priors
 def lnprior(m):
-    return -0.5*(m[0]+0.5)**2 -0.5*(m[1]+0.5)**2 -0.5*(m[2]+0.5)**2
-#     return -0.5*(m[0]+1.)**2 -0.5*(m[1]+1.)**2 -0.5*(m[2]+1.)**2
+#     return -0.5*(m[0]+0.5)**2 -0.5*(m[1]+0.5)**2 -0.5*(m[2]+0.5)**2
+    return -0.5*(m[0]+.1)**2 -0.5*(m[1]+1.)**2 -0.5*(m[2]+1.)**2
 
 # posterior
 def lnprob(m):
