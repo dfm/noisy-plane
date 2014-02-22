@@ -53,7 +53,8 @@ def plt(x, y, z, xerr, yerr, zerr, m, fname):
     pl.savefig("%s"%fname)
 
 def model(m, x, y):
-    return 1./m[0]*(x - np.log10(m[1]) - m[2]*y)
+#     return 1./m[0]*(x - np.log10(m[1]) - m[2]*y)
+    return 1./m[0]*(x - m[1]*y)
 
 # generative model
 def g_model(m, x, y): # model computes log(t) from log(p) and bv

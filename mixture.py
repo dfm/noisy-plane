@@ -10,28 +10,29 @@ from matplotlib import cm
 import scipy.optimize as op
 import plotting
 
-# def model(m, x, y):
-#     return 1./m[0]*(x - np.log10(m[1]) - m[2]*np.log10(y))
-
 def model(m, x, y):
-    return 1./m[0]*(x - np.log10(m[1]) - m[2]*y)
+#     return 1./m[0]*(x - np.log10(m[1]) - m[2]*y)
+    return 1./m[0]*(x - m[1]*y)
 
-print "loading real data"
-xr, yr, zr, xer, yer, zer = plotting.load()
+# print "loading real data"
+# xr, yr, zr, xer, yer, zer = plotting.load()
 
 print "generating fake data"
 # m_true = [0.5189,  0.7725, 0.601]
-m_true = [0.6,  .1, 0.6]
-x, y, z, x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.fake_data(m_true, 144)
+m_true = [0.5, 0.6]
+# x, y, z, x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.fake_data(m_true, 144)
 
-# replacing values slowly
-rp = 144
-x_obs[:rp] = xr[:rp]
-y_obs[:rp] = yr[:rp]
-z_obs[:rp] = zr[:rp]
-x_err[:rp] = xer[:rp]
-y_err[:rp] = yer[:rp]
-z_err[:rp] = zer[:rp]
+# # replacing values slowly
+# rp = 144
+# x_obs[:rp] = xr[:rp]
+# y_obs[:rp] = yr[:rp]
+# z_obs[:rp] = zr[:rp]
+# x_err[:rp] = xer[:rp]
+# y_err[:rp] = yer[:rp]
+# z_err[:rp] = zer[:rp]
+
+print "loading real data"
+x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.load()
 
 print "plotting data"
 plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, m_true, "fakedata")
@@ -52,7 +53,8 @@ def lnlike(m):
 
 # Gaussian priors
 def lnprior(m):
-    return -0.5*(m[0]+10.)**2 -0.5*(m[1]+10.)**2 -0.5*(m[2]+10.)**2
+#     return -0.5*(m[0]+10.)**2 -0.5*(m[1]+10.)**2 -0.5*(m[2]+10.)**2
+    return -0.5*(m[0]+10.)**2 -0.5*(m[1]+10.)**2
 
 # posterior
 def lnprob(m):
