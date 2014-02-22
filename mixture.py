@@ -21,7 +21,7 @@ xr, yr, zr, xer, yer, zer = plotting.load()
 
 print "generating fake data"
 # m_true = [0.5189,  0.7725, 0.601]
-m_true = [0.5189,  0.7725, 0.601]
+m_true = [0.6,  .1, 0.6]
 x, y, z, x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.fake_data(m_true, 144)
 
 # replacing values slowly
@@ -33,19 +33,15 @@ x_err[:rp] = xer[:rp]
 y_err[:rp] = yer[:rp]
 z_err[:rp] = zer[:rp]
 
-print 10**(z_obs[:2*rp])
-print 10**(x_obs[:2*rp])
-
 print "plotting data"
 plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, m_true, "fakedata")
 plotting.plot3d(x_obs, y_obs, z_obs, x_obs, y_obs, z_obs, m_true, 1, 'k', "3dorig")
+raw_input('enter')
 
 # Draw posterior samples.
 K = 500
 x_samp = np.vstack([x0+xe*np.random.randn(K) for x0, xe in zip(x_obs, x_err)])
 y_samp = np.vstack([y0+ye*np.random.randn(K) for y0, ye in zip(y_obs, y_err)])
-
-print "no. colours < 0:", sum(sum(y_samp<0))
 
 # lhf
 def lnlike(m):
@@ -56,8 +52,7 @@ def lnlike(m):
 
 # Gaussian priors
 def lnprior(m):
-#     return -0.5*(m[0]+1.)**2 -0.5*(m[1]+1.)**2 -0.5*(m[2]+1.)**2
-    return -0.5*(m[0]+1.)**2 -0.5*(m[1]+1.)**2 -0.5*(m[2]+1.)**2
+    return -0.5*(m[0]+10.)**2 -0.5*(m[1]+10.)**2 -0.5*(m[2]+10.)**2
 
 # posterior
 def lnprob(m):
@@ -73,7 +68,6 @@ plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, result, "ml_result")
 plotting.plot3d(x_obs, y_obs, z_obs, x_obs, y_obs, z_obs, result, 2, 'b', "3dml")
 
 print "lnlike = ", lnlike(m_true)
-raw_input('enter')
 
 # Sample the posterior probability for m.
 nwalkers, ndim = 32, len(m_true)
