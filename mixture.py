@@ -21,7 +21,7 @@ m_true = [0.5189,  0.7725, 0.601]
 x, y, z, x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.fake_data(m_true, 144)
 
 # replacing values slowly
-rp = 130
+rp = 144
 x_obs[:rp] = xr[:rp]
 y_obs[:rp] = yr[:rp]
 z_obs[:rp] = zr[:rp]
@@ -31,10 +31,6 @@ z_err[:rp] = zer[:rp]
 
 print 10**(z_obs[:2*rp])
 print 10**(x_obs[:2*rp])
-print (max(10**(z_obs[:2*rp]))), "Gyr"
-
-# print "loading real data"
-# x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.load()
 
 print "plotting data"
 plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, m_true, "fakedata")
@@ -56,7 +52,6 @@ def lnlike(m):
 
 # Gaussian priors
 def lnprior(m):
-#     return -0.5*(m[0]+0.5)**2 -0.5*(m[1]+0.5)**2 -0.5*(m[2]+0.5)**2
     return -0.5*(m[0]+1.)**2 -0.5*(m[1]+1.)**2 -0.5*(m[2]+1.)**2
 
 # posterior
@@ -69,7 +64,6 @@ def lnprob(m):
 print "Calculating maximum-likelihood values"
 nll = lambda *args: -lnlike(*args)
 result = op.fmin(nll, m_true)
-print "ml result = ", result
 plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, result, "ml_result")
 plotting.plot3d(x_obs, y_obs, z_obs, x_obs, y_obs, z_obs, result, 2, 'b', "3dml")
 
@@ -77,14 +71,14 @@ print "lnlike = ", lnlike(m_true)
 raw_input('enter')
 
 # Sample the posterior probability for m.
-nwalkers, ndim = 32, len(m_true)
+nwalkers, ndim = 64, len(m_true)
 p0 = [m_true+1e-4*np.random.rand(ndim) for i in range(nwalkers)]
 sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob)
 print("Burn-in")
 p0, lp, state = sampler.run_mcmc(p0, 100)
 sampler.reset()
 print("Production run")
-sampler.run_mcmc(p0, 700)
+sampler.run_mcmc(p0, 2000)
 
 print("Making triangle plot")
 fig_labels = ["$n$", "$a$", "$b$", "$c$", "$\mu_{age}$", "$\sigma_{age}$", "$P$"]
@@ -108,6 +102,7 @@ mcmc_result = map(lambda v: (v[1], v[2]-v[1], v[1]-v[0]),
 
 print 'initial values', m_true
 mcmc_result = np.array(mcmc_result)[:, 0]
+print "ml result = ", result
 print 'mcmc result', mcmc_result
 
 # plotting result
