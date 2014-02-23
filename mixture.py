@@ -29,7 +29,7 @@ m_true = [1.9272, 0.216, -0.3119]
 x, y, z, x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.fake_data(m_true, 144)
 
 # replacing values slowly
-rp = 0
+rp = 144
 x_obs[:rp] = xr[:rp]
 y_obs[:rp] = yr[:rp]
 z_obs[:rp] = zr[:rp]

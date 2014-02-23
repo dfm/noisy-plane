@@ -63,6 +63,7 @@ def g_model(m, x, y): # model computes log(t) from log(p) and bv
     cutoff = 0.2
     a = y > cutoff
     b = y < cutoff
+#     z[q] = m[0]*x[a] + m[1] + m[2]*y[a]
     z[a] = 1./m[0] * (x[a] - np.log10(m[1]) - m[2]*np.log10(y[a]))
     mu = model(m, 1., cutoff)
     z[b] = np.random.normal(mu, 0.1, len(z[b]))
@@ -74,7 +75,8 @@ def fake_data(m_true, N):
     rd = load()
     x = np.random.uniform(min(rd[0]), max(rd[0]), N) # log(period)
     y = np.random.uniform(min(rd[1]), max(rd[1]), N) # log(Teff)
-    z = g_model(m_true, x, y) # log(age)
+#     z = g_model(m_true, x, y) # log(age)
+    z = model(m_true, x, y) # log(age)
 
     # observational uncertainties.
     x_err = 0.1+0.1*np.random.rand(N)
