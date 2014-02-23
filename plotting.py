@@ -54,7 +54,6 @@ def plt(x, y, z, xerr, yerr, zerr, m, fname):
     pl.savefig("%s"%fname)
 
 def model(m, x, y):
-# #     return 1./m[0]*(x - np.log10(m[1]) - m[2]*y)
     return m[0]*x + m[1] + m[2]*y
 
 # generative model
@@ -102,5 +101,5 @@ def plot3d(x1, y1, z1, x2, y2, z2, m, fig, colour, sv):
     ax.set_xlabel('Rotational period (days)')
     ax.set_ylabel('B-V')
     ax.set_zlabel('Age (Gyr)')
-    pl.show()
+#     pl.show()
     pl.savefig(sv)
