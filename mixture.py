@@ -75,7 +75,7 @@ print("Plotting traces")
 pl.figure()
 for i in range(ndim):
     pl.clf()
-    pl.plot(m_true[i], "k-")
+    pl.axhline(m_true[i], color = "r")
     pl.plot(sampler.chain[:, :, i].T, 'k-', alpha=0.3)
     pl.savefig("{0}.png".format(i))
 
