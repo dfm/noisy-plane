@@ -21,9 +21,9 @@ def model(m, x, y):
     return m[0]*x + m[1] + m[2]*(y-m[3])
 #     return m[0]*x + m[1] + m[2]*y
 
-# print "generating fake data"
-x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.fake_data(m_true, 144)
-plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, m_true, "fakedata")
+# # generating fake data
+# x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.fake_data(m_true, 144)
+# plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, m_true, "fakedata")
 
 # print "loading real data"
 x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.load()
@@ -47,7 +47,9 @@ def lnlike(m):
 # Gaussian priors
 def lnprior(m):
 #     return -0.5*(m[0]+.5)**2 -0.5*(m[1]+.5)**2 -0.5*(m[2]+.5)**2
-    return -0.5*(m[0]+.5)**2 -0.5*(m[1]+.5)**2 -0.5*(m[2]+.5)**2 -0.5*(m[3]+.1)**2
+    if 0 < m[3]:
+        return -0.5*(m[0]+.5)**2 -0.5*(m[1]+.5)**2 -0.5*(m[2]+.5)**2 -0.5*(m[3]+.1)**2
+    return -np.inf
 
 # posterior
 def lnprob(m):
