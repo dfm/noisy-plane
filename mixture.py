@@ -10,19 +10,26 @@ from matplotlib import cm
 import scipy.optimize as op
 import plotting
 
-m_true = [1.9272, 0.216, -0.3119]
+# m_true = [1.9272, 0.216, -0.3119]
+m_true = [1.9272, 0.216, -0.3119, np.log10(6500)]
 
 def model(m, x, y):
-    return m[0]*x + m[1] + m[2]*y
+#     a = y<m[3]
+#     b = y>m[3]
+#     z[a] = m[0]*x[a] + m[1] + m[2]*y[a]
+#     z[b] = np.
+    return m[0]*x + m[1] + m[2]*(y-m[3])
+#     return m[0]*x + m[1] + m[2]*y
 
 # print "generating fake data"
-# x, y, z, x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.fake_data(m_true, 144)
+x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.fake_data(m_true, 144)
+plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, m_true, "fakedata")
 
 # print "loading real data"
 x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.load()
+plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, m_true, "realdata")
 
-print "plotting data"
-plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, m_true, "fakedata")
+# 3d plot
 plotting.plot3d(x_obs, y_obs, z_obs, x_obs, y_obs, z_obs, m_true, 1, 'k', "3dorig")
 
 # Draw posterior samples.
@@ -75,7 +82,7 @@ print("Plotting traces")
 pl.figure()
 for i in range(ndim):
     pl.clf()
-    pl.plot(m_true[i], "k-")
+    pl.axhline(m_true[i], color = "r")
     pl.plot(sampler.chain[:, :, i].T, 'k-', alpha=0.3)
     pl.savefig("{0}.png".format(i))
 

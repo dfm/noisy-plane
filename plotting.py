@@ -45,7 +45,8 @@ def load():
     return xr, yr, zr, xr_err, yr_err, zr_err
 
 def model(m, x, y):
-    return m[0]*x + m[1] + m[2]*y
+#     return m[0]*x + m[1] + m[2]*y
+    return m[0]*x + m[1] + m[2]*(y-m[3])
 
 def log_errorbar(y, errp, errm):
     plus = y + errp
@@ -115,7 +116,7 @@ def fake_data(m_true, N):
     z_obs = z+z_err*np.random.randn(N)
     x_obs = x+x_err*np.random.randn(N)
     y_obs = y+y_err*np.random.randn(N)
-    return x, y, z, x_obs, y_obs, z_obs, x_err, y_err, z_err
+    return x_obs, y_obs, z_obs, x_err, y_err, z_err
 
 def plot3d(x1, y1, z1, x2, y2, z2, m, fig, colour, sv):
     fig = pl.figure(fig)
