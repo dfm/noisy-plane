@@ -35,20 +35,11 @@ def load():
     yr_err = log_errorbar(yr, data[4][l], data[4][l])[0]
     zr_err, zr_errp, zr_errm  = log_errorbar(zr, zr_errp, zr_errm)
 
-#     # for now replace nans, -infs and 0s with means
-#     yr[np.isnan(yr)] = np.mean(yr[np.isfinite(yr)])
-#     yr[yr == -np.inf] = np.mean(yr[np.isfinite(yr)])
-#     yr[yr == 0.] = np.mean(yr[np.isfinite(yr)])
-#     zr[zr == -np.inf] = np.mean(zr[np.isfinite(zr)])
-#     xr_err[np.isnan(xr_err)] = np.mean(xr_err[np.isfinite(xr_err)])
-#     yr_err[np.isnan(yr_err)] = np.mean(yr_err[np.isfinite(yr_err)])
-#     zr_err[np.isnan(zr_err)] = np.mean(zr_err[np.isfinite(zr_err)])
-
 #     # make up observational uncertainties
 #     N = len(xr)
 #     xr_err = .1+.1*np.random.rand(N) # xr is log period
 #     yr_err = .1+.1*np.random.rand(N) # yr is log teff
-#     zr_err = .1+.1*np.random.rand(N) #zr is log age
+# #     zr_err = .1+.1*np.random.rand(N) #zr is log age
 #     zr_err = 1.+1.*np.random.rand(N) #zr is log age
 
     return xr, yr, zr, xr_err, yr_err, zr_err
