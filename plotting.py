@@ -70,20 +70,23 @@ def plt(x, y, z, xerr, yerr, zerr, m, fname):
     pl.subplot(3,1,1)
     pl.errorbar(10**y, (10**z), xerr = 10**yerr, yerr = 10**zerr, fmt = 'k.', capsize = 0, ecolor='0.5')
     pl.plot(10**ys, 10**zs, 'b-')
-    pl.ylabel('age')
+    pl.xlim(pl.gca().get_xlim()[::-1])
+    pl.ylabel('age (Myr)')
     pl.xlabel('Teff')
 
     pl.subplot(3,1,2)
     pl.errorbar(10**z, (10**x), xerr = 10**zerr, yerr = 10**xerr, fmt = 'k.', capsize = 0, ecolor='0.5')
     pl.plot(10**zs, 10**xs, 'b-')
-    pl.xlabel('age')
+    pl.xlabel('age (Myr)')
     pl.ylabel('period')
 
     pl.subplot(3,1,3)
     pl.errorbar(10**y, (10**x), xerr = 10**yerr, yerr = 10**xerr, fmt = 'k.', capsize = 0, ecolor='0.5')
     pl.plot(10**ys, 10**xs, 'b-')
+    pl.xlim(pl.gca().get_xlim()[::-1])
     pl.xlabel('Teff')
     pl.ylabel('period')
+    pl.subplots_adjust(hspace = 0.5)
     pl.savefig("%s"%fname)
 
 # generative model
