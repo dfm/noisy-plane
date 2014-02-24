@@ -10,11 +10,12 @@ from matplotlib import cm
 import scipy.optimize as op
 import plotting
 
+m_true = [1.9272, 0.216, -0.3119]
+
 def model(m, x, y):
     return m[0]*x + m[1] + m[2]*y
 
-print "generating fake data"
-m_true = [1.9272, 0.216, -0.3119]
+# print "generating fake data"
 # x, y, z, x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.fake_data(m_true, 144)
 
 # print "loading real data"
@@ -23,7 +24,6 @@ x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.load()
 print "plotting data"
 plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, m_true, "fakedata")
 plotting.plot3d(x_obs, y_obs, z_obs, x_obs, y_obs, z_obs, m_true, 1, 'k', "3dorig")
-raw_input('enter')
 
 # Draw posterior samples.
 K = 500

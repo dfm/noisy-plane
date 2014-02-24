@@ -8,23 +8,64 @@ def load():
     data = np.genfromtxt('/users/angusr/python/gyro/data/data.txt').T
     xr = data[1]
     l = (xr > 1.)
-    xr = np.log10(data[1][l])
-    zr = np.log10(data[13][l]*1000) # convert to myr
-    yr = np.log10(data[3][l])
 
-    # for now replace nans, -infs and 0s with means
-    yr[np.isnan(yr)] = np.mean(yr[np.isfinite(yr)])
-    yr[yr == -np.inf] = np.mean(yr[np.isfinite(yr)])
-    yr[yr == 0.] = np.mean(yr[np.isfinite(yr)])
-    zr[zr == -np.inf] = np.mean(zr[np.isfinite(zr)])
+    xr = data[1][l]
+    yr = data[3][l]
+    zr = data[13][l]*1000 # convert to myr
+    xr_err = data[2][l]
+    yr_err = data[4][l]
+    zr_errp = data[14][l]*1000
+    zr_errm = data[15][l]*1000
 
-    # make up observational uncertainties
-    N = len(xr)
-    xr_err = 0.1+0.1*np.random.rand(N) # xr is log period
-    yr_err = 0.1+0.1*np.random.rand(N) # yr is log teff
-    zr_err = 0.1+0.1*np.random.rand(N) #zr is log age
+    # for now replace values <= 0 with means
+    yr[yr <= 0.] = np.mean(yr[yr > 0.])
+    zr[zr <= 0.] = np.mean(zr[zr > 0.])
+    xr_err[xr_err <= 0.] = np.mean(xr_err[xr_err > 0.])
+    yr_err[yr_err <= 0.] = np.mean(yr_err[yr_err > 0.])
+    zr_errp[zr_errp <= 0.] = np.mean(zr_errp[zr_errp > 0.])
+    zr_errm[zr_errm <= 0.] = np.mean(zr_errm[zr_errm > 0.])
+
+    # take logs
+    xr = np.log10(xr)
+    yr = np.log10(yr)
+    zr = np.log10(zr) # convert to myr
+
+    # logarithmic errorbars
+    xr_err = log_errorbar(xr, data[2][l], data[2][l])[0]
+    yr_err = log_errorbar(yr, data[4][l], data[4][l])[0]
+    zr_err, zr_errp, zr_errm  = log_errorbar(zr, zr_errp, zr_errm)
+
+#     # for now replace nans, -infs and 0s with means
+#     yr[np.isnan(yr)] = np.mean(yr[np.isfinite(yr)])
+#     yr[yr == -np.inf] = np.mean(yr[np.isfinite(yr)])
+#     yr[yr == 0.] = np.mean(yr[np.isfinite(yr)])
+#     zr[zr == -np.inf] = np.mean(zr[np.isfinite(zr)])
+#     xr_err[np.isnan(xr_err)] = np.mean(xr_err[np.isfinite(xr_err)])
+#     yr_err[np.isnan(yr_err)] = np.mean(yr_err[np.isfinite(yr_err)])
+#     zr_err[np.isnan(zr_err)] = np.mean(zr_err[np.isfinite(zr_err)])
+
+#     # make up observational uncertainties
+#     N = len(xr)
+#     xr_err = .1+.1*np.random.rand(N) # xr is log period
+#     yr_err = .1+.1*np.random.rand(N) # yr is log teff
+#     zr_err = .1+.1*np.random.rand(N) #zr is log age
+#     zr_err = 1.+1.*np.random.rand(N) #zr is log age
 
     return xr, yr, zr, xr_err, yr_err, zr_err
+
+def model(m, x, y):
+    return m[0]*x + m[1] + m[2]*y
+
+def log_errorbar(y, errp, errm):
+    plus = y + errp
+    minus = y - errm
+    log_err = np.log10(plus/minus) / 2. # mean
+    log_errp = np.log10(plus/y) # positive error
+    log_errm = np.log10(y/minus) # negative error
+    l = minus < 0 # Make sure ages don't go below zero!
+    log_err[l] = log_errp[l]
+    log_errm[l] = log_errp[l]
+    return log_err, log_errp, log_errm
 
 def plt(x, y, z, xerr, yerr, zerr, m, fname):
 
@@ -52,9 +93,6 @@ def plt(x, y, z, xerr, yerr, zerr, m, fname):
     pl.xlabel('Teff')
     pl.ylabel('period')
     pl.savefig("%s"%fname)
-
-def model(m, x, y):
-    return m[0]*x + m[1] + m[2]*y
 
 # generative model
 def g_model(m, x, y): # model computes log(t) from log(p) and bv
