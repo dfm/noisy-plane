@@ -27,12 +27,12 @@ def load():
 
     # take logs
     xr = np.log10(xr)
-    yr = np.log10(yr)
+#     yr = np.log10(yr)
     zr = np.log10(zr) # convert to myr
 
     # logarithmic errorbars
     xr_err = log_errorbar(xr, data[2][l], data[2][l])[0]
-    yr_err = log_errorbar(yr, data[4][l], data[4][l])[0]
+#     yr_err = log_errorbar(yr, data[4][l], data[4][l])[0]
     zr_err, zr_errp, zr_errm  = log_errorbar(zr, zr_errp, zr_errm)
 
 #     # make up observational uncertainties
@@ -44,9 +44,18 @@ def load():
 
     return xr, yr, zr, xr_err, yr_err, zr_err
 
+# def model(m, x, y):
+#     return m[0]*x + m[1] + m[2]*(y-m[3])
+
 def model(m, x, y):
-#     return m[0]*x + m[1] + m[2]*y
-    return m[0]*x + m[1] + m[2]*(y-m[3])
+#     a = y<m[3]
+#     b = y>m[3]
+#     z = np.ones_like(x)
+#     z[a] = m[0]*x[a] + m[1] + m[2]*(y[a]-m[3])
+#     z[b] = np.random.normal(3., 0.1)
+#     return z
+#     return m[0]*x + m[1] + m[2]*(y-m[3])
+    return m[0]*x + m[1] + m[2]*np.log10(-y-m[3])
 
 def log_errorbar(y, errp, errm):
     plus = y + errp
@@ -68,8 +77,8 @@ def plt(x, y, z, xerr, yerr, zerr, m, fname):
 
     pl.clf()
     pl.subplot(3,1,1)
-    pl.errorbar(10**y, (10**z), xerr = 10**yerr, yerr = 10**zerr, fmt = 'k.', capsize = 0, ecolor='0.5')
-    pl.plot(10**ys, 10**zs, 'b-')
+    pl.errorbar(y, (10**z), xerr = yerr, yerr = 10**zerr, fmt = 'k.', capsize = 0, ecolor='0.5')
+    pl.plot(ys, 10**zs, 'b-')
     pl.xlim(pl.gca().get_xlim()[::-1])
     pl.ylabel('age (Myr)')
     pl.xlabel('Teff')
@@ -81,8 +90,8 @@ def plt(x, y, z, xerr, yerr, zerr, m, fname):
     pl.ylabel('period')
 
     pl.subplot(3,1,3)
-    pl.errorbar(10**y, (10**x), xerr = 10**yerr, yerr = 10**xerr, fmt = 'k.', capsize = 0, ecolor='0.5')
-    pl.plot(10**ys, 10**xs, 'b-')
+    pl.errorbar(y, (10**x), xerr = yerr, yerr = 10**xerr, fmt = 'k.', capsize = 0, ecolor='0.5')
+    pl.plot(ys, 10**xs, 'b-')
     pl.xlim(pl.gca().get_xlim()[::-1])
     pl.xlabel('Teff')
     pl.ylabel('period')

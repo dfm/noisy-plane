@@ -11,15 +11,10 @@ import scipy.optimize as op
 import plotting
 
 # m_true = [1.9272, 0.216, -0.3119]
-m_true = [1.9272, 0.216, -0.3119, np.log10(6500)]
+m_true = [1.9272, 0.216, -0.3119, 6500]
 
 def model(m, x, y):
-#     a = y<m[3]
-#     b = y>m[3]
-#     z[a] = m[0]*x[a] + m[1] + m[2]*(y[a] - m[3])
-#     z[b] = np.random.normal(3., 0.1)
-    return m[0]*x + m[1] + m[2]*(y-m[3])
-#     return m[0]*x + m[1] + m[2]*y
+    return m[0]*x + m[1] + m[2]*np.log10(-y-m[3])
 
 # # generating fake data
 # x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.fake_data(m_true, 144)
@@ -46,10 +41,7 @@ def lnlike(m):
 
 # Gaussian priors
 def lnprior(m):
-#     return -0.5*(m[0]+.5)**2 -0.5*(m[1]+.5)**2 -0.5*(m[2]+.5)**2
-    if 0 < m[3]:
-        return -0.5*(m[0]+.5)**2 -0.5*(m[1]+.5)**2 -0.5*(m[2]+.5)**2 -0.5*(m[3]+.1)**2
-    return -np.inf
+    return -0.5*(m[0]+.5)**2 -0.5*(m[1]+.5)**2 -0.5*(m[2]+.5)**2 -0.5*(m[3]+100.)**2
 
 # posterior
 def lnprob(m):
