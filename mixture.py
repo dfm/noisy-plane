@@ -32,12 +32,73 @@ K = 500
 x_samp = np.vstack([x0+xe*np.random.randn(K) for x0, xe in zip(x_obs, x_err)])
 y_samp = np.vstack([y0+ye*np.random.randn(K) for y0, ye in zip(y_obs, y_err)])
 
-# lhf
+
+# # original lhf
+# def lnlike(m):
+#     z_pred = model(m, x_samp, y_samp)
+#     chi2 = -0.5*((z_obs[:, None] - z_pred)/z_err[:, None])**2
+#     chi2[np.isnan(chi2)] = -np.inf
+#     return np.sum(np.logaddexp.reduce(chi2, axis=1))
+
+# Suzanne's lhf
+tmax = 7500.; tmin = 3000.
 def lnlike(m):
+    nobs,nsamp = x_samp.shape
     z_pred = model(m, x_samp, y_samp)
-    chi2 = -0.5*((z_obs[:, None] - z_pred)/z_err[:, None])**2
-    chi2[np.isnan(chi2)] = -np.inf
-    return np.sum(np.logaddexp.reduce(chi2, axis=1))
+    ll = np.zeros(nobs)
+    temp_Kraft = m[3]
+    A = max(0,(tmax- temp_Kraft) / float(tmax - tmin))
+    ll = np.zeros(nobs)
+    for i in np.arange(nobs):
+        l1 = y_samp[i,:] < temp_Kraft
+        if l1.sum() > 0:
+            like1 = \
+                np.exp(-((z_obs[i] - z_pred[i,l1])/2.0/z_err[i])**2) \
+                / z_err[i]
+            lik1 = np.sum(like1) / float(l1.sum())
+        else:
+            lik1 = 0.0
+        l2 = l1 == False
+        if l2.sum() > 0:
+            like2 = A * \
+                np.exp(-((y_obs[i] - y_samp[i,l2])/2.0/y_err[i])**2) \
+                / y_err[i]
+            lik2 = np.sum(like2) / float(l2.sum())
+        else:
+            lik2 = 0.0
+        ll[i] = np.log10(lik1 + lik2)
+    return -np.sum(ll)
+
+# # lhf
+# tmax = 7500.; tmin = 3000.
+# def lnlike(m):
+#
+#     A = max(0,(tmax - m[3])/float(tmax - tmin))
+#     ll = np.zeros(nobs)
+#
+#     for i in y_samp:
+#
+#     # stars falling at least partly below kraft
+#         a = i < m[3]
+#         if np.sum(i) > 0:
+#             chi2 = -0.5*((z_obs[i] - model(m,x_samp[i,a],y_samp[i,a]))/z_err[i])**2
+#             chi2[np.isnan(chi2)] = -np.inf
+#             like1 = np.sum(np.logaddexp.reduce(chi2, axis=1))/float(np.sum(a))
+#         else: like1 = -np.inf
+#
+#     # stars falling at least partly above kraft
+#         b = a == False
+#         if np.sum(b) > 0:
+#             chi2 = np.log(A) + (-((y_obs[i] - y_samp[i,b])/2.0/y_err[i])**2)/y_err[i]
+#             chi2[np.isnan(chi2)] = -np.inf
+#             like2 = np.sum(np.logaddexp.reduce(chi2, axis=1))/float(np.sum(b))
+#         else: like2 = -np.inf
+#
+#         ll[i] = like1 + like2
+#     return -np.logaddexp(ll)
+
+print lnlike(m_true)
+raw_input('enter')
 
 # Gaussian priors
 def lnprior(m):
