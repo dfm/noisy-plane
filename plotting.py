@@ -4,7 +4,8 @@ from mpl_toolkits.mplot3d import Axes3D
 # from mixture import model
 
 def load():
-    # load data
+
+    # "load data"
     data = np.genfromtxt('/users/angusr/python/gyro/data/data.txt').T
     xr = data[1]
     l = (xr > 1.)
@@ -17,7 +18,7 @@ def load():
     zr_errp = data[14][l]*1000
     zr_errm = data[15][l]*1000
 
-    # for now replace values <= 0 with means
+    # "for now replace values <= 0 with means"
     yr[yr <= 0.] = np.mean(yr[yr > 0.])
     zr[zr <= 0.] = np.mean(zr[zr > 0.])
     xr_err[xr_err <= 0.] = np.mean(xr_err[xr_err > 0.])
@@ -25,12 +26,12 @@ def load():
     zr_errp[zr_errp <= 0.] = np.mean(zr_errp[zr_errp > 0.])
     zr_errm[zr_errm <= 0.] = np.mean(zr_errm[zr_errm > 0.])
 
-    # take logs
+    # "take logs"
     xr = np.log10(xr)
 #     yr = np.log10(yr)
     zr = np.log10(zr) # convert to myr
 
-    # logarithmic errorbars
+    # logarithmic errorbars"
     xr_err = log_errorbar(xr, data[2][l], data[2][l])[0]
 #     yr_err = log_errorbar(yr, data[4][l], data[4][l])[0]
     zr_err, zr_errp, zr_errm  = log_errorbar(zr, zr_errp, zr_errm)
@@ -60,6 +61,7 @@ def model(m, x, y):
 def log_errorbar(y, errp, errm):
     plus = y + errp
     minus = y - errm
+#     minus[minus<0] = plus[minus<0]
     log_err = np.log10(plus/minus) / 2. # mean
     log_errp = np.log10(plus/y) # positive error
     log_errm = np.log10(y/minus) # negative error
@@ -74,18 +76,20 @@ def plt(x, y, z, xerr, yerr, zerr, m, fname):
     ys = np.linspace(min(y), max(y), num=500)
     zs = model(m, xs, ys)
     xr, yr, zr, xr_err, yr_err, zr_err = load()
+    zp = p_model(m, xs)
+    zt = t_model(m, ys)
 
     pl.clf()
     pl.subplot(3,1,1)
     pl.errorbar(y, (10**z), xerr = yerr, yerr = 10**zerr, fmt = 'k.', capsize = 0, ecolor='0.5')
-    pl.plot(ys, 10**zs, 'b-')
+    pl.plot(ys, 10**zt, 'b-')
     pl.xlim(pl.gca().get_xlim()[::-1])
     pl.ylabel('age (Myr)')
     pl.xlabel('Teff')
 
     pl.subplot(3,1,2)
     pl.errorbar(10**z, (10**x), xerr = 10**zerr, yerr = 10**xerr, fmt = 'k.', capsize = 0, ecolor='0.5')
-    pl.plot(10**zs, 10**xs, 'b-')
+    pl.plot(10**zp, 10**xs, 'b-')
     pl.xlabel('age (Myr)')
     pl.ylabel('period')
 
@@ -109,6 +113,12 @@ def g_model(m, x, y): # model computes log(t) from log(p) and bv
     mu = model(m, 1., cutoff)
     z[b] = np.random.normal(mu, 0.1, len(z[b]))
     return z
+
+def p_model(m, x):
+    return m[0]*x
+
+def t_model(m, y):
+    return m[1] + m[2]*np.log10(-y-m[3])
 
 # Generate some fake data set
 def fake_data(m_true, N):

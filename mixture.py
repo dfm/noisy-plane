@@ -14,24 +14,24 @@ import plotting
 m_true = [1.9272, 0.216, -0.3119, 6500]
 
 def model(m, x, y):
-    return m[0]*x + m[1] + m[2]*np.log10(-y-m[3])
+    return m[0]*x + m[1] + m[2]*np.log10(m[3]-y)
 
 # # generating fake data
 # x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.fake_data(m_true, 144)
 # plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, m_true, "fakedata")
 
-# print "loading real data"
+print "loading real data"
 x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.load()
+print "plotting"
 plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, m_true, "realdata")
 
 # 3d plot
-plotting.plot3d(x_obs, y_obs, z_obs, x_obs, y_obs, z_obs, m_true, 1, 'k', "3dorig")
+# plotting.plot3d(x_obs, y_obs, z_obs, x_obs, y_obs, z_obs, m_true, 1, 'k', "3dorig")
 
-# Draw posterior samples.
+print "Draw posterior samples."
 K = 500
 x_samp = np.vstack([x0+xe*np.random.randn(K) for x0, xe in zip(x_obs, x_err)])
 y_samp = np.vstack([y0+ye*np.random.randn(K) for y0, ye in zip(y_obs, y_err)])
-
 
 # # original lhf
 # def lnlike(m):
@@ -49,8 +49,10 @@ def lnlike(m):
     temp_Kraft = m[3]
     A = max(0,(tmax- temp_Kraft) / float(tmax - tmin))
     ll = np.zeros(nobs)
+
     for i in np.arange(nobs):
         l1 = y_samp[i,:] < temp_Kraft
+        print "len(y_samp[i:])", len(y_samp[i:])
         if l1.sum() > 0:
             like1 = \
                 np.exp(-((z_obs[i] - z_pred[i,l1])/2.0/z_err[i])**2) \
@@ -67,7 +69,8 @@ def lnlike(m):
         else:
             lik2 = 0.0
         ll[i] = np.log10(lik1 + lik2)
-    return -np.sum(ll)
+    print np.sum(ll)
+    return np.sum(ll)
 
 # # lhf
 # tmax = 7500.; tmin = 3000.
@@ -97,9 +100,6 @@ def lnlike(m):
 #         ll[i] = like1 + like2
 #     return -np.logaddexp(ll)
 
-print lnlike(m_true)
-raw_input('enter')
-
 # Gaussian priors
 def lnprior(m):
     return -0.5*(m[0]+.5)**2 -0.5*(m[1]+.5)**2 -0.5*(m[2]+.5)**2 -0.5*(m[3]+100.)**2
@@ -115,7 +115,7 @@ print "Calculating maximum-likelihood values"
 nll = lambda *args: -lnlike(*args)
 result = op.fmin(nll, m_true)
 plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, result, "ml_result")
-plotting.plot3d(x_obs, y_obs, z_obs, x_obs, y_obs, z_obs, result, 2, 'b', "3dml")
+# plotting.plot3d(x_obs, y_obs, z_obs, x_obs, y_obs, z_obs, result, 2, 'b', "3dml")
 
 print "lnlike = ", lnlike(m_true)
 
@@ -156,4 +156,4 @@ print 'mcmc result', mcmc_result
 
 # plotting result
 plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, mcmc_result, "mcmc_result")
-plotting.plot3d(x_obs, y_obs, z_obs, x_obs, y_obs, z_obs, mcmc_result, 3, 'r', "3dmcmc")
+# plotting.plot3d(x_obs, y_obs, z_obs, x_obs, y_obs, z_obs, mcmc_result, 3, 'r', "3dmcmc")
