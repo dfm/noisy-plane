@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as pl
 from mpl_toolkits.mplot3d import Axes3D
 # from mixture import model
+import models
 
 def load():
 
@@ -48,15 +49,15 @@ def load():
 # def model(m, x, y):
 #     return m[0]*x + m[1] + m[2]*(y-m[3])
 
-def model(m, x, y):
-#     a = y<m[3]
-#     b = y>m[3]
-#     z = np.ones_like(x)
-#     z[a] = m[0]*x[a] + m[1] + m[2]*(y[a]-m[3])
-#     z[b] = np.random.normal(3., 0.1)
-#     return z
-#     return m[0]*x + m[1] + m[2]*(y-m[3])
-    return m[0]*x + m[1] + m[2]*np.log10(-y-m[3])
+# def model(m, x, y):
+# #     a = y<m[3]
+# #     b = y>m[3]
+# #     z = np.ones_like(x)
+# #     z[a] = m[0]*x[a] + m[1] + m[2]*(y[a]-m[3])
+# #     z[b] = np.random.normal(3., 0.1)
+# #     return z
+# #     return m[0]*x + m[1] + m[2]*(y-m[3])
+#     return m[0]*x + m[1] + m[2]*np.log10(-y-m[3])
 
 def log_errorbar(y, errp, errm):
     plus = y + errp
@@ -74,10 +75,10 @@ def plt(x, y, z, xerr, yerr, zerr, m, fname):
 
     xs = np.linspace(min(x), max(x), num=500)
     ys = np.linspace(min(y), max(y), num=500)
-    zs = model(m, xs, ys)
+    zs = models.model(m, xs, ys)
     xr, yr, zr, xr_err, yr_err, zr_err = load()
-    zp = p_model(m, xs)
-    zt = t_model(m, ys)
+    zp = models.p_model(m, xs)
+    zt = models.t_model(m, ys)
 
     pl.clf()
     pl.subplot(3,1,1)
@@ -102,23 +103,23 @@ def plt(x, y, z, xerr, yerr, zerr, m, fname):
     pl.subplots_adjust(hspace = 0.5)
     pl.savefig("%s"%fname)
 
-# generative model
-def g_model(m, x, y): # model computes log(t) from log(p) and bv
-    z = np.ones_like(y)
-    cutoff = 0.2
-    a = y > cutoff
-    b = y < cutoff
-#     z[q] = m[0]*x[a] + m[1] + m[2]*y[a]
-    z[a] = 1./m[0] * (x[a] - np.log10(m[1]) - m[2]*np.log10(y[a]))
-    mu = model(m, 1., cutoff)
-    z[b] = np.random.normal(mu, 0.1, len(z[b]))
-    return z
-
-def p_model(m, x):
-    return m[0]*x
-
-def t_model(m, y):
-    return m[1] + m[2]*np.log10(-y-m[3])
+# # generative model
+# def g_model(m, x, y): # model computes log(t) from log(p) and bv
+#     z = np.ones_like(y)
+#     cutoff = 0.2
+#     a = y > cutoff
+#     b = y < cutoff
+# #     z[q] = m[0]*x[a] + m[1] + m[2]*y[a]
+#     z[a] = 1./m[0] * (x[a] - np.log10(m[1]) - m[2]*np.log10(y[a]))
+#     mu = model(m, 1., cutoff)
+#     z[b] = np.random.normal(mu, 0.1, len(z[b]))
+#     return z
+#
+# def p_model(m, x):
+#     return m[0]*x
+#
+# def t_model(m, y):
+#     return m[1] + m[2]*np.log10(-y-m[3])
 
 # Generate some fake data set
 def fake_data(m_true, N):
@@ -127,7 +128,7 @@ def fake_data(m_true, N):
     x = np.random.uniform(min(rd[0]), max(rd[0]), N) # log(period)
     y = np.random.uniform(min(rd[1]), max(rd[1]), N) # log(Teff)
 #     z = g_model(m_true, x, y) # log(age)
-    z = model(m_true, x, y) # log(age)
+    z = models.model(m_true, x, y) # log(age)
 
     # observational uncertainties.
     x_err = 0.1+0.1*np.random.rand(N)
@@ -148,7 +149,8 @@ def plot3d(x1, y1, z1, x2, y2, z2, m, fig, colour, sv):
     x_surf=np.arange(min(x1), max(x1), 0.01)
     y_surf=np.arange(min(y1), max(y1), 0.01)
     x_surf, y_surf = np.meshgrid(x_surf, y_surf)
-    z_surf = model(m, x_surf, y_surf)
+    z_surf = models.model(m, x_surf, y_surf)
+
     ax.plot_surface(x_surf, y_surf, z_surf, alpha = 0.2)
     ax.set_xlabel('Rotational period (days)')
     ax.set_ylabel('B-V')

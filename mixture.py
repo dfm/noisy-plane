@@ -9,12 +9,13 @@ from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 import scipy.optimize as op
 import plotting
+import models
 
 # m_true = [1.9272, 0.216, -0.3119]
 m_true = [1.9272, 0.216, -0.3119, 6500]
 
-def model(m, x, y):
-    return m[0]*x + m[1] + m[2]*np.log10(m[3]-y)
+# def model(m, x, y):
+#     return m[0]*x + m[1] + m[2]*np.log10(m[3]-y)
 
 # # generating fake data
 # x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.fake_data(m_true, 144)
@@ -35,16 +36,17 @@ y_samp = np.vstack([y0+ye*np.random.randn(K) for y0, ye in zip(y_obs, y_err)])
 
 # # original lhf
 # def lnlike(m):
-#     z_pred = model(m, x_samp, y_samp)
+#     z_pred = model.model(m, x_samp, y_samp)
 #     chi2 = -0.5*((z_obs[:, None] - z_pred)/z_err[:, None])**2
 #     chi2[np.isnan(chi2)] = -np.inf
 #     return np.sum(np.logaddexp.reduce(chi2, axis=1))
 
 # Suzanne's lhf
 tmax = 7500.; tmin = 3000.
-def lnlike(m):
+def lnlike(m, x_samp, y_samp, log_period_samp, \
+               temp_obs, temp_err, log_period_obs, log_period_err):
     nobs,nsamp = x_samp.shape
-    z_pred = model(m, x_samp, y_samp)
+    z_pred = model.model(m, x_samp, y_samp)
     ll = np.zeros(nobs)
     temp_Kraft = m[3]
     A = max(0,(tmax- temp_Kraft) / float(tmax - tmin))
