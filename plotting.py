@@ -46,19 +46,6 @@ def load():
 
     return xr, yr, zr, xr_err, yr_err, zr_err
 
-# def model(m, x, y):
-#     return m[0]*x + m[1] + m[2]*(y-m[3])
-
-# def model(m, x, y):
-# #     a = y<m[3]
-# #     b = y>m[3]
-# #     z = np.ones_like(x)
-# #     z[a] = m[0]*x[a] + m[1] + m[2]*(y[a]-m[3])
-# #     z[b] = np.random.normal(3., 0.1)
-# #     return z
-# #     return m[0]*x + m[1] + m[2]*(y-m[3])
-#     return m[0]*x + m[1] + m[2]*np.log10(-y-m[3])
-
 def log_errorbar(y, errp, errm):
     plus = y + errp
     minus = y - errm
@@ -78,12 +65,15 @@ def plt(x, y, z, xerr, yerr, zerr, m, fname):
     zs = models.model(m, xs, ys)
     xr, yr, zr, xr_err, yr_err, zr_err = load()
     zp = models.p_model(m, xs)
-    zt = models.t_model(m, ys)
+    a = ys < m[3]
+    zt = models.t_model(m, ys[a])
+#     print zt
 
     pl.clf()
     pl.subplot(3,1,1)
     pl.errorbar(y, (10**z), xerr = yerr, yerr = 10**zerr, fmt = 'k.', capsize = 0, ecolor='0.5')
-    pl.plot(ys, 10**zt, 'b-')
+    pl.plot(ys[a], 10**zt, 'b-')
+#     print 10**zt
     pl.xlim(pl.gca().get_xlim()[::-1])
     pl.ylabel('age (Myr)')
     pl.xlabel('Teff')
@@ -102,24 +92,6 @@ def plt(x, y, z, xerr, yerr, zerr, m, fname):
     pl.ylabel('period')
     pl.subplots_adjust(hspace = 0.5)
     pl.savefig("%s"%fname)
-
-# # generative model
-# def g_model(m, x, y): # model computes log(t) from log(p) and bv
-#     z = np.ones_like(y)
-#     cutoff = 0.2
-#     a = y > cutoff
-#     b = y < cutoff
-# #     z[q] = m[0]*x[a] + m[1] + m[2]*y[a]
-#     z[a] = 1./m[0] * (x[a] - np.log10(m[1]) - m[2]*np.log10(y[a]))
-#     mu = model(m, 1., cutoff)
-#     z[b] = np.random.normal(mu, 0.1, len(z[b]))
-#     return z
-#
-# def p_model(m, x):
-#     return m[0]*x
-#
-# def t_model(m, y):
-#     return m[1] + m[2]*np.log10(-y-m[3])
 
 # Generate some fake data set
 def fake_data(m_true, N):
