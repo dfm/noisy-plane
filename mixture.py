@@ -11,19 +11,17 @@ import scipy.optimize as op
 import plotting
 import models
 
-# m_true = [1.9272, 0.216, -0.3119]
-m_true = [1.9272, 0.216, -0.3119, 6500]
+# m_true = [1.9272, 0.216, -0.3119, 6500]
+m_true = [1.9272, 0.216, -0.3119, 6500, 3., .5] # with mean and variance of Kbreak stars
 
 # # generating fake data
-# x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.fake_data(m_true, 144)
-# plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, m_true, "fakedata")
+x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.fake_data(m_true, 200)
+plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, m_true, "fakedata")
+raw_input('enter')
 
 print "loading real data"
-x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.load()
-# fake errorbars
-# z_err = np.zeros(len(z_err)) + 0.05
-print "plotting"
-plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, m_true, "realdata")
+# x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.load()
+# plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, m_true, "realdata")
 
 # # 3d plot
 # a = y_obs < m_true[3]
@@ -34,92 +32,37 @@ K = 500
 x_samp = np.vstack([x0+xe*np.random.randn(K) for x0, xe in zip(x_obs, x_err)])
 y_samp = np.vstack([y0+ye*np.random.randn(K) for y0, ye in zip(y_obs, y_err)])
 
-# # original lhf
-# def lnlike(m):
-#     z_pred = models.model(m, x_samp, y_samp)
-#     chi2 = -0.5*((z_obs[:, None] - z_pred)/z_err[:, None])**2
-#     chi2[np.isnan(chi2)] = -np.inf
-#     return np.sum(np.logaddexp.reduce(chi2, axis=1))
-
-# modified lhf
+# original lhf
 def lnlike(m):
-    tmax, tmin = 7500, 3000
-    A = max(0,(tmax- m[3]) / float(tmax - tmin))
     z_pred = models.model(m, x_samp, y_samp)
-    chi2 = np.zeros((np.shape(x_samp)))
-    for i in range(len(y_samp)):
-        a = y_samp[i] < m[3]
-        if np.sum(a) > 0:
-            chi2[i][a] = -0.5*((z_obs[i] - z_pred[i][a])/z_err[i])**2
-        a = a == False
-        if np.sum(a) > 0:
-            chi2[i][a] = A* (-0.5*((y_obs[i] - y_samp[i][a])/y_err[i])**2)
+    chi2 = -0.5*((z_obs[:, None] - z_pred)/z_err[:, None])**2
     chi2[np.isnan(chi2)] = -np.inf
     return np.sum(np.logaddexp.reduce(chi2, axis=1))
 
-# # Suzanne's lhf
-# tmax = 7500.; tmin = 3000.
-# def lnlike(m, x_samp, y_samp, y_obs, y_err, x_obs, x_err):
-#     nobs,nsamp = x_samp.shape
+# # modified lhf
+# def lnlike(m):
+#     tmax, tmin = 7500, 3000
+#     A = max(0,(tmax- m[3]) / float(tmax - tmin))
 #     z_pred = models.model(m, x_samp, y_samp)
-#     ll = np.zeros(nobs)
-#     temp_Kraft = m[3]
-#     A = max(0,(tmax- temp_Kraft) / float(tmax - tmin))
-#     ll = np.zeros(nobs)
-#
-#     for i in np.arange(nobs):
-#         l1 = y_samp[i,:] < temp_Kraft
-#         if l1.sum() > 0:
-#             like1 = \
-#                 np.exp(-((z_obs[i] - z_pred[i,l1])/2.0/z_err[i])**2) \
-#                 / z_err[i]
-#             lik1 = np.sum(like1) / float(l1.sum())
-#         else:
-#             lik1 = 0.0
-#         l2 = l1 == False
-#         if l2.sum() > 0:
-#             like2 = A * \
-#                 np.exp(-((y_obs[i] - y_samp[i,l2])/2.0/y_err[i])**2) \
-#                 / y_err[i]
-#             lik2 = np.sum(like2) / float(l2.sum())
-#         else:
-#             lik2 = 0.0
-#         ll[i] = np.log10(lik1 + lik2)
-#     ll[np.isinf(ll)] = 0.
-#     print "np.sum(ll)", np.sum(ll)
-#     raw_input("enter")
-#     return np.sum(ll)
-
-# # lhf
-# tmax = 7500.; tmin = 3000.
-# def lnlike(m, x_samp, y_samp, y_obs, y_err, x_obs, x_err):
-#     A = max(0,(tmax - m[3])/float(tmax - tmin))
-#     ll = np.zeros(len(y_samp))
-#     z_pred = models.model(m, x_samp, y_samp)
-# #
+#     chi2 = np.zeros((np.shape(x_samp)))
 #     for i in range(len(y_samp)):
-#     # stars falling at least partly below kraft
 #         a = y_samp[i] < m[3]
 #         if np.sum(a) > 0:
-#             ll1 = -0.5*((z_obs[i] - z_pred[i,a])/z_err[i])**2
-#             ll1[np.isnan(ll1)] = -np.inf
-#             ll1 = np.sum(np.logaddexp.reduce(ll1, axis = 0))/float(np.sum(a))
-#         else: ll1 = -np.inf
-# #
-#     # stars falling at least partly above kraft
-#         b = a == False
-#         if np.sum(b) > 0:
-#             ll2 = np.log(A) -0.5*((y_obs[i] - y_samp[i,b])/y_err[i])**2 -np.log10(y_err[i])
-#             ll2[np.isnan(ll2)] = -np.inf
-#             ll2 = np.sum(np.logaddexp.reduce(ll2, axis = 0))/float(np.sum(b))
-#         else: ll2 = -np.inf
-# #
-#         ll[i] = ll1 + ll2
-#     return -np.logaddexp.reduce(ll, axis = 0)
+#             chi2[i][a] = -0.5*((z_obs[i] - z_pred[i][a])/z_err[i])**2
+#         a = a == False
+#         if np.sum(a) > 0:
+#             chi2[i][a] = A* (-0.5*((y_obs[i] - y_samp[i][a])/y_err[i])**2)
+#     chi2[np.isnan(chi2)] = -np.inf
+#     return np.sum(np.logaddexp.reduce(chi2, axis=1))
 
-# Gaussian priors
+# # Gaussian priors (for 4 parameter model)
+# def lnprior(m):
+#     return -0.5*(m[0]+.5)**2 -0.5*(m[1]+.5)**2 -0.5*(m[2]+.5)**2 -0.5*(m[3]+100.)**2
+
+# Gaussian priors (for 6 parameter model)
 def lnprior(m):
-    return -0.5*(m[0]+.5)**2 -0.5*(m[1]+.5)**2 -0.5*(m[2]+.5)**2 -0.5*(m[3]+100.)**2
+    return -0.5*(m[0]+.5)**2 -0.5*(m[1]+.5)**2 -0.5*(m[2]+.5)**2 -0.5*(m[3]+100.)**2 \
+    -0.5*(m[4]+.5)**2 -0.5*(m[5]+.5)**2
 
 # posterior
 def lnprob(m):
@@ -135,16 +78,15 @@ def lnprob(m):
 #         return -np.inf
 #     return lp + lnlike(m, x_samp, y_samp, y_obs, y_err, x_obs, x_err)
 
-print "Calculating maximum-likelihood values"
-args = [x_samp, y_samp, y_obs, y_err, x_obs, x_err]
+# print "Calculating maximum-likelihood values"
+# args = [x_samp, y_samp, y_obs, y_err, x_obs, x_err]
 # print "initial likelihood", lnlike(m_true, x_samp, y_samp, y_obs, y_err, x_obs, x_err)
-print "initial likelihood", lnlike(m_true)
+# print "initial likelihood", lnlike(m_true)
 # nll = lambda *args: -lnlike(*args)
 # result = op.fmin(nll, m_true, args = args)
 # print "final likelihood", lnlike(result, x_samp, y_samp, y_obs, y_err, x_obs, x_err)
 # plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, result, "ml_result")
 # plotting.plot3d(x_obs, y_obs, z_obs, x_obs, y_obs, z_obs, result, 2, 'b', "3dml")
-
 # print "lnlike = ", lnlike(m_true, x_samp, y_samp, y_obs, y_err, x_obs, x_err)
 
 # Sample the posterior probability for m.
@@ -180,7 +122,7 @@ mcmc_result = map(lambda v: (v[1], v[2]-v[1], v[1]-v[0]),
 
 print 'initial values', m_true
 mcmc_result = np.array(mcmc_result)[:, 0]
-print "ml result = ", result
+# print "ml result = ", result
 print 'mcmc result', mcmc_result
 
 # plotting result

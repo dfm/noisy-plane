@@ -64,15 +64,16 @@ def plt(x, y, z, xerr, yerr, zerr, m, fname):
     ys = np.linspace(min(y), max(y), num=500)
     zs = models.model(m, xs, ys)
     xr, yr, zr, xr_err, yr_err, zr_err = load()
-    zp = models.p_model(m, xs)
+#     zp = models.p_model(m, xs)
+    zp = zs
     a = ys < m[3]
-    zt = models.t_model(m, ys[a])
-#     print zt
+#     zt = models.t_model(m, ys[a])
+    zt = zs
 
     pl.clf()
     pl.subplot(3,1,1)
     pl.errorbar(y, (10**z), xerr = yerr, yerr = 10**zerr, fmt = 'k.', capsize = 0, ecolor='0.5')
-    pl.plot(ys[a], 10**zt, 'b-')
+    pl.plot(ys, 10**zt, 'b-')
 #     print 10**zt
     pl.xlim(pl.gca().get_xlim()[::-1])
     pl.ylabel('age (Myr)')
@@ -93,14 +94,23 @@ def plt(x, y, z, xerr, yerr, zerr, m, fname):
     pl.subplots_adjust(hspace = 0.5)
     pl.savefig("%s"%fname)
 
+    pl.clf()
+    pl.errorbar(y, z, xerr=yerr, yerr=zerr, fmt='k.', capsize=0)
+    py = np.arange(5000.,6000.,10)
+    print models.model(m, np.ones_like(py)*5., py)
+    pl.plot(py, models.model(m, np.ones_like(py)*5., py), "r-")
+    pl.plot(py, models.model(m, np.ones_like(py)*10., py), "r-")
+    pl.plot(py, models.model(m, np.ones_like(py)*20., py), "r-")
+    pl.savefig("a_vs_t")
+
 # Generate some fake data set
 def fake_data(m_true, N):
 
     rd = load()
     x = np.random.uniform(min(rd[0]), max(rd[0]), N) # log(period)
     y = np.random.uniform(min(rd[1]), max(rd[1]), N) # log(Teff)
-#     z = g_model(m_true, x, y) # log(age)
-    z = models.model(m_true, x, y) # log(age)
+    z = models.g_model(m_true, x, y) # log(age)
+#     z = models.model(m_true, x, y) # log(age)
 
     # observational uncertainties.
     x_err = 0.1+0.1*np.random.rand(N)
