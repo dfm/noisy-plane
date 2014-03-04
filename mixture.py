@@ -1,4 +1,5 @@
 # This script is the current working version. It was originally intended to be a mixture model, but now it's a composite.
+# works with real data, but not fake data. try removing kraft break stars
 
 import emcee
 import triangle
@@ -12,14 +13,17 @@ import plotting
 import models
 
 # m_true = [1.9272, 0.216, -0.3119, 6500]
-m_true = [1.9272, 0.216, -0.3119, 6500, 3., .5] # with mean and variance of Kbreak stars
+# m_true = [1.9272, 0.216, -0.3119, 6500, 3., .5] # with mean and variance of Kbreak stars
+# m_true = [1./0.5189, -np.log10(0.7725)/0.5189, -(0.601/0.5189)*3.42765108e-04, 6500, 3., .5]
+# m_true = [1.927, 0.216, 0.1156, 6500., 3., .5]
+m_true = [1.927, 0.216, 0.1156, 6500.]
 
-# # generating fake data
-x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.fake_data(m_true, 200)
-plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, m_true, "fakedata")
-raw_input('enter')
+# generating fake data
+# x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.fake_data(m_true, 144)
+# plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, m_true, "fakedata")
+# raw_input('enter')
 
-print "loading real data"
+# loading real data
 # x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.load()
 # plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, m_true, "realdata")
 
@@ -32,37 +36,84 @@ K = 500
 x_samp = np.vstack([x0+xe*np.random.randn(K) for x0, xe in zip(x_obs, x_err)])
 y_samp = np.vstack([y0+ye*np.random.randn(K) for y0, ye in zip(y_obs, y_err)])
 
-# original lhf
-def lnlike(m):
-    z_pred = models.model(m, x_samp, y_samp)
-    chi2 = -0.5*((z_obs[:, None] - z_pred)/z_err[:, None])**2
-    chi2[np.isnan(chi2)] = -np.inf
-    return np.sum(np.logaddexp.reduce(chi2, axis=1))
-
-# # modified lhf
+# # original lhf
 # def lnlike(m):
-#     tmax, tmin = 7500, 3000
-#     A = max(0,(tmax- m[3]) / float(tmax - tmin))
 #     z_pred = models.model(m, x_samp, y_samp)
-#     chi2 = np.zeros((np.shape(x_samp)))
-#     for i in range(len(y_samp)):
-#         a = y_samp[i] < m[3]
-#         if np.sum(a) > 0:
-#             chi2[i][a] = -0.5*((z_obs[i] - z_pred[i][a])/z_err[i])**2
-#         a = a == False
-#         if np.sum(a) > 0:
-#             chi2[i][a] = A* (-0.5*((y_obs[i] - y_samp[i][a])/y_err[i])**2)
+#     chi2 = -0.5*((z_obs[i] - z_pred1[i][a])/z_err[i]**2)
 #     chi2[np.isnan(chi2)] = -np.inf
 #     return np.sum(np.logaddexp.reduce(chi2, axis=1))
+
+# # composite model lhf
+# def lnlike(m):
+#     z_pred1 = models.model(m, x_samp, y_samp)
+#     z_pred2 = np.zeros((np.shape(x_samp)))*m[4]
+#     for i in range(len(y_samp)):
+#         a = y_samp[i] < m[3]
+#         if sum(a) > 0:
+#             chi2 = -0.5*((z_obs[i] - z_pred1[i][a])/z_err[i]**2 - \
+#                     np.log10(1./z_err[i]**2))
+#             like1 = np.logaddexp.reduce(chi2, axis=0)/float(sum(a))
+#         else: like1 = 0.
+#         a = a == False
+#         if sum(a) > 0:
+#             chi2 = -0.5*((z_obs[i] - z_pred2[i][a])/(z_err[i]**2+m[5]) \
+#                 - np.log10(1./(z_err[i]**2 + m[5])))
+#             like2 = np.logaddexp.reduce(chi2, axis=0)/float(sum(a))
+#         else: like2 = 0.
+#     return np.sum(np.logaddexp(like1, like2))
+
+# Suzanne's lhf
+def lnlike(par):
+    TEMP_MAX = 7500
+    TEMP_MIN = 3000
+    z_pred = models.model(par, x_samp, y_samp)
+    nobs,nsamp = x_samp.shape
+    ll = np.zeros(nobs)
+    temp_Kraft = par[3]
+    A = max(0,(TEMP_MAX- temp_Kraft) / float(TEMP_MAX - TEMP_MIN))
+    ll = np.zeros(nobs)
+    for i in np.arange(nobs):
+        l1 = y_samp[i,:] < temp_Kraft
+        if l1.sum() > 0:
+            like1 = \
+                np.exp(-((np.log10(z_obs[i]) - z_pred[i][l1])/2.0/z_err[i])**2) \
+                / z_err[i]
+            lik1 = np.sum(like1) / float(l1.sum())
+        else:
+            lik1 = 0.0
+        l2 = l1 == False
+        if l2.sum() > 0:
+            like2 = A * \
+                np.exp(-((y_obs[i] - y_samp[i][l2])/2.0/y_err[i])**2) \
+                / y_err[i]
+            lik2 = np.sum(like2) / float(l2.sum())
+        else:
+            lik2 = 0.0
+        ll[i] = np.log10(lik1 + lik2)
+    return np.sum(ll)
 
 # # Gaussian priors (for 4 parameter model)
 # def lnprior(m):
 #     return -0.5*(m[0]+.5)**2 -0.5*(m[1]+.5)**2 -0.5*(m[2]+.5)**2 -0.5*(m[3]+100.)**2
 
-# Gaussian priors (for 6 parameter model)
+# # Gaussian priors (for 6 parameter model)
+# def lnprior(m):
+#     return -0.5*(m[0]+.5)**2 -0.5*(m[1]+.5)**2 -0.5*(m[2]+.5)**2 -0.5*(m[3]+100.)**2 \
+#     -0.5*(m[4]+.5)**2 -0.5*(m[5]+.5)**2
+
+# # uniform Priors (for 6 parameter model)
+# def lnprior(m):
+#     if 0. < m[0] < 2.5 and 0.0 < m[1] < 2. and 0. < m[2] < 5. and 5000.< m[3] < 8000 \
+#             and 0. < m[4] < 10. and 0. < m[5] < 10.:
+#         return 0.0
+#     return -np.inf
+
+# uniform Priors (for 4 parameter model)
 def lnprior(m):
-    return -0.5*(m[0]+.5)**2 -0.5*(m[1]+.5)**2 -0.5*(m[2]+.5)**2 -0.5*(m[3]+100.)**2 \
-    -0.5*(m[4]+.5)**2 -0.5*(m[5]+.5)**2
+#     if 0. < m[0] < 2.5 and 0.0 < m[1] < 2. and 0. < m[2] < 5. and 5000.< m[3] < 8000:
+    if -10. < m[0] < 10. and -10. < m[1] < 10. and -10. < m[2] < 10. and 5000.< m[3] < 8000:
+        return 0.0
+    return -np.inf
 
 # posterior
 def lnprob(m):
@@ -79,15 +130,16 @@ def lnprob(m):
 #     return lp + lnlike(m, x_samp, y_samp, y_obs, y_err, x_obs, x_err)
 
 # print "Calculating maximum-likelihood values"
-# args = [x_samp, y_samp, y_obs, y_err, x_obs, x_err]
-# print "initial likelihood", lnlike(m_true, x_samp, y_samp, y_obs, y_err, x_obs, x_err)
 # print "initial likelihood", lnlike(m_true)
+# args = None
 # nll = lambda *args: -lnlike(*args)
-# result = op.fmin(nll, m_true, args = args)
-# print "final likelihood", lnlike(result, x_samp, y_samp, y_obs, y_err, x_obs, x_err)
-# plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, result, "ml_result")
-# plotting.plot3d(x_obs, y_obs, z_obs, x_obs, y_obs, z_obs, result, 2, 'b', "3dml")
-# print "lnlike = ", lnlike(m_true, x_samp, y_samp, y_obs, y_err, x_obs, x_err)
+# # nll = lambda: -lnlike
+# result = op.fmin(-lnlike, m_true, args = args)
+# # print "final likelihood", lnlike(result, x_samp, y_samp, y_obs, y_err, x_obs, x_err)
+# print "final likelihood", lnlike(result)
+# print "ml params = ", result
+# # plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, result, "ml_result")
+# # plotting.plot3d(x_obs, y_obs, z_obs, x_obs, y_obs, z_obs, result, 2, 'b', "3dml")
 
 # Sample the posterior probability for m.
 nwalkers, ndim = 32, len(m_true)
@@ -101,7 +153,8 @@ print("Production run")
 sampler.run_mcmc(p0, 500)
 
 print("Making triangle plot")
-fig_labels = ["$n$", "$a$", "$b$", "$c$", "$\mu_{age}$", "$\sigma_{age}$", "$P$"]
+# fig_labels = ["$\frac{1}{n}$", "$\alpha$", "$\beta$", "$T_K$", "$\mu_{A}$", "$\sigma_{A}$"]
+fig_labels = ["$n$", "$a$", "$b$", "$T_K$", "$Z$", "$V$"]
 fig = triangle.corner(sampler.flatchain, truths=m_true, labels=fig_labels[:len(m_true)])
 fig.savefig("triangle.png")
 
@@ -126,5 +179,5 @@ mcmc_result = np.array(mcmc_result)[:, 0]
 print 'mcmc result', mcmc_result
 
 # plotting result
-plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, mcmc_result, "mcmc_result")
+# plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, mcmc_result, "mcmc_result")
 # plotting.plot3d(x_obs, y_obs, z_obs, x_obs, y_obs, z_obs, mcmc_result, 3, 'r', "3dmcmc")
