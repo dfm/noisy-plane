@@ -1,5 +1,7 @@
 # This script is the current working version. It was originally intended to be a mixture model, but now it's a composite.
 # works with real data, but not fake data. try removing kraft break stars
+# try on hyades data?
+# try fixing T_K?
 
 import emcee
 import triangle
@@ -16,15 +18,16 @@ import models
 # m_true = [1.9272, 0.216, -0.3119, 6500, 3., .5] # with mean and variance of Kbreak stars
 # m_true = [1./0.5189, -np.log10(0.7725)/0.5189, -(0.601/0.5189)*3.42765108e-04, 6500, 3., .5]
 # m_true = [1.927, 0.216, 0.1156, 6500., 3., .5]
-m_true = [1.927, 0.216, 0.1156, 6500.]
+# m_true = [1.927, 0.216, 0.1156, 6500.] # latest version
+m_true = [1.927, 0.216, 0.1156] # fixed T_k
 
 # generating fake data
 # x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.fake_data(m_true, 144)
 # plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, m_true, "fakedata")
-# raw_input('enter')
+# raw_input('enter)
 
 # loading real data
-# x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.load()
+x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.load()
 # plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, m_true, "realdata")
 
 # # 3d plot
@@ -36,32 +39,6 @@ K = 500
 x_samp = np.vstack([x0+xe*np.random.randn(K) for x0, xe in zip(x_obs, x_err)])
 y_samp = np.vstack([y0+ye*np.random.randn(K) for y0, ye in zip(y_obs, y_err)])
 
-# # original lhf
-# def lnlike(m):
-#     z_pred = models.model(m, x_samp, y_samp)
-#     chi2 = -0.5*((z_obs[i] - z_pred1[i][a])/z_err[i]**2)
-#     chi2[np.isnan(chi2)] = -np.inf
-#     return np.sum(np.logaddexp.reduce(chi2, axis=1))
-
-# # composite model lhf
-# def lnlike(m):
-#     z_pred1 = models.model(m, x_samp, y_samp)
-#     z_pred2 = np.zeros((np.shape(x_samp)))*m[4]
-#     for i in range(len(y_samp)):
-#         a = y_samp[i] < m[3]
-#         if sum(a) > 0:
-#             chi2 = -0.5*((z_obs[i] - z_pred1[i][a])/z_err[i]**2 - \
-#                     np.log10(1./z_err[i]**2))
-#             like1 = np.logaddexp.reduce(chi2, axis=0)/float(sum(a))
-#         else: like1 = 0.
-#         a = a == False
-#         if sum(a) > 0:
-#             chi2 = -0.5*((z_obs[i] - z_pred2[i][a])/(z_err[i]**2+m[5]) \
-#                 - np.log10(1./(z_err[i]**2 + m[5])))
-#             like2 = np.logaddexp.reduce(chi2, axis=0)/float(sum(a))
-#         else: like2 = 0.
-#     return np.sum(np.logaddexp(like1, like2))
-
 # Suzanne's lhf
 def lnlike(par):
     TEMP_MAX = 7500
@@ -69,7 +46,8 @@ def lnlike(par):
     z_pred = models.model(par, x_samp, y_samp)
     nobs,nsamp = x_samp.shape
     ll = np.zeros(nobs)
-    temp_Kraft = par[3]
+    temp_Kraft = 6500.
+#     temp_Kraft = par[3]
     A = max(0,(TEMP_MAX- temp_Kraft) / float(TEMP_MAX - TEMP_MIN))
     ll = np.zeros(nobs)
     for i in np.arange(nobs):
@@ -92,10 +70,6 @@ def lnlike(par):
         ll[i] = np.log10(lik1 + lik2)
     return np.sum(ll)
 
-# # Gaussian priors (for 4 parameter model)
-# def lnprior(m):
-#     return -0.5*(m[0]+.5)**2 -0.5*(m[1]+.5)**2 -0.5*(m[2]+.5)**2 -0.5*(m[3]+100.)**2
-
 # # Gaussian priors (for 6 parameter model)
 # def lnprior(m):
 #     return -0.5*(m[0]+.5)**2 -0.5*(m[1]+.5)**2 -0.5*(m[2]+.5)**2 -0.5*(m[3]+100.)**2 \
@@ -111,7 +85,8 @@ def lnlike(par):
 # uniform Priors (for 4 parameter model)
 def lnprior(m):
 #     if 0. < m[0] < 2.5 and 0.0 < m[1] < 2. and 0. < m[2] < 5. and 5000.< m[3] < 8000:
-    if -10. < m[0] < 10. and -10. < m[1] < 10. and -10. < m[2] < 10. and 5000.< m[3] < 8000:
+#     if -10. < m[0] < 10. and -10. < m[1] < 10. and -10. < m[2] < 10. and 5000.< m[3] < 8000:
+    if -10. < m[0] < 10. and -10. < m[1] < 10. and -10. < m[2] < 10.:
         return 0.0
     return -np.inf
 
@@ -121,13 +96,6 @@ def lnprob(m):
     if not np.isfinite(lp):
         return -np.inf
     return lp + lnlike(m)
-
-# # posterior
-# def lnprob(m, x_samp, y_samp, y_obs, y_err, x_obs, x_err):
-#     lp = lnprior(m)
-#     if not np.isfinite(lp):
-#         return -np.inf
-#     return lp + lnlike(m, x_samp, y_samp, y_obs, y_err, x_obs, x_err)
 
 # print "Calculating maximum-likelihood values"
 # print "initial likelihood", lnlike(m_true)

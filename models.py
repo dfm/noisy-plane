@@ -2,7 +2,9 @@ import numpy as np
 # import teff_bv
 
 def model(m, x, y):
-    return m[0]*x + m[1] + m[2]*np.log10(m[3]-y)
+    Tk = 6500.
+    return m[0]*x + m[1] + m[2]*np.log10(Tk-y)
+#     return m[0]*x + m[1] + m[2]*np.log10(m[3]-y)
 
 # generative model
 def g_model(m, x, y): # model computes log(t) from log(p) and bv
