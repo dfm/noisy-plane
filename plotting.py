@@ -4,7 +4,7 @@ from mpl_toolkits.mplot3d import Axes3D
 # from mixture import model
 import models
 
-def load():
+def load_dat():
 
     # "load data"
     data = np.genfromtxt('/Users/angusr/Python/Gyro/data/data.txt').T
@@ -12,12 +12,12 @@ def load():
     xr = data[1]
     l = (xr > 1.)
 
-    # load list of MS stars
-    MSKID = np.genfromtxt("/Users/angusr/Python/Gyro/data/MS_stars.txt").T
-    print MSKID
-    for i in MSKID:
-        print KID[KID == i]
-    raw_input('enter')
+#     # load list of MS stars
+#     MSKID = np.genfromtxt("/Users/angusr/Python/Gyro/data/MS_stars.txt").T
+#     print MSKID
+#     for i in MSKID:
+#         print KID[KID == i]
+#     raw_input('enter')
 
     xr = data[1][l]
     yr = data[3][l]

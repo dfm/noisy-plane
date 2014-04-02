@@ -10,6 +10,7 @@ from matplotlib import cm
 import scipy.optimize as op
 import plotting
 import models
+from load_hyades import hya_load
 
 # Suzanne's lhf
 def lnlike(par):
@@ -76,8 +77,11 @@ if __name__ == "__main__":
     # plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, m_true, "fakedata")
 
     # loading real data
-    x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.load()
+    x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.load_dat()
     # plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, m_true, "realdata")
+
+    # loading hyades + sun data
+    x_obs, y_obs, z_obs, x_err, y_err, z_err = hya_load()
 
     print '3d plot'
     # 3d plot
