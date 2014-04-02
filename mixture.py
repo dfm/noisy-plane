@@ -1,7 +1,4 @@
 # This script is the current working version. It was originally intended to be a mixture model, but now it's a composite.
-# works with real data, but not fake data. try removing kraft break stars
-# try on hyades data?
-# try fixing T_K?
 
 import emcee
 import triangle
@@ -14,25 +11,23 @@ import scipy.optimize as op
 import plotting
 import models
 
-# m_true = [1.9272, 0.216, -0.3119, 6500]
-# m_true = [1.9272, 0.216, -0.3119, 6500, 3., .5] # with mean and variance of Kbreak stars
-# m_true = [1./0.5189, -np.log10(0.7725)/0.5189, -(0.601/0.5189)*3.42765108e-04, 6500, 3., .5]
-# m_true = [1.927, 0.216, 0.1156, 6500., 3., .5]
 # m_true = [1.927, 0.216, 0.1156, 6500.] # latest version
 m_true = [1.927, 0.216, 0.1156] # fixed T_k
 
 # generating fake data
 # x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.fake_data(m_true, 144)
 # plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, m_true, "fakedata")
-# raw_input('enter)
 
 # loading real data
 x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.load()
 # plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, m_true, "realdata")
 
-# # 3d plot
+print '3d plot'
+# 3d plot
 # a = y_obs < m_true[3]
 # plotting.plot2d(x_obs[a], y_obs[a], z_obs[a], x_obs[a], y_obs[a], z_obs[a], m_true, 1, 'k', "3dorig")
+plotting.plot3d(x_obs, y_obs, z_obs, x_obs, y_obs, z_obs, m_true, 1, 'k', "3dorig")
+raw_input('enter')
 
 print "Draw posterior samples."
 K = 500
@@ -70,22 +65,8 @@ def lnlike(par):
         ll[i] = np.log10(lik1 + lik2)
     return np.sum(ll)
 
-# # Gaussian priors (for 6 parameter model)
-# def lnprior(m):
-#     return -0.5*(m[0]+.5)**2 -0.5*(m[1]+.5)**2 -0.5*(m[2]+.5)**2 -0.5*(m[3]+100.)**2 \
-#     -0.5*(m[4]+.5)**2 -0.5*(m[5]+.5)**2
-
-# # uniform Priors (for 6 parameter model)
-# def lnprior(m):
-#     if 0. < m[0] < 2.5 and 0.0 < m[1] < 2. and 0. < m[2] < 5. and 5000.< m[3] < 8000 \
-#             and 0. < m[4] < 10. and 0. < m[5] < 10.:
-#         return 0.0
-#     return -np.inf
-
 # uniform Priors (for 4 parameter model)
 def lnprior(m):
-#     if 0. < m[0] < 2.5 and 0.0 < m[1] < 2. and 0. < m[2] < 5. and 5000.< m[3] < 8000:
-#     if -10. < m[0] < 10. and -10. < m[1] < 10. and -10. < m[2] < 10. and 5000.< m[3] < 8000:
     if -10. < m[0] < 10. and -10. < m[1] < 10. and -10. < m[2] < 10.:
         return 0.0
     return -np.inf
@@ -121,7 +102,6 @@ print("Production run")
 sampler.run_mcmc(p0, 500)
 
 print("Making triangle plot")
-# fig_labels = ["$\frac{1}{n}$", "$\alpha$", "$\beta$", "$T_K$", "$\mu_{A}$", "$\sigma_{A}$"]
 fig_labels = ["$n$", "$a$", "$b$", "$T_K$", "$Z$", "$V$"]
 fig = triangle.corner(sampler.flatchain, truths=m_true, labels=fig_labels[:len(m_true)])
 fig.savefig("triangle.png")

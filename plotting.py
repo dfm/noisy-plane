@@ -7,9 +7,17 @@ import models
 def load():
 
     # "load data"
-    data = np.genfromtxt('/users/angusr/python/gyro/data/data.txt').T
+    data = np.genfromtxt('/Users/angusr/Python/Gyro/data/data.txt').T
+    KID = data[0]
     xr = data[1]
     l = (xr > 1.)
+
+    # load list of MS stars
+    MSKID = np.genfromtxt("/Users/angusr/Python/Gyro/data/MS_stars.txt").T
+    print MSKID
+    for i in MSKID:
+        print KID[KID == i]
+    raw_input('enter')
 
     xr = data[1][l]
     yr = data[3][l]
@@ -29,12 +37,10 @@ def load():
 
     # "take logs"
     xr = np.log10(xr)
-#     yr = np.log10(yr)
     zr = np.log10(zr) # convert to myr
 
     # logarithmic errorbars"
     xr_err = log_errorbar(xr, data[2][l], data[2][l])[0]
-#     yr_err = log_errorbar(yr, data[4][l], data[4][l])[0]
     zr_err, zr_errp, zr_errm  = log_errorbar(zr, zr_errp, zr_errm)
 
 #     # make up observational uncertainties
@@ -125,14 +131,13 @@ def plot3d(x1, y1, z1, x2, y2, z2, m, fig, colour, sv):
     ax = fig.gca(projection='3d')
     ax.scatter(x1, y1, z1, c = colour, marker = 'o')
     ax.scatter(x2, y2, z2, c = colour, marker = 'o')
-    x_surf=np.arange(min(x1), max(x1), 0.01)
-    y_surf=np.arange(min(y1), max(y1), 0.01)
+    x_surf=np.r_[min(x1):max(x1):100j]
+    y_surf=np.r_[min(y1):max(y1):100j]
     x_surf, y_surf = np.meshgrid(x_surf, y_surf)
     z_surf = models.model(m, x_surf, y_surf)
-
     ax.plot_surface(x_surf, y_surf, z_surf, alpha = 0.2)
     ax.set_xlabel('Rotational period (days)')
     ax.set_ylabel('B-V')
     ax.set_zlabel('Age (Gyr)')
-#     pl.show()
+    pl.show()
     pl.savefig(sv)

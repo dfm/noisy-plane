@@ -2,7 +2,8 @@ import numpy as np
 # import teff_bv
 
 def model(m, x, y):
-    Tk = 6500.
+    Tk = 8000.
+    m[0] = 2.
     return m[0]*x + m[1] + m[2]*np.log10(Tk-y)
 #     return m[0]*x + m[1] + m[2]*np.log10(m[3]-y)
 
@@ -45,6 +46,7 @@ def sibt_model(x, y):
 #     return m[0]*(x + m[1] - m[2]*np.log10(m[3]-y))
     return m[0]*x + m[1] + m[2]*np.log10(m[3]-y)
 
+# Test print outs
 # age = 4000
 # teff = 5000
 # bv = teff_bv.teff2bv(5000, 4.3, -0.2)
@@ -55,4 +57,3 @@ def sibt_model(x, y):
 # print 'age = ', 10**(ibc_model(np.log10(period), bv))
 # print 'age = ', 10**(ibt_model(np.log10(period), teff))
 # print 'age = ', 10**(sibt_model(np.log10(period), teff))
-#
