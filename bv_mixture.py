@@ -18,13 +18,14 @@ def lnlike(par):
     C_MAX = 0.2
     C_MIN = 1.3
     z_pred = 10**(models.ibc_model(par, np.log10(x_samp), y_samp))
+#     print z_pred
     nobs,nsamp = x_samp.shape
     ll = np.zeros(nobs)
     temp_Kraft = .4
     A = max(0,(C_MAX- temp_Kraft) / float(C_MAX - C_MIN))
     ll = np.zeros(nobs)
     for i in np.arange(nobs):
-        l1 = y_samp[i,:] < temp_Kraft
+        l1 = y_samp[i,:] > temp_Kraft
         if l1.sum() > 0:
             like1 = -0.5*((z_obs[i] - z_pred[i][l1])/z_err[i])**2 - np.log(z_err[i])
             lik1 = np.logaddexp.reduce(like1, axis=0) -np.log(float(l1.sum()))
@@ -42,6 +43,7 @@ def lnlike(par):
 #         print 'l1', lik1
 #         print 'l2', lik2
     ll[np.isnan(ll)] = -np.inf
+#     print np.logaddexp.reduce(ll, axis=0)
     return np.logaddexp.reduce(ll, axis=0)
 
 # # Suzanne's lhf
@@ -79,7 +81,7 @@ def lnlike(par):
 
 # uniform Priors (for 4 parameter model)
 def lnprior(m):
-    m = np.exp(m)
+#     m = np.exp(m)
 #     if -10.<m[0]<10. and -10.<m[1]<10. and -10.<m[2]<10. and -10.<m[3]<10.:
     if -10.<m[0]<10. and -10.<m[1]<10. and -10.<m[2]<10.:
         return 0.0
@@ -95,7 +97,8 @@ def lnprob(m):
 if __name__ == "__main__":
 
 #     m_true = [0.5189, 0.7725, 0.601, 0.4]
-    m_true = np.log([0.5189, 0.7725, 0.601])
+    m_true = [0.5189, 0.7725, 0.601]
+    m_true = np.log(m_true)
 
     # loading hyades + sun data
     x_obs, y_obs, z_obs, x_err, y_err, z_err = hya_load()
@@ -141,6 +144,8 @@ if __name__ == "__main__":
     y_samp = np.vstack([y0+ye*np.random.randn(K) for y0, ye in zip(y_obs, y_err)])
 
     print 'initial likelihood = ', lnlike(m_true)
+    print 'initial likelihood = ', lnlike([0.6, 0.7725, 0.601])
+    raw_input('enter')
 
     # Sample the posterior probability for m.
     nwalkers, ndim = 32, len(m_true)
