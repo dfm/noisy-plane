@@ -18,8 +18,9 @@ def g_model(m, x, y): # model computes log(t) from log(p) and bv
     return z
 
 # Barnes colour model
-def bc_model(z, y):
-    n, a, b, c = 0.5189, 0.7725, 0.601, 0.4
+def bc_model(m, z, y):
+    n, a, b, c = m
+#     n, a, b, c = 0.5189, 0.7725, 0.601, 0.4
     return n*z + np.log10(a) + b*np.log10(y-c)
 
 # Barnes teff model
@@ -29,9 +30,10 @@ def bt_model(z, y):
     # b = 0.601*np.log10(0.5-0.4)/np.log10(6500-6000)
     return n*z + np.log10(a) + b*np.log10(c-y)
 
-# inverse Barnes colour model
-def ibc_model(x, y):
-    n, a, b, c = 0.5189, 0.7725, 0.601, 0.4
+# inverse Barnes colour model. returns age from period and colour
+def ibc_model(m, x, y):
+    n, a, b, c = m
+#     n, a, b, c = 0.5189, 0.7725, 0.601, 0.4
     return (1./n)*(x - np.log10(a) - b*np.log10(y-c))
 
 # inverse Barnes teff model

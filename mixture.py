@@ -1,5 +1,4 @@
 # This script is the current working version. It was originally intended to be a mixture model, but now it's a composite.
-
 import emcee
 import triangle
 import numpy as np
@@ -80,8 +79,13 @@ if __name__ == "__main__":
     x_obs, y_obs, z_obs, x_err, y_err, z_err = plotting.load_dat()
     # plotting.plt(x_obs, y_obs, z_obs, x_err, y_err, z_err, m_true, "realdata")
 
-    # loading hyades + sun data
-    x_obs, y_obs, z_obs, x_err, y_err, z_err = hya_load()
+#     # loading hyades + sun data
+#     x_obs, y_obs, z_obs, x_err, y_err, z_err = hya_load()
+#     pl.clf()
+#     pl.errorbar(y_obs[1:], x_obs[1:], xerr=y_err[1:], yerr=x_err[1:], fmt = 'k.')
+#     pl.errorbar(y_obs[0], x_obs[0], xerr=y_err[0], yerr=x_err[0], fmt = 'r.')
+#     pl.savefig('hyades')
+#     raw_input('enter')
 
     print '3d plot'
     # 3d plot

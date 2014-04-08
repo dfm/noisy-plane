@@ -1,4 +1,4 @@
-# This script is the current working version. It was originally intended to be a mixture model, but now it's a composite.
+# using colours instead of teffs...
 import emcee
 import triangle
 import numpy as np
@@ -10,12 +10,13 @@ import scipy.optimize as op
 import plotting
 import models
 from load_hyades import hya_load
+from mpl_toolkits.mplot3d import Axes3D
 
 # Suzanne's lhf
 def lnlike(par):
     TEMP_MAX = 7500
     TEMP_MIN = 3000
-    z_pred = models.model(par, x_samp, y_samp)
+    z_pred = 10**(models.ibc_model(par, np.log10(x_samp), y_samp))
     nobs,nsamp = x_samp.shape
     ll = np.zeros(nobs)
     temp_Kraft = 6500.
@@ -25,26 +26,34 @@ def lnlike(par):
     for i in np.arange(nobs):
         l1 = y_samp[i,:] < temp_Kraft
         if l1.sum() > 0:
-            like1 = \
-                np.exp(-((np.log10(z_obs[i]) - z_pred[i][l1])/2.0/z_err[i])**2) \
-                / z_err[i]
-            lik1 = np.sum(like1) / float(l1.sum())
+            like1 = -((z_obs[i] - z_pred[i][l1])/2.0/z_err[i])**2 - np.log(z_err[i])
+            lik1 = np.logaddexp.reduce(like1, axis=0) / float(l1.sum())
+#             print lik1
         else:
-            lik1 = 0.0
+            lik1 = -np.inf
         l2 = l1 == False
         if l2.sum() > 0:
-            like2 = A * \
-                np.exp(-((y_obs[i] - y_samp[i][l2])/2.0/y_err[i])**2) \
-                / y_err[i]
-            lik2 = np.sum(like2) / float(l2.sum())
+            like2 = np.log(A)*(-((y_obs[i] - y_samp[i][l2])/2.0/y_err[i])**2) -np.log(y_err[i])
+            lik2 = np.logaddexp.reduce(like2, axis=0) / float(l2.sum())
+#             print 'lik2 = ', lik2
         else:
-            lik2 = 0.0
-        ll[i] = np.log10(lik1 + lik2)
-    return np.sum(ll)
+            lik2 = -np.inf
+        ll[i] = np.logaddexp(lik1, lik2)
+#         print lik1, lik2
+#         print 'll', ll[i]
+#         if ll[i] == np.isnan:
+#             print ll[i], lik1, lik2
+#         raw_input('enter')
+#     if np.any(np.isnan(ll)):
+#         print 'll', ll
+#         print 'l1', lik1
+#         print 'l2', lik2
+    ll[np.isnan(ll)] = -np.inf
+    return np.logaddexp.reduce(ll, axis=0)
 
 # uniform Priors (for 4 parameter model)
 def lnprior(m):
-    if -10. < m[0] < 10. and -10. < m[1] < 10. and -10. < m[2] < 10.:
+    if -10.<m[0]<10. and -10.<m[1]<10. and -10.<m[2]<10. and -10.<m[3]<10.:
         return 0.0
     return -np.inf
 
@@ -56,21 +65,43 @@ def lnprob(m):
     return lp + lnlike(m)
 
 if __name__ == "__main__":
-    # m_true = [1.927, 0.216, 0.1156, 6500.] # latest version
-    m_true = [1.927, 0.216, 0.1156] # fixed T_k
+
+    m_true = [0.5189, 0.7725, 0.601, 0.4]
 
     # loading hyades + sun data
     x_obs, y_obs, z_obs, x_err, y_err, z_err = hya_load()
+
     pl.clf()
+#     y_plot = np.linspace(min(y_obs), max(y_obs), 100)
+    y_plot = np.linspace(.401, max(y_obs), 100)
     pl.errorbar(y_obs[1:], x_obs[1:], xerr=y_err[1:], yerr=x_err[1:], fmt = 'k.')
     pl.errorbar(y_obs[0], x_obs[0], xerr=y_err[0], yerr=x_err[0], fmt = 'r.')
+    pl.plot(y_plot, 10**(models.bc_model(m_true, np.log10(1000), y_plot)), 'r-')
+    pl.plot(y_plot, 10**(models.bc_model(m_true, np.log10(650), y_plot)), 'b-')
+    pl.plot(y_plot, 10**(models.bc_model(m_true, np.log10(800), y_plot)), 'm-')
+    pl.plot(y_plot, 10**(models.bc_model(m_true, np.log10(400), y_plot)), 'c-')
     pl.savefig('hyades')
-    raw_input('enter')
+
+    pl.clf()
+    fig = pl.figure(1)
+    ax = fig.gca(projection='3d')
+    ax.scatter(x_obs, y_obs, z_obs, c = 'b', marker = 'o')
+    x_surf=np.r_[min(x_obs):max(x_obs):100j]
+    y_surf=np.r_[min(y_obs):max(y_obs):100j]
+    x_surf, y_surf = np.meshgrid(x_surf, y_surf)
+    z_surf = 10**(models.ibc_model(m_true, np.log10(x_surf), y_surf))
+    ax.plot_surface(x_surf, y_surf, z_surf, alpha = 0.2)
+    ax.set_xlabel('Rotational period (days)')
+    ax.set_ylabel('B-V')
+    ax.set_zlabel('Age (Gyr)')
+    pl.savefig('bv_3d')
 
     print "Draw posterior samples."
     K = 500
     x_samp = np.vstack([x0+xe*np.random.randn(K) for x0, xe in zip(x_obs, x_err)])
     y_samp = np.vstack([y0+ye*np.random.randn(K) for y0, ye in zip(y_obs, y_err)])
+
+    print 'initial likelihood = ', lnlike(m_true)
 
     # Sample the posterior probability for m.
     nwalkers, ndim = 32, len(m_true)
@@ -83,7 +114,7 @@ if __name__ == "__main__":
     sampler.run_mcmc(p0, 500)
 
     print("Making triangle plot")
-    fig_labels = ["$n$", "$a$", "$b$", "$T_K$", "$Z$", "$V$"]
+    fig_labels = ["$n$", "$a$", "$b$", "$T_K$"]
     fig = triangle.corner(sampler.flatchain, truths=m_true, labels=fig_labels[:len(m_true)])
     fig.savefig("triangle.png")
 
