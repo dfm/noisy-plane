@@ -17,8 +17,9 @@ def lnlike(par):
     par = np.exp(par)
     C_MAX = 0.2
     C_MIN = 1.3
-    z_pred = 10**(models.ibc_model(par, np.log10(x_samp), y_samp))
-#     print z_pred
+    z_pred = (10**(models.ibc_model(par, np.log10(x_samp), y_samp)))*1000
+#     print z_obs
+#     raw_input('enter')
     nobs,nsamp = x_samp.shape
     ll = np.zeros(nobs)
     temp_Kraft = .4
@@ -52,19 +53,21 @@ def lnlike(par):
 #     C_MAX = .2
 #     C_MIN = 1.3
 #     nobs,nsamp = x_samp.shape
-#     z_pred = 10**models.ibc_model(m, np.log10(x_samp), y_samp)
+#     z_pred = (10**models.ibc_model(m, np.log10(x_samp), y_samp))*1000
 #     ll = np.zeros(nobs)
 # #     temp_Kraft = m[3]
 #     temp_Kraft = .4
 #     A = max(0,(C_MAX- temp_Kraft) / float(C_MAX - C_MIN))
 #     ll = np.zeros(nobs)
 #     for i in np.arange(nobs):
-#         l1 = y_samp[i,:] < temp_Kraft
+#         l1 = y_samp[i,:] > temp_Kraft
 #         if l1.sum() > 0:
 #             like1 = \
 #                 np.exp(-((z_obs[i] - z_pred[i,l1])/2.0/z_err[i])**2) \
 #                 / z_err[i]
+#             print z_err
 #             lik1 = np.sum(like1) / float(l1.sum())
+# #             print lik1
 #         else:
 #             lik1 = 0.0
 #         l2 = l1 == False
@@ -76,7 +79,8 @@ def lnlike(par):
 #         else:
 #             lik2 = 0.0
 #         ll[i] = np.log10(lik1 + lik2)
-#     ll[np.isinf(ll)] = 0.
+# #     ll[np.isnan(ll)] = 0.
+# #     ll[np.isinf(ll)] = 0.
 #     return np.sum(ll)
 
 # uniform Priors (for 4 parameter model)
