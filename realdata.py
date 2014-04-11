@@ -95,7 +95,8 @@ log_age_true[40:] = 1.0
 temp_true = np.random.uniform(3500,7000,nobs)
 
 # First create noise-free values
-par_true = [np.log10(0.7725), 0.5189, -0.06, 6300.]
+# par_true = [np.log10(0.7725), 0.5189, -0.06, 6300.]
+par_true = [0.7, 0.575, -0.07, 6390.] # better initialisation
 log_period_true = log_period_model(par_true,log_age_true,temp_true)
 l = np.isfinite(log_period_true) == False
 n = l.sum()
@@ -109,6 +110,12 @@ temp_obs = np.random.normal(temp_true, temp_err)
 log_period_err = np.zeros(nobs) + 0.05
 # log_period_obs = np.random.normal(log_period_true, log_period_err)
 
+# plot
+pl.clf()
+pl.errorbar(10**log_period_obs, 10**log_age_obs, xerr=log_period_err, yerr=log_age_err, fmt='k.')
+log_age_plot = np.linspace(min(log_age_obs), max(log_age_obs))
+pl.plot(log_age_plot, log_period_model(par_true, log_age_plot, 6000.), 'r-')
+pl.savefig("init")
 
 # Now generate samples
 nsamp = 100
@@ -155,7 +162,7 @@ print("Production run")
 sampler.run_mcmc(p0, 2000)
 
 print("Making triangle plot")
-fig_labels = ["$n$", "$a$", "$b$", "$T_K$"]
+fig_labels = ["$log(a)$", "$n$", "$b$", "$T_K$"]
 fig = triangle.corner(sampler.flatchain, truths=par_true, labels=fig_labels[:len(par_true)])
 fig.savefig("triangle.png")
 
@@ -177,3 +184,9 @@ mcmc_result = map(lambda v: (v[1], v[2]-v[1], v[1]-v[0]),
 print 'initial values', par_true
 mcmc_result = np.array(mcmc_result)[:, 0]
 print 'mcmc result', mcmc_result
+
+# plot result
+pl.clf()
+pl.errorbar(10**log_period_obs, 10**log_age_obs, xerr=log_period_err, yerr=log_age_err, fmt='k.')
+pl.plot(log_age_plot, log_period_model(mcmc_result, log_age_plot, 6000.), 'r-')
+pl.savefig("init")
