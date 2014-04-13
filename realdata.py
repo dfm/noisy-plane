@@ -5,6 +5,14 @@ import emcee
 import triangle
 from plotting import load_dat
 
+plotpar = {'axes.labelsize': 20,
+           'text.fontsize': 20,
+           'legend.fontsize': 15,
+           'xtick.labelsize': 18,
+           'ytick.labelsize': 18,
+           'text.usetex': True}
+pl.rcParams.update(plotpar)
+
 TEMP_MAX = 7500
 TEMP_MIN = 3000
 
@@ -80,42 +88,99 @@ def lnprob(m, log_age_samp, temp_samp, log_period_samp, \
     return lp + lnlike(m, log_age_samp, temp_samp, \
             log_period_samp, temp_obs, temp_err, log_period_obs, log_period_err)
 
+par_true = [np.log10(0.7725), 0.5189, .2, 6300.]
+
 # load real data
-log_period_obs, temp_obs, log_age_obs, period_err, temp_err, age_err = load_dat()
-# need to add errorbars later
+log_period_obs, temp_obs, log_age_obs, log_period_err, temp_err, log_age_err = load_dat()
+# replace nans and zeros and in errorbars with means
+log_age_err[np.isnan(log_age_err)] = np.mean(log_age_err[np.isfinite(log_age_err)])
+log_age_err[log_age_err==np.inf] = np.mean(log_age_err[np.isfinite(log_age_err)])
+# remove negative ages with mean
+a = log_age_obs>0
+log_age_obs = log_age_obs[a]
+log_age_err = log_age_err[a]
+log_period_obs = log_period_obs[a]
+log_period_err = log_period_err[a]
+temp_obs = temp_obs[a]
+temp_err = temp_err[a]
 
-# Generate set of fake observations
+# reduce errorbars if they go below zero
+diff = log_age_obs - log_age_err
+a = diff<0
+# really need to use asymmetric error bars!!!!
+log_age_err[a] = log_age_err[a] + diff[a] - np.finfo(float).eps
+diff = log_age_obs - log_age_err
+
+# print log_age_obs
+# raw_input('enter')
+# print log_age_err
+# raw_input('enter')
+# print log_period_obs
+# raw_input('enter')
+# print log_period_err
+# raw_input('enter')
+# print temp_obs
+# raw_input('enter')
+# print temp_err
+
+# # Generate set of fake observations
 nobs = len(log_period_obs)
-log_age_true = np.random.uniform(0,1,nobs)
-log_age_true = np.zeros(nobs)
-log_age_true[:20] = 0.0
-log_age_true[20:40] = 0.3
-log_age_true[40:] = 1.0
-
-temp_true = np.random.uniform(3500,7000,nobs)
-
-# First create noise-free values
+# nobs = 60
+# log_age_true = np.random.uniform(0,1,nobs)
+# log_age_true = np.zeros(nobs)
+# log_age_true[:20] = 0.0
+# log_age_true[20:40] = 0.3
+# log_age_true[40:] = 1.0
+#
+# temp_true = np.random.uniform(3500,7000,nobs)
+#
+# # First create noise-free values
 # par_true = [np.log10(0.7725), 0.5189, -0.06, 6300.]
-par_true = [0.7, 0.575, -0.07, 6390.] # better initialisation
-log_period_true = log_period_model(par_true,log_age_true,temp_true)
-l = np.isfinite(log_period_true) == False
-n = l.sum()
-log_period_true[l] = np.random.uniform(0,1,n)
-
-# Then add noise
-log_age_err = np.zeros(nobs) + 0.05
+# par_true = [np.log10(0.7725), 0.5189, .2, 6300.]
+# # par_true = [0.7, 0.575, -0.07, 6390.] # better initialisation
+# log_period_true = log_period_model(par_true,log_age_true,temp_true)
+# l = np.isfinite(log_period_true) == False
+# n = l.sum()
+# log_period_true[l] = np.random.uniform(0,1,n)
+#
+# # Then add noise
+# log_age_err = np.zeros(nobs) + 0.05
+log_age_err = np.ones(nobs)*np.mean(log_age_err)
+# print log_age_err
+# raw_input('enter')
 # log_age_obs = np.random.normal(log_age_true, log_age_err)
-temp_err = np.zeros(nobs) + 100
-temp_obs = np.random.normal(temp_true, temp_err)
-log_period_err = np.zeros(nobs) + 0.05
+temp_err = np.ones(nobs)*np.mean(temp_err)
+# temp_obs = np.random.normal(temp_true, temp_err)
+log_period_err = np.ones(nobs)*np.mean(log_period_err)
 # log_period_obs = np.random.normal(log_period_true, log_period_err)
 
-# plot
+# plot period vs age
 pl.clf()
-pl.errorbar(10**log_period_obs, 10**log_age_obs, xerr=log_period_err, yerr=log_age_err, fmt='k.')
-log_age_plot = np.linspace(min(log_age_obs), max(log_age_obs))
-pl.plot(log_age_plot, log_period_model(par_true, log_age_plot, 6000.), 'r-')
+pl.errorbar(10**log_age_obs, 10**log_period_obs, xerr=log_age_err, yerr=10**log_period_err, fmt='k.', \
+        capsize = 0, ecolor = '.7')
+log_age_plot = np.linspace(0, max(log_age_obs))
+pl.plot(10**log_age_plot, 10**log_period_model(par_true, log_age_plot, 6000.), 'r-')
+pl.plot(10**log_age_plot, 10**log_period_model(par_true, log_age_plot, 4000.), 'b-')
+pl.plot(10**log_age_plot, 10**log_period_model(par_true, log_age_plot, 5000.), 'm-')
+pl.plot(10**log_age_plot, 10**log_period_model(par_true, log_age_plot, 4500.), 'c-')
+pl.xlabel('$\mathrm{Age~(Gyr)}$')
+pl.ylabel('$P_{rot}~\mathrm{(days)}$')
 pl.savefig("init")
+
+# plot period vs teff
+pl.clf()
+pl.errorbar(temp_obs, log_period_obs, xerr=temp_err, yerr=log_period_err, fmt='k.', \
+        capsize = 0, ecolor = '.7')
+temp_plot = np.linspace(min(temp_obs), max(temp_obs))
+pl.plot(temp_plot, log_period_model(par_true, 1., temp_plot), 'r-')
+pl.plot(temp_plot, log_period_model(par_true, 2., temp_plot), 'b-')
+pl.plot(temp_plot, log_period_model(par_true, 5., temp_plot), 'm-')
+pl.plot(temp_plot, log_period_model(par_true, 10., temp_plot), 'c-')
+pl.xlim(pl.gca().get_xlim()[::-1])
+pl.xlabel('$\mathrm{T_{eff}~(K)}$')
+pl.ylabel('$log~P_{rot}~\mathrm{(days)}$')
+pl.savefig("init_teff")
+raw_input('enter')
 
 # Now generate samples
 nsamp = 100
@@ -131,20 +196,20 @@ par_fit = spo.fmin(negloglike, par_true, \
 print par_true
 print par_fit
 
-pl.clf()
-pl.plot(temp_samp, log_period_samp, ',', c = 'grey', mec = 'grey', alpha = 0.5)
-pl.errorbar(temp_obs, log_period_obs, xerr = temp_err, yerr = log_period_err,\
-              fmt = 'b.', mec = 'b', capsize = 0)
-pl.plot(temp_true, log_period_true, 'r.', mec = 'r')
-pl.xlim(7500,3000)
-pl.xlabel('$T_{\mathrm{eff}}$ (K)')
-pl.ylabel('$\log_{10} P_{\mathrm{rot}}$ (days)')
-xx = np.r_[TEMP_MIN:TEMP_MAX:10]
-yy = np.array([0, 0.3, 1.0])
-for i in np.arange(len(yy)):
-    zz = log_period_model(par_fit,yy[i],xx)
-    pl.plot(xx, zz, 'g--',lw=2)
-pl.savefig('SuzGyroTest.png')
+# pl.clf()
+# pl.plot(temp_samp, log_period_samp, ',', c = 'grey', mec = 'grey', alpha = 0.5)
+# pl.errorbar(temp_obs, log_period_obs, xerr = temp_err, yerr = log_period_err,\
+#               fmt = 'b.', mec = 'b', capsize = 0)
+# pl.plot(temp_true, log_period_true, 'r.', mec = 'r')
+# pl.xlim(7500,3000)
+# pl.xlabel('$T_{\mathrm{eff}}$ (K)')
+# pl.ylabel('$\log_{10} P_{\mathrm{rot}}$ (days)')
+# xx = np.r_[TEMP_MIN:TEMP_MAX:10]
+# yy = np.array([0, 0.3, 1.0])
+# for i in np.arange(len(yy)):
+#     zz = log_period_model(par_fit,yy[i],xx)
+#     pl.plot(xx, zz, 'g--',lw=2)
+# pl.savefig('SuzGyroTest.png')
 
 print 'intial likelihood = ', lnlike(par_true, log_age_samp, temp_samp, \
         log_period_samp, temp_obs, temp_err, log_period_obs, log_period_err)
@@ -187,6 +252,27 @@ print 'mcmc result', mcmc_result
 
 # plot result
 pl.clf()
-pl.errorbar(10**log_period_obs, 10**log_age_obs, xerr=log_period_err, yerr=log_age_err, fmt='k.')
-pl.plot(log_age_plot, log_period_model(mcmc_result, log_age_plot, 6000.), 'r-')
-pl.savefig("init")
+pl.errorbar(10**log_age_obs, 10**log_period_obs, xerr=log_age_err, yerr=10**log_period_err, fmt='k.', \
+        capsize = 0, ecolor = '.7')
+log_age_plot = np.linspace(0, max(log_age_obs))
+pl.plot(10**log_age_plot, 10**log_period_model(mcmc_result, log_age_plot, 6000.), 'r-')
+pl.plot(10**log_age_plot, 10**log_period_model(mcmc_result, log_age_plot, 4000.), 'b-')
+pl.plot(10**log_age_plot, 10**log_period_model(mcmc_result, log_age_plot, 5000.), 'm-')
+pl.plot(10**log_age_plot, 10**log_period_model(mcmc_result, log_age_plot, 4500.), 'c-')
+pl.xlabel('$\mathrm{Age~(Gyr)}$')
+pl.ylabel('$P_{rot}~\mathrm{(days)}$')
+pl.savefig("result")
+
+# plot period vs teff
+pl.clf()
+pl.errorbar(temp_obs, log_period_obs, xerr=temp_err, yerr=log_period_err, fmt='k.', \
+        capsize = 0, ecolor = '.7')
+temp_plot = np.linspace(min(temp_obs), max(temp_obs))
+pl.plot(temp_plot, log_period_model(mcmc_result, 1., temp_plot), 'r-')
+pl.plot(temp_plot, log_period_model(mcmc_result, 2., temp_plot), 'b-')
+pl.plot(temp_plot, log_period_model(mcmc_result, 5., temp_plot), 'm-')
+pl.plot(temp_plot, log_period_model(mcmc_result, 10., temp_plot), 'c-')
+pl.xlim(pl.gca().get_xlim()[::-1])
+pl.xlabel('$\mathrm{T_{eff}~(K)}$')
+pl.ylabel('$log~P_{rot}~\mathrm{(days)}$')
+pl.savefig("result_teff")
