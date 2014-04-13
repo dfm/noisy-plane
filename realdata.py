@@ -1,9 +1,10 @@
+import matplotlib.pyplot as pl
 import numpy as np
-import pylab as pl
 import scipy.optimize as spo
 import emcee
 import triangle
 from plotting import load_dat
+import pretty5
 
 plotpar = {'axes.labelsize': 20,
            'text.fontsize': 20,
@@ -20,7 +21,8 @@ def log_period_model(par, log_age, temp):
     return par[0] + par[1] * log_age + par[2] * np.log10(par[3] - temp)
 
 def lnprior(m):
-    if -10. < m[0] < 10. and -10. < m[1] < 10. and -10. < m[2] < 10. and 3000. < m[3] < 10000.:
+#     if -10. < m[0] < 10. and -10. < m[1] < 10. and -10. < m[2] < 10. and 3000. < m[3] < 10000.:
+    if -10. < m[0] < 10. and 0. < m[1] < 10. and -10. < m[2] < 10. and 5000. < m[3] < 8000.:
         return 0.0
     return -np.inf
 
@@ -89,12 +91,27 @@ def lnprob(m, log_age_samp, temp_samp, log_period_samp, \
             log_period_samp, temp_obs, temp_err, log_period_obs, log_period_err)
 
 par_true = [np.log10(0.7725), 0.5189, .2, 6300.]
+# par_true = [np.log10(0.03), 0.5189, .3, 6600.]
 
 # load real data
 log_period_obs, temp_obs, log_age_obs, log_period_err, temp_err, log_age_err = load_dat()
+
+data = np.genfromtxt("/Users/angusr/Python/Gyro/data/data.txt").T
+logg = data[10]
+a = logg > 4.
+
+#remove subgiants
+log_period_obs = log_period_obs[a]
+log_period_err = log_period_err[a]
+log_age_obs = log_age_obs[a]
+log_age_err = log_age_err[a]
+temp_err = temp_err[a]
+temp_obs = temp_obs[a]
+
 # replace nans and zeros and in errorbars with means
 log_age_err[np.isnan(log_age_err)] = np.mean(log_age_err[np.isfinite(log_age_err)])
 log_age_err[log_age_err==np.inf] = np.mean(log_age_err[np.isfinite(log_age_err)])
+log_period_err[log_period_err==0] = np.mean(log_period_err[log_period_err>0])
 # remove negative ages with mean
 a = log_age_obs>0
 log_age_obs = log_age_obs[a]
@@ -110,18 +127,6 @@ a = diff<0
 # really need to use asymmetric error bars!!!!
 log_age_err[a] = log_age_err[a] + diff[a] - np.finfo(float).eps
 diff = log_age_obs - log_age_err
-
-# print log_age_obs
-# raw_input('enter')
-# print log_age_err
-# raw_input('enter')
-# print log_period_obs
-# raw_input('enter')
-# print log_period_err
-# raw_input('enter')
-# print temp_obs
-# raw_input('enter')
-# print temp_err
 
 # # Generate set of fake observations
 nobs = len(log_period_obs)
@@ -145,19 +150,20 @@ nobs = len(log_period_obs)
 #
 # # Then add noise
 # log_age_err = np.zeros(nobs) + 0.05
-log_age_err = np.ones(nobs)*np.mean(log_age_err)
-# print log_age_err
-# raw_input('enter')
+# log_period_err = np.zeros(nobs) + 0.05
+# temp_err = np.zeros(nobs) + 100
+# log_age_err = np.ones(nobs)*np.mean(log_age_err)
 # log_age_obs = np.random.normal(log_age_true, log_age_err)
-temp_err = np.ones(nobs)*np.mean(temp_err)
+# temp_err = np.ones(nobs)*np.mean(temp_err)
 # temp_obs = np.random.normal(temp_true, temp_err)
-log_period_err = np.ones(nobs)*np.mean(log_period_err)
+# log_period_err = np.ones(nobs)*np.mean(log_period_err)
 # log_period_obs = np.random.normal(log_period_true, log_period_err)
 
 # plot period vs age
 pl.clf()
 pl.errorbar(10**log_age_obs, 10**log_period_obs, xerr=log_age_err, yerr=10**log_period_err, fmt='k.', \
         capsize = 0, ecolor = '.7')
+
 log_age_plot = np.linspace(0, max(log_age_obs))
 pl.plot(10**log_age_plot, 10**log_period_model(par_true, log_age_plot, 6000.), 'r-')
 pl.plot(10**log_age_plot, 10**log_period_model(par_true, log_age_plot, 4000.), 'b-')
@@ -172,15 +178,17 @@ pl.clf()
 pl.errorbar(temp_obs, log_period_obs, xerr=temp_err, yerr=log_period_err, fmt='k.', \
         capsize = 0, ecolor = '.7')
 temp_plot = np.linspace(min(temp_obs), max(temp_obs))
-pl.plot(temp_plot, log_period_model(par_true, 1., temp_plot), 'r-')
-pl.plot(temp_plot, log_period_model(par_true, 2., temp_plot), 'b-')
-pl.plot(temp_plot, log_period_model(par_true, 5., temp_plot), 'm-')
-pl.plot(temp_plot, log_period_model(par_true, 10., temp_plot), 'c-')
+pl.plot(temp_plot, log_period_model(par_true, np.log10(1.), temp_plot), 'r-')
+pl.plot(temp_plot, log_period_model(par_true, np.log10(2.), temp_plot), 'b-')
+pl.plot(temp_plot, log_period_model(par_true, np.log10(5.), temp_plot), 'm-')
+pl.plot(temp_plot, log_period_model(par_true, np.log10(10.), temp_plot), 'c-')
 pl.xlim(pl.gca().get_xlim()[::-1])
 pl.xlabel('$\mathrm{T_{eff}~(K)}$')
 pl.ylabel('$log~P_{rot}~\mathrm{(days)}$')
 pl.savefig("init_teff")
-raw_input('enter')
+
+plots = pretty5.plotting()
+plots.p_vs_t(par_true)
 
 # Now generate samples
 nsamp = 100
@@ -268,11 +276,15 @@ pl.clf()
 pl.errorbar(temp_obs, log_period_obs, xerr=temp_err, yerr=log_period_err, fmt='k.', \
         capsize = 0, ecolor = '.7')
 temp_plot = np.linspace(min(temp_obs), max(temp_obs))
-pl.plot(temp_plot, log_period_model(mcmc_result, 1., temp_plot), 'r-')
-pl.plot(temp_plot, log_period_model(mcmc_result, 2., temp_plot), 'b-')
-pl.plot(temp_plot, log_period_model(mcmc_result, 5., temp_plot), 'm-')
-pl.plot(temp_plot, log_period_model(mcmc_result, 10., temp_plot), 'c-')
+pl.plot(temp_plot, log_period_model(mcmc_result, np.log10(1.), temp_plot), 'r-')
+pl.plot(temp_plot, log_period_model(mcmc_result, np.log10(2.), temp_plot), 'b-')
+pl.plot(temp_plot, log_period_model(mcmc_result, np.log10(5.), temp_plot), 'm-')
+pl.plot(temp_plot, log_period_model(mcmc_result, np.log10(10.), temp_plot), 'c-')
 pl.xlim(pl.gca().get_xlim()[::-1])
 pl.xlabel('$\mathrm{T_{eff}~(K)}$')
 pl.ylabel('$log~P_{rot}~\mathrm{(days)}$')
 pl.savefig("result_teff")
+
+plots = pretty5.plotting()
+plots.p_vs_t(mcmc_result)
+
