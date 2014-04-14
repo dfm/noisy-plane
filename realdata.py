@@ -127,7 +127,7 @@ a = diff<0
 # really need to use asymmetric error bars!!!!
 log_age_err[a] = log_age_err[a] + diff[a] - np.finfo(float).eps
 diff = log_age_obs - log_age_err
-
+#
 # # Generate set of fake observations
 nobs = len(log_period_obs)
 # nobs = 60
@@ -136,9 +136,9 @@ nobs = len(log_period_obs)
 # log_age_true[:20] = 0.0
 # log_age_true[20:40] = 0.3
 # log_age_true[40:] = 1.0
-#
+# #
 # temp_true = np.random.uniform(3500,7000,nobs)
-#
+# #
 # # First create noise-free values
 # par_true = [np.log10(0.7725), 0.5189, -0.06, 6300.]
 # par_true = [np.log10(0.7725), 0.5189, .2, 6300.]
@@ -148,9 +148,9 @@ nobs = len(log_period_obs)
 # n = l.sum()
 # log_period_true[l] = np.random.uniform(0,1,n)
 #
-# # Then add noise
+# Then add noise
 # log_age_err = np.zeros(nobs) + 0.05
-# log_period_err = np.zeros(nobs) + 0.05
+log_period_err = np.zeros(nobs) + 0.05
 # temp_err = np.zeros(nobs) + 100
 # log_age_err = np.ones(nobs)*np.mean(log_age_err)
 # log_age_obs = np.random.normal(log_age_true, log_age_err)
