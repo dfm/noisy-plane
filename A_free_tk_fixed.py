@@ -276,13 +276,17 @@ pl.clf()
 pl.errorbar(temp_obs, log_period_obs, xerr=temp_err, yerr=log_period_err, fmt='k.', \
         capsize = 0, ecolor = '.7')
 temp_plot = np.linspace(min(temp_obs), max(temp_obs))
-pl.plot(temp_plot, log_period_model(mcmc_result, np.log10(1.), temp_plot), 'r-')
-pl.plot(temp_plot, log_period_model(mcmc_result, np.log10(2.), temp_plot), 'b-')
-pl.plot(temp_plot, log_period_model(mcmc_result, np.log10(5.), temp_plot), 'm-')
-pl.plot(temp_plot, log_period_model(mcmc_result, np.log10(10.), temp_plot), 'c-')
+pl.plot(temp_plot, 10**log_period_model(mcmc_result, np.log10(1.), temp_plot), color=ocols[0],\
+         linestyle='-')
+pl.plot(temp_plot, 10**log_period_model(mcmc_result, np.log10(2.), temp_plot), color=ocols[1],\
+         linestyle='-')
+pl.plot(temp_plot, 10**log_period_model(mcmc_result, np.log10(5.), temp_plot), color=ocols[2],\
+         linestyle='-')
+pl.plot(temp_plot, 10**log_period_model(mcmc_result, np.log10(10.), temp_plot), color=ocols[3],\
+         linestyle='-')
 pl.xlim(pl.gca().get_xlim()[::-1])
 pl.xlabel('$\mathrm{T_{eff}~(K)}$')
-pl.ylabel('$log~P_{rot}~\mathrm{(days)}$')
+pl.ylabel('$P_{rot}~\mathrm{(days)}$')
 pl.savefig("result_teff")
 
 plots = pretty5.plotting()
