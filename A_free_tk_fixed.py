@@ -126,33 +126,33 @@ a = diff<0
 log_age_err[a] = log_age_err[a] + diff[a] - np.finfo(float).eps
 diff = log_age_obs - log_age_err
 
-# Generate set of fake observations
-nobs = len(log_period_obs)
-nobs = 60
-log_age_true = np.random.uniform(0,1,nobs)
-log_age_true = np.zeros(nobs)
-log_age_true[:20] = 0.0
-log_age_true[20:40] = 0.3
-log_age_true[40:] = 1.0
-
-temp_true = np.random.uniform(3500,7000,nobs)
-
-# First create noise-free values
-log_period_true = log_period_model(par_true,log_age_true,temp_true)
-l = np.isfinite(log_period_true) == False
-n = l.sum()
-log_period_true[l] = np.random.uniform(0,1,n)
-
-# Then add noise
-log_age_err = np.zeros(nobs) + 0.05
-log_period_err = np.zeros(nobs) + 0.05
-temp_err = np.zeros(nobs) + 100
-log_age_err = np.ones(nobs)*np.mean(log_age_err)
-log_age_obs = np.random.normal(log_age_true, log_age_err)
-temp_err = np.ones(nobs)*np.mean(temp_err)
-temp_obs = np.random.normal(temp_true, temp_err)
-log_period_err = np.ones(nobs)*np.mean(log_period_err)
-log_period_obs = np.random.normal(log_period_true, log_period_err)
+# # Generate set of fake observations
+# nobs = len(log_period_obs)
+# nobs = 60
+# log_age_true = np.random.uniform(0,1,nobs)
+# log_age_true = np.zeros(nobs)
+# log_age_true[:20] = 0.0
+# log_age_true[20:40] = 0.3
+# log_age_true[40:] = 1.0
+#
+# temp_true = np.random.uniform(3500,7000,nobs)
+#
+# # First create noise-free values
+# log_period_true = log_period_model(par_true,log_age_true,temp_true)
+# l = np.isfinite(log_period_true) == False
+# n = l.sum()
+# log_period_true[l] = np.random.uniform(0,1,n)
+#
+# # Then add noise
+# log_age_err = np.zeros(nobs) + 0.05
+# log_period_err = np.zeros(nobs) + 0.05
+# temp_err = np.zeros(nobs) + 100
+# log_age_err = np.ones(nobs)*np.mean(log_age_err)
+# log_age_obs = np.random.normal(log_age_true, log_age_err)
+# temp_err = np.ones(nobs)*np.mean(temp_err)
+# temp_obs = np.random.normal(temp_true, temp_err)
+# log_period_err = np.ones(nobs)*np.mean(log_period_err)
+# log_period_obs = np.random.normal(log_period_true, log_period_err)
 
 # plot period vs age
 pl.clf()
