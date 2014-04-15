@@ -22,7 +22,7 @@ def log_period_model(par, log_age, temp):
 
 def lnprior(m):
     if -10. < m[0] < 10. and 0. < m[1] < 10. and -10. < m[2] < 10. and 5000. < m[3] < 8000.\
-            and np.log10(0) < m[4] < np.log10(30.) and np.log10(0) < m[5] < np.log10(100.):
+            and 0 < m[4] < np.log10(30.) and 0 < m[5] < np.log10(100.):
         return 0.0
     return -np.inf
 
@@ -45,7 +45,7 @@ def negloglike(par, log_age_samp, temp_samp, log_period_samp, \
             lik1 = 0.0
         l2 = l1 == False
         if l2.sum() > 0:
-            like2 = np.exp(-((log_period_obs[i] - Y)/2.0/(log_period_err[i])+V)**2) \
+            like2 = np.exp(-((log_period_obs[i] - Y)**2/2.0**2/((log_period_err[i])**2+V))) \
                 / (log_period_err[i]+V)
             lik2 = np.sum(like2) / float(l2.sum())
         else:
@@ -72,7 +72,7 @@ def lnlike(par, log_age_samp, temp_samp, log_period_samp, \
             lik1 = 0.0
         l2 = l1 == False
         if l2.sum() > 0:
-            like2 = np.exp(-((log_period_obs[i] - Y)/2.0/(log_period_err[i])+V)**2) \
+            like2 = np.exp(-((log_period_obs[i] - Y)**2/2.0**2/((log_period_err[i])**2+V))) \
                 / (log_period_err[i]+V)
             lik2 = np.sum(like2) / float(l2.sum())
         else:
@@ -126,28 +126,25 @@ log_age_err[a] = log_age_err[a] + diff[a] - np.finfo(float).eps
 diff = log_age_obs - log_age_err
 #
 # # Generate set of fake observations
-nobs = len(log_period_obs)
+# nobs = len(log_period_obs)
 # nobs = 60
 # log_age_true = np.random.uniform(0,1,nobs)
 # log_age_true = np.zeros(nobs)
 # log_age_true[:20] = 0.0
 # log_age_true[20:40] = 0.3
 # log_age_true[40:] = 1.0
-# #
+#
 # temp_true = np.random.uniform(3500,7000,nobs)
-# #
+#
 # # First create noise-free values
-# par_true = [np.log10(0.7725), 0.5189, -0.06, 6300.]
-# par_true = [np.log10(0.7725), 0.5189, .2, 6300.]
-# # par_true = [0.7, 0.575, -0.07, 6390.] # better initialisation
 # log_period_true = log_period_model(par_true,log_age_true,temp_true)
 # l = np.isfinite(log_period_true) == False
 # n = l.sum()
 # log_period_true[l] = np.random.uniform(0,1,n)
 #
-# Then add noise
+# # Then add noise
 # log_age_err = np.zeros(nobs) + 0.05
-log_period_err = np.zeros(nobs) + 0.05
+# log_period_err = np.zeros(nobs) + 0.05
 # temp_err = np.zeros(nobs) + 100
 # log_age_err = np.ones(nobs)*np.mean(log_age_err)
 # log_age_obs = np.random.normal(log_age_true, log_age_err)
