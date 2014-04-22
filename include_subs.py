@@ -20,7 +20,7 @@ def log_period_model(par, log_age, temp):
     return par[0] + par[1] * log_age + par[2] * np.log10(Tk - temp)
 
 def lnprior(m):
-    if -10. < m[0] < 10. and 0. < m[1] < 10. and -10. < m[2] < 10. \
+    if -10. < m[0] < 10. and 0. < m[1] < 10. and 0. < m[2] < 10. \
             and 0 < m[3] < np.log10(30.) and 0 < m[4] < np.log10(100.)\
             and 0 < m[5] < np.log10(30.) and 0 < m[6] < np.log10(100.):
         return 0.0
@@ -202,11 +202,6 @@ sampler.reset()
 print("Production run")
 sampler.run_mcmc(p0, 2000)
 
-print("Making triangle plot")
-fig_labels = ["$log(a)$", "$n$", "$b$", "$Y$", "$V$", "$Z$", "$U$"]
-fig = triangle.corner(sampler.flatchain, truths=par_true, labels=fig_labels[:len(par_true)])
-fig.savefig("triangle.png")
-
 print("Plotting traces")
 pl.figure()
 for i in range(ndim):
@@ -226,8 +221,14 @@ print 'initial values', par_true
 mcmc_result = np.array(mcmc_result)[:, 0]
 print 'mcmc result', mcmc_result
 
+print("Making triangle plot")
+fig_labels = ["$log(a)$", "$n$", "$b$", "$Y$", "$V$", "$Z$", "$U$"]
+fig = triangle.corner(sampler.flatchain, truths=mcmc_result, labels=fig_labels[:len(par_true)])
+fig.savefig("triangle.png")
+
 mcmc_result = [mcmc_result[0], mcmc_result[1], mcmc_result[2], 6250, \
         mcmc_result[3], mcmc_result[4]]
+
 # plot result
 pl.clf()
 pl.errorbar(10**log_age_obs, 10**log_period_obs, xerr=log_age_err, yerr=10**log_period_err, fmt='k.', \
