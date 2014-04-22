@@ -287,4 +287,3 @@ pl.savefig("result_teff")
 
 plots = pretty5.plotting()
 plots.p_vs_t(mcmc_result)
-

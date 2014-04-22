@@ -79,7 +79,7 @@ def lnprob(m, log_age_samp, temp_samp, log_period_samp, \
 
 # log(a), n, beta, Y, V, Z, U
 true_pars = [np.log10(0.7725), 0.5189, .2, np.log10(5.), np.log10(10.), \
-        np.log10(10.), np.log10(10.), np.log10(10.)]
+        np.log10(10.), np.log10(10.)]
 plot_pars = [np.log10(0.7725), 0.5189, .2, 6250, np.log10(5.), np.log10(10.)]
 
 par_true = true_pars

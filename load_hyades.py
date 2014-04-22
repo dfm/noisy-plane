@@ -10,7 +10,7 @@ def hya_load():
     data = np.empty((6, len(hya[0])+1))
     data[:4, 1:] = hya
     data[4, 1:] = np.ones_like(hya[0])*650
-    data[5, 1:] = np.ones_like(hya[0])*data[4,1:]*.01
+    data[5, 1:] = np.ones_like(hya[0])*data[4,1:]*.1
     data[:, :1] = sun[:, None]
 
 #     data[0] = bv2teff(data[0])

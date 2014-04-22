@@ -10,7 +10,7 @@ def load_dat():
     data = np.genfromtxt('/Users/angusr/Python/Gyro/data/data.txt').T
     KID = data[0]
     xr = data[1]
-    l = (xr > 1.)
+    l = (xr > 0.)
 
 #     # load list of MS stars
 #     MSKID = np.genfromtxt("/Users/angusr/Python/Gyro/data/MS_stars.txt").T
@@ -21,11 +21,14 @@ def load_dat():
 
     xr = data[1][l]
     yr = data[3][l]
-    zr = data[13][l]*1000 # convert to myr
+#     zr = data[13][l]*1000 # convert to myr
+    zr = data[13][l]
     xr_err = data[2][l]
     yr_err = data[4][l]
-    zr_errp = data[14][l]*1000
-    zr_errm = data[15][l]*1000
+#     zr_errp = data[14][l]*1000
+#     zr_errm = data[15][l]*1000
+    zr_errp = data[14][l]
+    zr_errm = data[15][l]
 
     # "for now replace values <= 0 with means"
     yr[yr <= 0.] = np.mean(yr[yr > 0.])

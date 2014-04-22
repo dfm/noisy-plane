@@ -6,6 +6,7 @@ import triangle
 from plotting import load_dat
 import pretty5
 
+ocols = ['#FF9933','#66CCCC' , '#FF33CC', '#3399FF', '#CC0066', '#99CC99', '#9933FF', '#CC0000']
 plotpar = {'axes.labelsize': 20,
            'text.fontsize': 20,
            'legend.fontsize': 15,
