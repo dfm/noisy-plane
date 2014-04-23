@@ -20,7 +20,7 @@ def log_period_model(par, log_age, temp):
     return par[0] + par[1] * log_age + par[2] * np.log10(Tk - temp)
 
 def lnprior(m):
-    if 0. < m[0] < 10. and 0. < m[1] < 10. and 0. < m[2] < 10. \
+    if -10. < m[0] < 10. and 0. < m[1] < 10. and 0. < m[2] < 10. \
             and 0 < m[3] < np.log10(30.) and 0 < m[4] < np.log10(100.)\
             and 0 < m[5] < np.log10(30.) and 0 < m[6] < np.log10(100.):
         return 0.0
@@ -112,7 +112,7 @@ a = diff<0
 # really need to use asymmetric error bars!!!!
 log_age_err[a] = log_age_err[a] + diff[a] - np.finfo(float).eps
 diff = log_age_obs - log_age_err
-log_period_err = np.zeros_like(log_period_obs) + 0.05
+# log_period_err = np.zeros_like(log_period_obs) + 0.05
 
 # # Generate set of fake observations
 # nobs = len(log_period_obs)
