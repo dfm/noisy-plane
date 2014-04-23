@@ -85,33 +85,34 @@ plot_pars = [np.log10(0.7725), 0.5189, .2, 6250, np.log10(5.), np.log10(10.)]
 par_true = true_pars
 
 # load real data
-log_period_obs, temp_obs, log_age_obs, log_period_err, temp_err, log_age_err = load_dat()
+log_period_obs, temp_obs, log_age_obs, log_period_err, temp_err, log_age_err, \
+        logg_obs, logg_err = load_dat()
 
-data = np.genfromtxt("/Users/angusr/Python/Gyro/data/data.txt").T
-logg_obs = data[10]
-logg_err = data[11]
-
-# replace nans and zeros and in errorbars with means
-log_age_err[np.isnan(log_age_err)] = np.mean(log_age_err[np.isfinite(log_age_err)])
-log_age_err[log_age_err==np.inf] = np.mean(log_age_err[np.isfinite(log_age_err)])
-log_period_err[log_period_err==0] = np.mean(log_period_err[log_period_err>0])
-# remove negative ages with mean
-a = log_age_obs>0
-log_age_obs = log_age_obs[a]
-log_age_err = log_age_err[a]
-log_period_obs = log_period_obs[a]
-log_period_err = log_period_err[a]
-temp_obs = temp_obs[a]
-temp_err = temp_err[a]
-logg_obs = logg_obs[a]
-logg_err = logg_err[a]
-
-# reduce errorbars if they go below zero
-diff = log_age_obs - log_age_err
-a = diff<0
-# really need to use asymmetric error bars!!!!
-log_age_err[a] = log_age_err[a] + diff[a] - np.finfo(float).eps
-diff = log_age_obs - log_age_err
+# data = np.genfromtxt("/Users/angusr/Python/Gyro/data/data.txt").T
+# logg_obs = data[10]
+# logg_err = data[11]
+#
+# # replace nans and zeros in errorbars with means
+# log_age_err[np.isnan(log_age_err)] = np.mean(log_age_err[np.isfinite(log_age_err)])
+# log_age_err[log_age_err==np.inf] = np.mean(log_age_err[np.isfinite(log_age_err)])
+# log_period_err[log_period_err==0] = np.mean(log_period_err[log_period_err>0])
+# # remove negative ages
+# a = log_age_obs>0
+# log_age_obs = log_age_obs[a]
+# log_age_err = log_age_err[a]
+# log_period_obs = log_period_obs[a]
+# log_period_err = log_period_err[a]
+# temp_obs = temp_obs[a]
+# temp_err = temp_err[a]
+# logg_obs = logg_obs[a]
+# logg_err = logg_err[a]
+#
+# # reduce errorbars if they go below zero
+# diff = log_age_obs - log_age_err
+# a = diff<0
+# # really need to use asymmetric error bars!!!!
+# log_age_err[a] = log_age_err[a] + diff[a] - np.finfo(float).eps
+# diff = log_age_obs - log_age_err
 # log_period_err = np.zeros_like(log_period_obs) + 0.05
 
 # # Generate set of fake observations

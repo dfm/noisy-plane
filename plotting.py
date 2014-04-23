@@ -9,36 +9,55 @@ def load_dat():
     # "load data"
     data = np.genfromtxt('/Users/angusr/Python/Gyro/data/data.txt').T
     KID = data[0]
-    xr = data[1]
+    p = data[1]
 
     # remove periods <= 0
-    l = (xr > 0.)
+    l = (p > 0.)
 
-    xr = data[1][l]
-    yr = data[3][l]
-    zr = data[13][l]
-    xr_err = data[2][l]
-    yr_err = data[4][l]
-    zr_errp = data[14][l]
-    zr_errm = data[15][l]
+    p = data[1][l]
+    p_err = data[2][l]
+    t = data[3][l]
+    t_err = data[4][l]
+    g = data[10]
+    g_errp = data[11]
+    g_errm = data[11]
+    a = data[13][l]
+    a_errp = data[14][l]
+    a_errm = data[15][l]
 
-#     # "for now replace values <= 0 with means"
-#     yr[yr <= 0.] = np.mean(yr[yr > 0.])
-#     zr[zr <= 0.] = np.mean(zr[zr > 0.])
-#     xr_err[xr_err <= 0.] = np.mean(xr_err[xr_err > 0.])
-#     yr_err[yr_err <= 0.] = np.mean(yr_err[yr_err > 0.])
-#     zr_errp[zr_errp <= 0.] = np.mean(zr_errp[zr_errp > 0.])
-#     zr_errm[zr_errm <= 0.] = np.mean(zr_errm[zr_errm > 0.])
+    # take logs
+    log_p = np.log10(p)
+    log_a = np.log10(a)
 
-    # "take logs"
-    xr = np.log10(xr)
-    zr = np.log10(zr) # convert to myr
+    # logarithmic errorbars
+    log_p_err = log_errorbar(p, data[2][l], data[2][l])[0]
+    log_a_err, log_a_errp, log_a_errm  = log_errorbar(a, a_errp, a_errm)
 
-    # logarithmic errorbars"
-    xr_err = log_errorbar(xr, data[2][l], data[2][l])[0]
-    zr_err, zr_errp, zr_errm  = log_errorbar(zr, zr_errp, zr_errm)
+    # replace nans, zeros and infs in errorbars with means
+    log_a_err[np.isnan(log_a_err)] = np.mean(log_a_err[np.isfinite(log_a_err)])
+    log_a_err[log_a_err==np.inf] = np.mean(log_a_err[np.isfinite(log_a_err)])
+    log_p_err[log_p_err==0] = np.mean(log_p_err[log_p_err>0])
 
-    return xr, yr, zr, xr_err, yr_err, zr_err
+    # remove negative ages
+    a = log_a > 0
+    log_a = log_a[a]
+    log_a_err = log_a_err[a]
+    log_p = log_p[a]
+    log_p_err = log_p_err[a]
+    t = t[a]
+    t_err = t_err[a]
+    g = g[a]
+    g_err = g_err[a]
+
+    # reduce errorbars if they go below zero
+    diff = log_a - log_a_err
+    a = diff < 0
+
+    # really need to use asymmetric error bars!!!!
+    log_a_err[a] = log_a_err[a] + diff[a] - np.finfo(float).eps
+    log_p_err = np.zeros_like(log_p_obs) + 0.05
+
+    return log_p, t, log_a, log_p_err, t_err, log_a_err, g, g_err
 
 def log_errorbar(y, errp, errm):
     log_errp = (np.log10(y)*errp)/y
