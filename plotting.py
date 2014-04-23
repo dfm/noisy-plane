@@ -22,13 +22,13 @@ def load_dat():
     zr_errp = data[14][l]
     zr_errm = data[15][l]
 
-    # "for now replace values <= 0 with means"
-    yr[yr <= 0.] = np.mean(yr[yr > 0.])
-    zr[zr <= 0.] = np.mean(zr[zr > 0.])
-    xr_err[xr_err <= 0.] = np.mean(xr_err[xr_err > 0.])
-    yr_err[yr_err <= 0.] = np.mean(yr_err[yr_err > 0.])
-    zr_errp[zr_errp <= 0.] = np.mean(zr_errp[zr_errp > 0.])
-    zr_errm[zr_errm <= 0.] = np.mean(zr_errm[zr_errm > 0.])
+#     # "for now replace values <= 0 with means"
+#     yr[yr <= 0.] = np.mean(yr[yr > 0.])
+#     zr[zr <= 0.] = np.mean(zr[zr > 0.])
+#     xr_err[xr_err <= 0.] = np.mean(xr_err[xr_err > 0.])
+#     yr_err[yr_err <= 0.] = np.mean(yr_err[yr_err > 0.])
+#     zr_errp[zr_errp <= 0.] = np.mean(zr_errp[zr_errp > 0.])
+#     zr_errm[zr_errm <= 0.] = np.mean(zr_errm[zr_errm > 0.])
 
     # "take logs"
     xr = np.log10(xr)
@@ -41,13 +41,7 @@ def load_dat():
     return xr, yr, zr, xr_err, yr_err, zr_err
 
 def log_errorbar(y, errp, errm):
-    plus = y + errp
-    minus = y - errm
-#     minus[minus<0] = plus[minus<0]
-    log_err = np.log10(plus/minus) / 2. # mean
-    log_errp = np.log10(plus/y) # positive error
-    log_errm = np.log10(y/minus) # negative error
-    l = minus < 0 # Make sure ages don't go below zero!
-    log_err[l] = log_errp[l]
-    log_errm[l] = log_errp[l]
-    return log_err, log_errp, log_errm
+    log_errp = (np.log10(y)*errp)/y
+    log_errm = (np.log10(y)*errm)/y
+    log_err = .5*(log_errp + log_errm)
+    return log_err, log_errp, log_err
