@@ -88,33 +88,6 @@ par_true = true_pars
 log_period_obs, temp_obs, log_age_obs, log_period_err, temp_err, log_age_err, \
         logg_obs, logg_err = load_dat()
 
-# data = np.genfromtxt("/Users/angusr/Python/Gyro/data/data.txt").T
-# logg_obs = data[10]
-# logg_err = data[11]
-#
-# # replace nans and zeros in errorbars with means
-# log_age_err[np.isnan(log_age_err)] = np.mean(log_age_err[np.isfinite(log_age_err)])
-# log_age_err[log_age_err==np.inf] = np.mean(log_age_err[np.isfinite(log_age_err)])
-# log_period_err[log_period_err==0] = np.mean(log_period_err[log_period_err>0])
-# # remove negative ages
-# a = log_age_obs>0
-# log_age_obs = log_age_obs[a]
-# log_age_err = log_age_err[a]
-# log_period_obs = log_period_obs[a]
-# log_period_err = log_period_err[a]
-# temp_obs = temp_obs[a]
-# temp_err = temp_err[a]
-# logg_obs = logg_obs[a]
-# logg_err = logg_err[a]
-#
-# # reduce errorbars if they go below zero
-# diff = log_age_obs - log_age_err
-# a = diff<0
-# # really need to use asymmetric error bars!!!!
-# log_age_err[a] = log_age_err[a] + diff[a] - np.finfo(float).eps
-# diff = log_age_obs - log_age_err
-# log_period_err = np.zeros_like(log_period_obs) + 0.05
-
 # # Generate set of fake observations
 # nobs = len(log_period_obs)
 # nobs = 60
@@ -123,16 +96,16 @@ log_period_obs, temp_obs, log_age_obs, log_period_err, temp_err, log_age_err, \
 # log_age_true[:20] = 0.0
 # log_age_true[20:40] = 0.3
 # log_age_true[40:] = 1.0
-#
+
 # temp_true = np.random.uniform(3500,7000,nobs)
 # logg_true = np.random.uniform(3.5,4.5,nobs)
-#
+
 # # First create noise-free values
 # log_period_true = log_period_model(par_true,log_age_true,temp_true)
 # l = np.isfinite(log_period_true) == False
 # n = l.sum()
 # log_period_true[l] = np.random.uniform(0,1,n)
-#
+
 # # Then add noise
 # log_age_err = np.zeros(nobs) + 0.05
 # log_period_err = np.zeros(nobs) + 0.05
