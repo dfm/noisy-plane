@@ -21,9 +21,9 @@ def load_dat():
     g = data[10]
     g_errp = data[11]
     g_errm = data[11]
-    a = data[13][l]
-    a_errp = data[14][l]
-    a_errm = data[15][l]
+    a = data[13][l]#*1000
+    a_errp = data[14][l]#*1000
+    a_errm = data[15][l]#*1000
 
     # take logs
     log_p = np.log10(p)
@@ -57,7 +57,7 @@ def load_dat():
     log_a_err[a] = log_a_err[a] + diff[a] - np.finfo(float).eps
     print log_p_err
 #     log_p_err = np.zeros_like(log_p) + 0.05
-    a = log_p_err < log_p_err[0]
+    a = log_p_err < 0.01
     log_p_err[a] = log_p_err[0]
 #     log_p_err = np.ones_like(log_p_err)*log_p_err[0]
     print log_p_err

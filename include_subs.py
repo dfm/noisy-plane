@@ -96,16 +96,16 @@ log_period_obs, temp_obs, log_age_obs, log_period_err, temp_err, log_age_err, \
 # log_age_true[:20] = 0.0
 # log_age_true[20:40] = 0.3
 # log_age_true[40:] = 1.0
-
+#
 # temp_true = np.random.uniform(3500,7000,nobs)
 # logg_true = np.random.uniform(3.5,4.5,nobs)
-
+#
 # # First create noise-free values
 # log_period_true = log_period_model(par_true,log_age_true,temp_true)
 # l = np.isfinite(log_period_true) == False
 # n = l.sum()
 # log_period_true[l] = np.random.uniform(0,1,n)
-
+#
 # # Then add noise
 # log_age_err = np.zeros(nobs) + 0.05
 # log_period_err = np.zeros(nobs) + 0.05
@@ -118,7 +118,7 @@ log_period_obs, temp_obs, log_age_obs, log_period_err, temp_err, log_age_err, \
 # log_period_err = np.ones(nobs)*np.mean(log_period_err)
 # log_period_obs = np.random.normal(log_period_true, log_period_err)
 # logg_obs = np.random.normal(logg_true, logg_err)
-
+#
 # plot period vs age
 pl.clf()
 pl.errorbar(10**log_age_obs, 10**log_period_obs, xerr=log_age_err, yerr=10**log_period_err, fmt='k.', \
@@ -218,7 +218,7 @@ pl.savefig("result")
 
 # plot period vs teff
 pl.clf()
-pl.errorbar(temp_obs, log_period_obs, xerr=temp_err, yerr=log_period_err, fmt='k.', \
+pl.errorbar(temp_obs, 10**log_period_obs, xerr=temp_err, yerr=log_period_err, fmt='k.', \
         capsize = 0, ecolor = '.7')
 temp_plot = np.linspace(min(temp_obs), max(temp_obs))
 pl.plot(temp_plot, 10**log_period_model(mcmc_result, np.log10(1.), temp_plot), color=ocols[0],\
