@@ -10,9 +10,11 @@ def load_dat():
     data = np.genfromtxt('/Users/angusr/Python/Gyro/data/data.txt').T
     KID = data[0]
     p = data[1]
+    t = data[3]
+    g = data[10]
 
-    # remove periods <= 0
-    l = (p > 0.)
+    # remove periods <= 0 and teff == 0
+    l = (p > 0.)*(t > 0.)*(g > 4.1)*(t < 6400)
 
     p = data[1][l]
     p_err = data[2][l]
@@ -55,7 +57,6 @@ def load_dat():
 
     # really need to use asymmetric error bars!!!!
     log_a_err[a] = log_a_err[a] + diff[a] - np.finfo(float).eps
-    print log_p_err
 #     log_p_err = np.zeros_like(log_p) + 0.05
     a = log_p_err < 0.01
     log_p_err[a] = log_p_err[0]

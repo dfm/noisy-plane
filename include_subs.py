@@ -118,7 +118,7 @@ log_period_obs, temp_obs, log_age_obs, log_period_err, temp_err, log_age_err, \
 # log_period_err = np.ones(nobs)*np.mean(log_period_err)
 # log_period_obs = np.random.normal(log_period_true, log_period_err)
 # logg_obs = np.random.normal(logg_true, logg_err)
-#
+
 # plot period vs age
 pl.clf()
 pl.errorbar(10**log_age_obs, 10**log_period_obs, xerr=log_age_err, yerr=10**log_period_err, fmt='k.', \
@@ -136,20 +136,21 @@ pl.savefig("init")
 
 # plot period vs teff
 pl.clf()
-pl.errorbar(temp_obs, log_period_obs, xerr=temp_err, yerr=log_period_err, fmt='k.', \
+pl.errorbar(temp_obs, 10**log_period_obs, xerr=temp_err, yerr=10**log_period_err, fmt='k.', \
         capsize = 0, ecolor = '.7')
 temp_plot = np.linspace(min(temp_obs), max(temp_obs))
-pl.plot(temp_plot, log_period_model(par_true, np.log10(1.), temp_plot), 'r-')
-pl.plot(temp_plot, log_period_model(par_true, np.log10(2.), temp_plot), 'b-')
-pl.plot(temp_plot, log_period_model(par_true, np.log10(5.), temp_plot), 'm-')
-pl.plot(temp_plot, log_period_model(par_true, np.log10(10.), temp_plot), 'c-')
+pl.plot(temp_plot, 10**log_period_model(par_true, np.log10(1.), temp_plot), 'r-')
+pl.plot(temp_plot, 10**log_period_model(par_true, np.log10(2.), temp_plot), 'b-')
+pl.plot(temp_plot, 10**log_period_model(par_true, np.log10(5.), temp_plot), 'm-')
+pl.plot(temp_plot, 10**log_period_model(par_true, np.log10(10.), temp_plot), 'c-')
 pl.xlim(pl.gca().get_xlim()[::-1])
 pl.xlabel('$\mathrm{T_{eff}~(K)}$')
-pl.ylabel('$log~P_{rot}~\mathrm{(days)}$')
+pl.ylabel('$P_{rot}~\mathrm{(days)}$')
 pl.savefig("init_teff")
 
 plots = pretty5.plotting()
 plots.p_vs_t(par_true)
+raw_input('enter')
 
 par_true = true_pars
 
@@ -174,7 +175,7 @@ print("Burn-in")
 p0, lp, state = sampler.run_mcmc(p0, 500)
 sampler.reset()
 print("Production run")
-sampler.run_mcmc(p0, 2000)
+sampler.run_mcmc(p0, 5000)
 
 print("Plotting traces")
 pl.figure()
@@ -218,7 +219,7 @@ pl.savefig("result")
 
 # plot period vs teff
 pl.clf()
-pl.errorbar(temp_obs, 10**log_period_obs, xerr=temp_err, yerr=log_period_err, fmt='k.', \
+pl.errorbar(temp_obs, 10**log_period_obs, xerr=temp_err, yerr=10**log_period_err, fmt='k.', \
         capsize = 0, ecolor = '.7')
 temp_plot = np.linspace(min(temp_obs), max(temp_obs))
 pl.plot(temp_plot, 10**log_period_model(mcmc_result, np.log10(1.), temp_plot), color=ocols[0],\
