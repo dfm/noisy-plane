@@ -23,7 +23,7 @@ def lnprior(m):
     if -10. < m[0] < 10. and .4 < m[1] < .7 and 0. < m[2] < 1. \
             and 0 < m[3] < np.log10(30.) and 0 < m[4] < np.log10(100.)\
             and 0 < m[5] < np.log10(30.) and 0 < m[6] < np.log10(100.):
-        return -.5*((m[1]-.5189)/.01)**2 -.5*((m[2]-.2)/.01)**2
+        return -.5*((m[1]-.5189)/.1)**2 -.5*((m[2]-.2)/.1)**2
     return -np.inf
 
 def lnlike(par, log_age_samp, temp_samp, log_period_samp, \
