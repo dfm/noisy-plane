@@ -141,6 +141,7 @@ if __name__ == "__main__":
     ax.set_ylabel('B-V')
     ax.set_zlabel('Age (Gyr)')
     pl.savefig('bv_3d')
+    raw_input('enter')
 
     print "Draw posterior samples."
     K = 500

@@ -20,7 +20,7 @@ def log_period_model(par, log_age, temp):
     return par[0] + par[1] * log_age + par[2] * np.log10(Tk - temp)
 
 def lnprior(m):
-    if -10. < m[0] < 10. and 0. < m[1] < 10. and 0. < m[2] < 10. \
+    if -10. < m[0] < 10. and 0.4 < m[1] < .7 and 0. < m[2] < .1 \
             and 0 < m[3] < np.log10(30.) and 0 < m[4] < np.log10(100.)\
             and 0 < m[5] < np.log10(30.) and 0 < m[6] < np.log10(100.):
         return 0.0
