@@ -28,7 +28,7 @@ def lnprior(m):
     return -np.inf
 
 def lnlike(par, log_age_samp, temp_samp, log_period_samp, \
-               temp_obs, temp_err, log_period_obs, log_period_err):
+               temp_obs, temp_err, log_period_obs, log_period_err, coeffs):
     nobs,nsamp = log_age_samp.shape
     log_period_pred = log_period_model(par[:4], log_age_samp, temp_samp)
     ll = np.zeros(nobs)
@@ -37,8 +37,6 @@ def lnlike(par, log_age_samp, temp_samp, log_period_samp, \
     Y, V = par[3], par[4]
     Z, U = par[5], par[6]
     ll = np.zeros(nobs)
-
-    coeffs = MS_poly() # FIXME: take this outside the loop to speed up!
 
     for i in np.arange(nobs):
 
@@ -76,12 +74,12 @@ def lnlike(par, log_age_samp, temp_samp, log_period_samp, \
     return np.sum(ll)
 
 def lnprob(m, log_age_samp, temp_samp, log_period_samp, \
-        temp_obs, temp_err, log_period_obs, log_period_err):
+        temp_obs, temp_err, log_period_obs, log_period_err, coeffs):
     lp = lnprior(m)
     if not np.isfinite(lp):
         return -np.inf
     return lp + lnlike(m, log_age_samp, temp_samp, \
-            log_period_samp, temp_obs, temp_err, log_period_obs, log_period_err)
+            log_period_samp, temp_obs, temp_err, log_period_obs, log_period_err, coeffs)
 
 # log(a), n, beta, Y, V, Z, U
 true_pars = [np.log10(0.7725), 0.5189, .2, np.log10(5.), np.log10(10.), \
@@ -204,12 +202,15 @@ logg_samp = np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(logg_obs, 
 log_period_samp = np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(log_period_obs, log_period_err)])
 # FIXME: asymmetric errorbars for age and logg
 
-print 'intial likelihood = ', lnlike(par_true, log_age_samp, temp_samp, \
-        log_period_samp, temp_obs, temp_err, log_period_obs, log_period_err)
+# calculate ms turnoff coeffs
+coeffs = MS_poly()
+
+print 'initial likelihood = ', lnlike(par_true, log_age_samp, temp_samp, \
+        log_period_samp, temp_obs, temp_err, log_period_obs, log_period_err, coeffs)
 
 nwalkers, ndim = 32, len(par_true)
 p0 = [par_true+1e-4*np.random.rand(ndim) for i in range(nwalkers)]
-args = (log_age_samp, temp_samp, log_period_samp, temp_obs, temp_err, log_period_obs, log_period_err)
+args = (log_age_samp, temp_samp, log_period_samp, temp_obs, temp_err, log_period_obs, log_period_err, coeffs)
 sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args = args)
 # sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob)
 
@@ -217,7 +218,7 @@ print("Burn-in")
 p0, lp, state = sampler.run_mcmc(p0, 500)
 sampler.reset()
 print("Production run")
-sampler.run_mcmc(p0, 5000)
+sampler.run_mcmc(p0, 2000)
 
 print("Plotting traces")
 pl.figure()
