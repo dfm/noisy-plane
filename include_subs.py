@@ -5,6 +5,7 @@ import emcee
 import triangle
 from plotting import load_dat
 import pretty5
+from subgiants import MS_poly
 
 ocols = ['#FF9933','#66CCCC' , '#FF33CC', '#3399FF', '#CC0066', '#99CC99', '#9933FF', '#CC0000']
 plotpar = {'axes.labelsize': 20,
@@ -23,7 +24,7 @@ def lnprior(m):
     if -10. < m[0] < 10. and .4 < m[1] < .7 and 0. < m[2] < 1. \
             and 0 < m[3] < np.log10(30.) and 0 < m[4] < np.log10(100.)\
             and 0 < m[5] < np.log10(30.) and 0 < m[6] < np.log10(100.):
-        return -.5*((m[1]-.5189)/.1)**2 -.5*((m[2]-.2)/.1)**2
+        return -.5*((m[1]-.5189)/.05)**2 -.5*((m[2]-.2)/.05)**2
     return -np.inf
 
 def lnlike(par, log_age_samp, temp_samp, log_period_samp, \
@@ -121,35 +122,71 @@ log_period_obs, temp_obs, log_age_obs, log_period_err, temp_err, log_age_err, \
 
 # plot period vs age
 pl.clf()
-pl.errorbar(10**log_age_obs, 10**log_period_obs, xerr=log_age_err, yerr=10**log_period_err, fmt='k.', \
+pl.errorbar(10**log_age_obs, 10**log_period_obs, xerr=10**log_age_err, yerr=10**log_period_err, fmt='k.', \
         capsize = 0, ecolor = '.7')
 
 par_true = plot_pars
 log_age_plot = np.linspace(0, max(log_age_obs))
 pl.plot(10**log_age_plot, 10**log_period_model(par_true, log_age_plot, 6000.), 'r-')
-pl.plot(10**log_age_plot, 10**log_period_model(par_true, log_age_plot, 4000.), 'b-')
-pl.plot(10**log_age_plot, 10**log_period_model(par_true, log_age_plot, 5000.), 'm-')
-pl.plot(10**log_age_plot, 10**log_period_model(par_true, log_age_plot, 4500.), 'c-')
+pl.plot(10**log_age_plot, 10**log_period_model(par_true, log_age_plot, 5500.), 'm-')
+pl.plot(10**log_age_plot, 10**log_period_model(par_true, log_age_plot, 5000.), 'b-')
+pl.plot(10**log_age_plot, 10**log_period_model(par_true, log_age_plot, 4000.), 'c-')
 pl.xlabel('$\mathrm{Age~(Gyr)}$')
 pl.ylabel('$P_{rot}~\mathrm{(days)}$')
 pl.savefig("init")
 
+pl.clf()
+pl.errorbar(10**log_age_obs, 10**log_period_obs/(6250-temp_obs)**0.2, xerr=10**log_age_err, yerr=10**log_period_err, fmt='k.', \
+        capsize = 0, ecolor = '.7')
+par_true = plot_pars
+log_age_plot = np.linspace(0, max(log_age_obs))
+pl.plot(10**log_age_plot, 10**(.5189*log_age_plot), 'r-')
+pl.xlabel('$\mathrm{Age~(Gyr)}$')
+pl.ylabel('$P_{rot}/(T_k-T_{eff})^b$')
+pl.savefig("init2")
+
 # plot period vs teff
 pl.clf()
 pl.errorbar(temp_obs, 10**log_period_obs, xerr=temp_err, yerr=10**log_period_err, fmt='k.', \
-        capsize = 0, ecolor = '.7')
+        capsize = 0, ecolor = '.7')#, zorder=1)
+# pl.scatter(temp_obs, 10**log_period_obs, c = logg_obs, s=50, vmin=min(logg_obs[logg_obs>0]), vmax=max(logg_obs), zorder=2)
 temp_plot = np.linspace(min(temp_obs), max(temp_obs))
 pl.plot(temp_plot, 10**log_period_model(par_true, np.log10(1.), temp_plot), 'r-')
-pl.plot(temp_plot, 10**log_period_model(par_true, np.log10(2.), temp_plot), 'b-')
-pl.plot(temp_plot, 10**log_period_model(par_true, np.log10(5.), temp_plot), 'm-')
+pl.plot(temp_plot, 10**log_period_model(par_true, np.log10(2.), temp_plot), 'm-')
+pl.plot(temp_plot, 10**log_period_model(par_true, np.log10(5.), temp_plot), 'b-')
 pl.plot(temp_plot, 10**log_period_model(par_true, np.log10(10.), temp_plot), 'c-')
 pl.xlim(pl.gca().get_xlim()[::-1])
 pl.xlabel('$\mathrm{T_{eff}~(K)}$')
 pl.ylabel('$P_{rot}~\mathrm{(days)}$')
+# pl.colorbar()
 pl.savefig("init_teff")
+
+pl.clf()
+pl.errorbar(temp_obs, 10**log_period_obs/(10**(log_age_obs)**.5189), xerr=temp_err, yerr=10**log_period_err, fmt='k.', \
+        capsize = 0, ecolor = '.7')#, zorder=1)
+# pl.scatter(temp_obs, 10**log_period_obs/(10**(log_age_obs)**.5189), c = logg_obs, s=50, vmin=min(logg_obs[logg_obs>0]), vmax=max(logg_obs), zorder=2)
+temp_plot = np.linspace(min(temp_obs), max(temp_obs))
+pl.plot(temp_plot, (6250-temp_plot)**.2, 'r-')
+pl.xlim(pl.gca().get_xlim()[::-1])
+pl.xlabel('$\mathrm{T_{eff}~(K)}$')
+pl.ylabel('$P_{rot}/A^n$')
+pl.ylim(0, 15)
+# pl.colorbar()
+pl.savefig("init_teff2")
 
 plots = pretty5.plotting()
 plots.p_vs_t(par_true)
+
+# plot ms turnoff
+pl.clf()
+pl.plot(temp_obs, logg_obs, 'k.')
+coeffs = MS_poly()
+plt = np.polyval(coeffs, temp_obs)
+pl.plot(temp_obs, plt, 'ro')
+pl.ylim(pl.gca().get_ylim()[::-1])
+pl.xlim(pl.gca().get_xlim()[::-1])
+pl.savefig('t_vs_l')
+
 raw_input('enter')
 
 par_true = true_pars

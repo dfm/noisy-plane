@@ -14,7 +14,7 @@ def load_dat():
     g = data[10]
 
     # remove periods <= 0 and teff == 0
-    l = (p > 0.)*(t > 0.)#*(g > 4.)*(t < 6300)
+    l = (p > 0.)*(t > 0.)*(g > 0.)#*(g > 4.2)*(t < 6300)
 
     p = data[1][l]
     p_err = data[2][l]
