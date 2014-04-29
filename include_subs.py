@@ -21,10 +21,10 @@ def log_period_model(par, log_age, temp):
     return par[0] + par[1] * log_age + par[2] * np.log10(Tk - temp)
 
 def lnprior(m):
-    if -10. < m[0] < 10. and .4 < m[1] < .7 and 0. < m[2] < 1. \
+    if -10. < m[0] < 10. and .3 < m[1] < .8 and 0. < m[2] < 1. \
             and 0 < m[3] < np.log10(30.) and 0 < m[4] < np.log10(100.)\
             and 0 < m[5] < np.log10(30.) and 0 < m[6] < np.log10(100.):
-        return -.5*((m[1]-.5189)/.05)**2 -.5*((m[2]-.2)/.05)**2
+        return -.5*((m[1]-.5189)/.2)**2 -.5*((m[2]-.2)/.2)**2
     return -np.inf
 
 def lnlike(par, log_age_samp, temp_samp, log_period_samp, \
@@ -37,10 +37,14 @@ def lnlike(par, log_age_samp, temp_samp, log_period_samp, \
     Y, V = par[3], par[4]
     Z, U = par[5], par[6]
     ll = np.zeros(nobs)
+
+    coeffs = MS_poly() # FIXME: take this outside the loop to speed up!
+
     for i in np.arange(nobs):
 
         # cool MS stars
-        l1 = (temp_samp[i,:] < temp_Kraft) * (logg_samp[i,:] > 4.)
+        turnoff = np.polyval(coeffs, temp_samp[i,:])
+        l1 = (temp_samp[i,:] < temp_Kraft) * (logg_samp[i,:] > 4.) * (logg_samp[i,:] > turnoff)
         if l1.sum() > 0:
             like1 = \
                 np.exp(-((log_period_obs[i] - log_period_pred[i,l1])/2.0/log_period_err[i])**2) \
@@ -50,7 +54,7 @@ def lnlike(par, log_age_samp, temp_samp, log_period_samp, \
             lik1 = 0.0
 
         # hot MS stars
-        l2 = (temp_samp[i,:] > temp_Kraft) * (logg_samp[i,:] > 4.)
+        l2 = (temp_samp[i,:] > temp_Kraft) * (logg_samp[i,:] > 4.) * (logg_samp[i,:] > turnoff)
         if l2.sum() > 0:
             like2 = np.exp(-((log_period_obs[i] - Y)**2/2.0**2/((log_period_err[i])**2+V))) \
                 / (log_period_err[i]+V)
@@ -59,7 +63,8 @@ def lnlike(par, log_age_samp, temp_samp, log_period_samp, \
             lik2 = 0.0
 
         # subgiants
-        l3 = logg_samp[i,:] < 4.
+        # l3 = logg_samp[i,:] < 4.
+        l3 = logg_samp[i,:] < turnoff
         if l3.sum() > 0:
             like3 = np.exp(-((log_period_obs[i] - Z)**2/2.0**2/((log_period_err[i])**2+U))) \
                 / (log_period_err[i]+U)
@@ -181,8 +186,8 @@ plots.p_vs_t(par_true)
 pl.clf()
 pl.plot(temp_obs, logg_obs, 'k.')
 coeffs = MS_poly()
-plt = np.polyval(coeffs, temp_obs)
-pl.plot(temp_obs, plt, 'ro')
+turnoff = np.polyval(coeffs, temp_obs)
+pl.plot(temp_obs, turnoff, 'ro')
 pl.ylim(pl.gca().get_ylim()[::-1])
 pl.xlim(pl.gca().get_xlim()[::-1])
 pl.savefig('t_vs_l')
