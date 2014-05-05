@@ -23,7 +23,7 @@ def lnprior(m):
             and 0 < m[3] < np.log10(30.) and 0 < m[4] < np.log10(100.)\
             and 0 < m[5] < np.log10(30.) and 0 < m[6] < np.log10(100.):
         return -.5*((m[1]-.5189)/.2)**2 -.5*((m[2]-.2)/.2)**2
-        return 0.0
+#         return 0.0
     return -np.inf
 
 def lnprob(m, log_age_samp, temp_samp, log_period_samp, \
@@ -34,13 +34,14 @@ def lnprob(m, log_age_samp, temp_samp, log_period_samp, \
     return lp + lnlike(m, log_age_samp, temp_samp, \
             log_period_samp, logg_samp, temp_obs, temp_err, log_period_obs, \
             log_period_err, logg_obs, logg_err, coeffs, Tk)
+def MCMC(par, log_age_samp, temp_samp, log_period_samp, logg_samp, temp_obs, \
+        temp_err, log_period_obs, log_period_err, logg_obs, logg_err, coeffs, Tk):
 
-def MCMC():
     nwalkers, ndim = 32, len(par_true)
     p0 = [par_true+1e-4*np.random.rand(ndim) for i in range(nwalkers)]
-    args = (log_age_samp, temp_samp, log_period_samp, temp_obs, temp_err, log_period_obs, log_period_err, coeffs)
+    args = (log_age_samp, temp_samp, log_period_samp, temp_obs, temp_err, log_period_obs, \
+            log_period_err, coeffs)
     sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args = args)
-    # sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob)
 
     print("Burn-in")
     p0, lp, state = sampler.run_mcmc(p0, 500)
@@ -72,8 +73,7 @@ def MCMC():
     fig = triangle.corner(sampler.flatchain, truths=mcmc_result, labels=fig_labels[:len(par_true)])
     fig.savefig("triangle.png")
 
-    mcmc_result = [mcmc_result[0], mcmc_result[1], mcmc_result[2], 6250, \
-            mcmc_result[3], mcmc_result[4]]
+    return mcmc_result
 
 def maxlike(par, log_age_samp, temp_samp, log_period_samp, logg_samp, temp_obs, \
         temp_err, log_period_obs, log_period_err, logg_obs, logg_err, coeffs, Tk):
@@ -84,9 +84,11 @@ def maxlike(par, log_age_samp, temp_samp, log_period_samp, logg_samp, temp_obs, 
     print 'initial likelihood = ', lnlike(par, log_age_samp, temp_samp, log_period_samp, logg_samp, temp_obs, \
             temp_err, log_period_obs, log_period_err, logg_obs, logg_err, coeffs, Tk)
 
-    result = fmin(neglnlike, par, args=args)
-    print 'result = ', result
+#     result = fmin(neglnlike, par, args=args)
+    result = MCMC(par, log_age_samp, temp_samp, log_period_samp, logg_samp, temp_obs, \
+        temp_err, log_period_obs, log_period_err, logg_obs, logg_err, coeffs, Tk)
 
+    print 'result = ', result
     likelihood = lnlike(result, log_age_samp, temp_samp, log_period_samp, logg_samp, temp_obs, \
             temp_err, log_period_obs, log_period_err, logg_obs, logg_err, coeffs, Tk)
 
@@ -114,7 +116,7 @@ if __name__ == "__main__":
     coeffs = MS_poly()
 
     # Grid over Tk
-    K_temps = np.arange(6100, 6450, 50)
+    K_temps = np.arange(6100, 6500, 100)
 #     K_temps = np.ones(5)*6250
     L = np.empty_like(K_temps)
 
