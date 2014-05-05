@@ -58,7 +58,7 @@ def load_dat():
     # really need to use asymmetric error bars!!!!
     log_a_err[a] = log_a_err[a] + diff[a] - np.finfo(float).eps
 #     log_p_err = np.zeros_like(log_p) + 0.05
-    a = log_p_err < 0.0001
+    a = log_p_err < 0.01
     log_p_err[a] = log_p_err[0]
 #     log_p_err = np.ones_like(log_p_err)*log_p_err[0]
 #     print log_p_err

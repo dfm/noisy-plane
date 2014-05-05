@@ -6,6 +6,7 @@ import triangle
 from plotting import load_dat
 import pretty5
 from subgiants import MS_poly
+from lnlikes import lnlike
 
 ocols = ['#FF9933','#66CCCC' , '#FF33CC', '#3399FF', '#CC0066', '#99CC99', '#9933FF', '#CC0000']
 plotpar = {'axes.labelsize': 20,
@@ -16,8 +17,9 @@ plotpar = {'axes.labelsize': 20,
            'text.usetex': True}
 pl.rcParams.update(plotpar)
 
+Tk = 6250
+
 def log_period_model(par, log_age, temp):
-    Tk = 6250
     return par[0] + par[1] * log_age + par[2] * np.log10(Tk - temp)
 
 def lnprior(m):
@@ -29,60 +31,62 @@ def lnprior(m):
 #         return 0.0
     return -np.inf
 
-def lnlike(par, log_age_samp, temp_samp, log_period_samp, \
-               temp_obs, temp_err, log_period_obs, log_period_err, coeffs):
-    nobs,nsamp = log_age_samp.shape
-    log_period_pred = log_period_model(par[:4], log_age_samp, temp_samp)
-    ll = np.zeros(nobs)
-    temp_Kraft = 6250
-    logg_cut = 4.
-    Y, V = par[3], par[4]
-    Z, U = par[5], par[6]
-    ll = np.zeros(nobs)
+# def lnlike(par, log_age_samp, temp_samp, log_period_samp, \
+#                temp_obs, temp_err, log_period_obs, log_period_err, coeffs):
+#     nobs,nsamp = log_age_samp.shape
+#     log_period_pred = log_period_model(par[:4], log_age_samp, temp_samp)
+#     ll = np.zeros(nobs)
+#     temp_Kraft = 6250
+#     logg_cut = 4.
+#     Y, V = par[3], par[4]
+#     Z, U = par[5], par[6]
+#     ll = np.zeros(nobs)
+#
+#     for i in np.arange(nobs):
+#
+#         # cool MS stars
+# #         turnoff = np.polyval(coeffs, temp_samp[i,:])-.1
+#         turnoff = np.polyval(coeffs, temp_samp[i,:])
+#         l1 = (temp_samp[i,:] < temp_Kraft) * (logg_samp[i,:] > 4.) * (logg_samp[i,:] > turnoff)
+#         if l1.sum() > 0:
+#             like1 = \
+#                 np.exp(-((log_period_obs[i] - log_period_pred[i,l1])/2.0/log_period_err[i])**2) \
+#                 / log_period_err[i]
+#             lik1 = np.sum(like1) / float(l1.sum())
+#         else:
+#             lik1 = 0.0
+#
+#         # hot MS stars
+#         l2 = (temp_samp[i,:] > temp_Kraft) * (logg_samp[i,:] > 4.) * (logg_samp[i,:] > turnoff)
+#         if l2.sum() > 0:
+#             like2 = np.exp(-((log_period_obs[i] - Y)**2/2.0**2/((log_period_err[i])**2+V))) \
+#                 / (log_period_err[i]+V)
+#             lik2 = np.sum(like2) / float(l2.sum())
+#         else:
+#             lik2 = 0.0
+#
+#         # subgiants
+#         # l3 = logg_samp[i,:] < 4.
+#         l3 = logg_samp[i,:] < turnoff
+#         if l3.sum() > 0:
+#             like3 = np.exp(-((log_period_obs[i] - Z)**2/2.0**2/((log_period_err[i])**2+U))) \
+#                 / (log_period_err[i]+U)
+#             lik3 = np.sum(like3) / float(l3.sum())
+#         else:
+#             lik3 = 0.0
+#
+#         ll[i] = np.log10(lik1 + lik2 + lik3)
+#     return np.sum(ll)
 
-    for i in np.arange(nobs):
-
-        # cool MS stars
-#         turnoff = np.polyval(coeffs, temp_samp[i,:])-.1
-        turnoff = np.polyval(coeffs, temp_samp[i,:])
-        l1 = (temp_samp[i,:] < temp_Kraft) * (logg_samp[i,:] > 4.) * (logg_samp[i,:] > turnoff)
-        if l1.sum() > 0:
-            like1 = \
-                np.exp(-((log_period_obs[i] - log_period_pred[i,l1])/2.0/log_period_err[i])**2) \
-                / log_period_err[i]
-            lik1 = np.sum(like1) / float(l1.sum())
-        else:
-            lik1 = 0.0
-
-        # hot MS stars
-        l2 = (temp_samp[i,:] > temp_Kraft) * (logg_samp[i,:] > 4.) * (logg_samp[i,:] > turnoff)
-        if l2.sum() > 0:
-            like2 = np.exp(-((log_period_obs[i] - Y)**2/2.0**2/((log_period_err[i])**2+V))) \
-                / (log_period_err[i]+V)
-            lik2 = np.sum(like2) / float(l2.sum())
-        else:
-            lik2 = 0.0
-
-        # subgiants
-        # l3 = logg_samp[i,:] < 4.
-        l3 = logg_samp[i,:] < turnoff
-        if l3.sum() > 0:
-            like3 = np.exp(-((log_period_obs[i] - Z)**2/2.0**2/((log_period_err[i])**2+U))) \
-                / (log_period_err[i]+U)
-            lik3 = np.sum(like3) / float(l3.sum())
-        else:
-            lik3 = 0.0
-
-        ll[i] = np.log10(lik1 + lik2 + lik3)
-    return np.sum(ll)
-
-def lnprob(m, log_age_samp, temp_samp, log_period_samp, \
-        temp_obs, temp_err, log_period_obs, log_period_err, coeffs):
+def lnprob(m, log_age_samp, temp_samp, log_period_samp, logg_samp, \
+        temp_obs, temp_err, log_period_obs, log_period_err, logg_obs, \
+        logg_err, coeffs, Tk):
     lp = lnprior(m)
     if not np.isfinite(lp):
         return -np.inf
     return lp + lnlike(m, log_age_samp, temp_samp, \
-            log_period_samp, temp_obs, temp_err, log_period_obs, log_period_err, coeffs)
+            log_period_samp, logg_samp, temp_obs, temp_err, log_period_obs, \
+            logg_obs, logg_err, log_period_err, coeffs, Tk)
 
 # log(a), n, beta, Y, V, Z, U
 true_pars = [np.log10(0.7725), 0.5189, .2, np.log10(5.), np.log10(10.), \
@@ -210,11 +214,13 @@ log_period_samp = np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(log_
 coeffs = MS_poly()
 
 print 'initial likelihood = ', lnlike(par_true, log_age_samp, temp_samp, \
-        log_period_samp, temp_obs, temp_err, log_period_obs, log_period_err, coeffs)
+        log_period_samp, logg_samp, temp_obs, temp_err, log_period_obs, log_period_err, \
+        logg_obs, logg_err, coeffs, Tk)
 
 nwalkers, ndim = 32, len(par_true)
 p0 = [par_true+1e-4*np.random.rand(ndim) for i in range(nwalkers)]
-args = (log_age_samp, temp_samp, log_period_samp, temp_obs, temp_err, log_period_obs, log_period_err, coeffs)
+args = (log_age_samp, temp_samp, log_period_samp, logg_samp, temp_obs, \
+        temp_err, log_period_obs, log_period_err, logg_obs, logg_err, coeffs, Tk)
 sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args = args)
 # sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob)
 
