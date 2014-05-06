@@ -31,8 +31,8 @@ def lnprior(m):
 #         return 0.0
     return -np.inf
 
-# def lnlike(par, log_age_samp, temp_samp, log_period_samp, \
-#                temp_obs, temp_err, log_period_obs, log_period_err, coeffs):
+# def lnlike(par, log_age_samp, temp_samp, log_period_samp, logg_samp, \
+#                temp_obs, temp_err, log_period_obs, log_period_err, logg_obs, logg_err, coeffs, Tk):
 #     nobs,nsamp = log_age_samp.shape
 #     log_period_pred = log_period_model(par[:4], log_age_samp, temp_samp)
 #     ll = np.zeros(nobs)
@@ -41,9 +41,9 @@ def lnprior(m):
 #     Y, V = par[3], par[4]
 #     Z, U = par[5], par[6]
 #     ll = np.zeros(nobs)
-#
+# #
 #     for i in np.arange(nobs):
-#
+# #
 #         # cool MS stars
 # #         turnoff = np.polyval(coeffs, temp_samp[i,:])-.1
 #         turnoff = np.polyval(coeffs, temp_samp[i,:])
@@ -55,7 +55,7 @@ def lnprior(m):
 #             lik1 = np.sum(like1) / float(l1.sum())
 #         else:
 #             lik1 = 0.0
-#
+# #
 #         # hot MS stars
 #         l2 = (temp_samp[i,:] > temp_Kraft) * (logg_samp[i,:] > 4.) * (logg_samp[i,:] > turnoff)
 #         if l2.sum() > 0:
@@ -64,7 +64,7 @@ def lnprior(m):
 #             lik2 = np.sum(like2) / float(l2.sum())
 #         else:
 #             lik2 = 0.0
-#
+# #
 #         # subgiants
 #         # l3 = logg_samp[i,:] < 4.
 #         l3 = logg_samp[i,:] < turnoff
@@ -74,7 +74,7 @@ def lnprior(m):
 #             lik3 = np.sum(like3) / float(l3.sum())
 #         else:
 #             lik3 = 0.0
-#
+# #
 #         ll[i] = np.log10(lik1 + lik2 + lik3)
 #     return np.sum(ll)
 
@@ -86,7 +86,7 @@ def lnprob(m, log_age_samp, temp_samp, log_period_samp, logg_samp, \
         return -np.inf
     return lp + lnlike(m, log_age_samp, temp_samp, \
             log_period_samp, logg_samp, temp_obs, temp_err, log_period_obs, \
-            logg_obs, logg_err, log_period_err, coeffs, Tk)
+            log_period_err, logg_obs, logg_err, coeffs, Tk)
 
 # log(a), n, beta, Y, V, Z, U
 true_pars = [np.log10(0.7725), 0.5189, .2, np.log10(5.), np.log10(10.), \

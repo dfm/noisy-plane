@@ -4,6 +4,7 @@ from lnlikes import lnlike, neglnlike
 from plotting import load_dat
 from subgiants import MS_poly
 import emcee
+import triangle
 
 Tk = 6250
 
@@ -18,8 +19,8 @@ def lnprior(m):
 #         return -.5*((m[1]-.5189)/.4)**2
     return -np.inf
 
-def lnprob(m, log_age_samp, temp_samp, log_period_samp, \
-        temp_obs, temp_err, log_period_obs, log_period_err, coeffs):
+def lnprob(m, log_age_samp, temp_samp, log_period_samp, logg_samp, \
+        temp_obs, temp_err, log_period_obs, log_period_err, logg_obs, logg_err, coeffs, Tk):
     lp = lnprior(m)
     if not np.isfinite(lp):
         return -np.inf
@@ -41,7 +42,7 @@ turnoff = np.polyval(coeffs, temp_obs)
 a = (temp_obs < Tk) * (logg_obs > turnoff)
 
 # Replace gyro rotation periods with fake observations
-log_period_obs[a] = log_period_model(par_true, log_age_obs[a], temp_obs[a])
+# log_period_obs[a] = log_period_model(par_true, log_age_obs[a], temp_obs[a])
 
 # Now generate samples
 nsamp = 100

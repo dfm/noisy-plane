@@ -49,13 +49,13 @@ def MCMC(par, log_age_samp, temp_samp, log_period_samp, logg_samp, temp_obs, \
     print("Production run")
     sampler.run_mcmc(p0, 2000)
 
-    print("Plotting traces")
-    pl.figure()
-    for i in range(ndim):
-        pl.clf()
-        pl.axhline(par_true[i], color = "r")
-        pl.plot(sampler.chain[:, :, i].T, 'k-', alpha=0.3)
-        pl.savefig("{0}.png".format(i))
+#     print("Plotting traces")
+#     pl.figure()
+#     for i in range(ndim):
+#         pl.clf()
+#         pl.axhline(par_true[i], color = "r")
+#         pl.plot(sampler.chain[:, :, i].T, 'k-', alpha=0.3)
+#         pl.savefig("{0}.png".format(i))
 
     # Flatten chain
     samples = sampler.chain[:, 50:, :].reshape((-1, ndim))
@@ -68,10 +68,10 @@ def MCMC(par, log_age_samp, temp_samp, log_period_samp, logg_samp, temp_obs, \
     mcmc_result = np.array(mcmc_result)[:, 0]
     print 'mcmc result', mcmc_result
 
-    print("Making triangle plot")
-    fig_labels = ["$log(a)$", "$n$", "$b$", "$Y$", "$V$", "$Z$", "$U$"]
-    fig = triangle.corner(sampler.flatchain, truths=mcmc_result, labels=fig_labels[:len(par_true)])
-    fig.savefig("triangle.png")
+#     print("Making triangle plot")
+#     fig_labels = ["$log(a)$", "$n$", "$b$", "$Y$", "$V$", "$Z$", "$U$"]
+#     fig = triangle.corner(sampler.flatchain, truths=mcmc_result, labels=fig_labels[:len(par_true)])
+#     fig.savefig("triangle.png")
 
     return mcmc_result
 
@@ -116,7 +116,7 @@ if __name__ == "__main__":
     coeffs = MS_poly()
 
     # Grid over Tk
-    K_temps = np.arange(6100, 6500, 100)
+    K_temps = np.arange(6000, 7000, 100)
 #     K_temps = np.ones(5)*6250
     L = np.empty_like(K_temps)
 
