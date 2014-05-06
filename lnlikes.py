@@ -13,15 +13,15 @@ def lnlike(par, log_age_samp, temp_samp, log_period_samp, logg_samp, \
     ll = np.zeros(nobs)
 
     logg_cut = 4.
-    period_cut = 2.2
+    period_cut = 2.1
 
     for i in np.arange(nobs):
 
         # cool MS stars
 #         turnoff = np.polyval(coeffs, temp_samp[i,:])-.1
         turnoff = np.polyval(coeffs, temp_samp[i,:])
-#         l1 = (temp_samp[i,:] < Tk) * (logg_samp[i,:] > turnoff)
-        l1 = (temp_samp[i,:] < Tk) * (logg_samp[i,:] > logg_cut) * (period_samp[i,:] > period_cut)
+        l1 = (temp_samp[i,:] < Tk) * (logg_samp[i,:] > turnoff)
+#         l1 = (temp_samp[i,:] < Tk) * (logg_samp[i,:] > logg_cut) * ((10**log_period_samp[i,:])/(10**(log_age_obs[i,:])**.5189) > period_cut)
         if l1.sum() > 0:
             like1 = \
                 np.exp(-((log_period_obs[i] - log_period_pred[i,l1])/2.0/log_period_err[i])**2) \
@@ -31,8 +31,8 @@ def lnlike(par, log_age_samp, temp_samp, log_period_samp, logg_samp, \
             lik1 = 0.0
 
         # hot MS stars
-#         l2 = (temp_samp[i,:] > Tk) * (logg_samp[i,:] > turnoff)
-        l2 = (temp_samp[i,:] > Tk) * (logg_samp[i,:] > logg_cut) * (period_samp[i,:] > period_cut)
+        l2 = (temp_samp[i,:] > Tk) * (logg_samp[i,:] > turnoff)
+#         l2 = (temp_samp[i,:] > Tk) * (logg_samp[i,:] > logg_cut) * ((10**log_period_samp[i,:])/(10**(log_age_obs[i,:])**.5189) > period_cut)
         if l2.sum() > 0:
             like2 = np.exp(-((log_period_obs[i] - Y)**2/2.0**2/((log_period_err[i])**2+V))) \
                 / (log_period_err[i]+V)
