@@ -27,9 +27,9 @@ def lnprior(m):
             and 0 < m[3] < np.log10(30.) and 0 < m[4] < np.log10(100.)\
             and 0 < m[5] < np.log10(30.) and 0 < m[6] < np.log10(100.)\
             and 0 < m[7] < np.log10(30.) and 0 < m[8] < np.log10(100.):
-        return -.5*((m[1]-.5189)/.2)**2 -.5*((m[2]-.2)/.2)**2
+#         return -.5*((m[1]-.5189)/.2)**2 -.5*((m[2]-.2)/.2)**2
 #         return -.5*((m[1]-.5189)/.4)**2
-#         return 0.0
+        return 0.0
     return -np.inf
 
 def lnprob(m, log_age_samp, temp_samp, log_period_samp, logg_samp, \
