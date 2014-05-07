@@ -42,7 +42,7 @@ turnoff = np.polyval(coeffs, temp_obs)
 a = (temp_obs < Tk) * (logg_obs > turnoff)
 
 # Replace gyro rotation periods with fake observations
-# log_period_obs[a] = log_period_model(par_true, log_age_obs[a], temp_obs[a])
+log_period_obs[a] = log_period_model(par_true, log_age_obs[a], temp_obs[a])
 
 # Now generate samples
 nsamp = 100
@@ -61,7 +61,8 @@ print 'initial likelihood = ', lnlike(par_true, log_age_samp, temp_samp, \
 
 nwalkers, ndim = 32, len(par_true)
 p0 = [par_true+1e-4*np.random.rand(ndim) for i in range(nwalkers)]
-args = (log_age_samp, temp_samp, log_period_samp, temp_obs, temp_err, log_period_obs, log_period_err, coeffs)
+args = (log_age_samp, temp_samp, log_period_samp, logg_samp, temp_obs, temp_err, log_period_obs, log_period_err, \
+        logg_obs, logg_err, coeffs, Tk)
 sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args = args)
 # sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob)
 

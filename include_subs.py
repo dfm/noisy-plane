@@ -31,53 +31,6 @@ def lnprior(m):
 #         return 0.0
     return -np.inf
 
-# def lnlike(par, log_age_samp, temp_samp, log_period_samp, logg_samp, \
-#                temp_obs, temp_err, log_period_obs, log_period_err, logg_obs, logg_err, coeffs, Tk):
-#     nobs,nsamp = log_age_samp.shape
-#     log_period_pred = log_period_model(par[:4], log_age_samp, temp_samp)
-#     ll = np.zeros(nobs)
-#     temp_Kraft = 6250
-#     logg_cut = 4.
-#     Y, V = par[3], par[4]
-#     Z, U = par[5], par[6]
-#     ll = np.zeros(nobs)
-# #
-#     for i in np.arange(nobs):
-# #
-#         # cool MS stars
-# #         turnoff = np.polyval(coeffs, temp_samp[i,:])-.1
-#         turnoff = np.polyval(coeffs, temp_samp[i,:])
-#         l1 = (temp_samp[i,:] < temp_Kraft) * (logg_samp[i,:] > 4.) * (logg_samp[i,:] > turnoff)
-#         if l1.sum() > 0:
-#             like1 = \
-#                 np.exp(-((log_period_obs[i] - log_period_pred[i,l1])/2.0/log_period_err[i])**2) \
-#                 / log_period_err[i]
-#             lik1 = np.sum(like1) / float(l1.sum())
-#         else:
-#             lik1 = 0.0
-# #
-#         # hot MS stars
-#         l2 = (temp_samp[i,:] > temp_Kraft) * (logg_samp[i,:] > 4.) * (logg_samp[i,:] > turnoff)
-#         if l2.sum() > 0:
-#             like2 = np.exp(-((log_period_obs[i] - Y)**2/2.0**2/((log_period_err[i])**2+V))) \
-#                 / (log_period_err[i]+V)
-#             lik2 = np.sum(like2) / float(l2.sum())
-#         else:
-#             lik2 = 0.0
-# #
-#         # subgiants
-#         # l3 = logg_samp[i,:] < 4.
-#         l3 = logg_samp[i,:] < turnoff
-#         if l3.sum() > 0:
-#             like3 = np.exp(-((log_period_obs[i] - Z)**2/2.0**2/((log_period_err[i])**2+U))) \
-#                 / (log_period_err[i]+U)
-#             lik3 = np.sum(like3) / float(l3.sum())
-#         else:
-#             lik3 = 0.0
-# #
-#         ll[i] = np.log10(lik1 + lik2 + lik3)
-#     return np.sum(ll)
-
 def lnprob(m, log_age_samp, temp_samp, log_period_samp, logg_samp, \
         temp_obs, temp_err, log_period_obs, log_period_err, logg_obs, \
         logg_err, coeffs, Tk):
@@ -145,9 +98,13 @@ pl.xlabel('$\mathrm{Age~(Gyr)}$')
 pl.ylabel('$P_{rot}~\mathrm{(days)}$')
 pl.savefig("init")
 
+coeffs = MS_poly()
+turnoff = np.polyval(coeffs, temp_obs)-.1
+a = (temp_obs < 6250)*(logg_obs > .4) * (10**log_period_obs)/(10**(log_age_obs)**.5189) > 2.1
 pl.clf()
 pl.errorbar(10**log_age_obs, 10**log_period_obs/(6250-temp_obs)**0.2, xerr=10**log_age_err, yerr=10**log_period_err, fmt='k.', \
         capsize = 0, ecolor = '.7')
+pl.plot(10**log_age_obs[a], 10**log_period_obs[a]/(6250-temp_obs[a])**.2, 'r.')
 par_true = plot_pars
 log_age_plot = np.linspace(0, max(log_age_obs))
 pl.plot(10**log_age_plot, 10**(.5189*log_age_plot), 'r-')
@@ -158,7 +115,7 @@ pl.savefig("init2")
 # plot period vs teff
 pl.clf()
 pl.errorbar(temp_obs, 10**log_period_obs, xerr=temp_err, yerr=10**log_period_err, fmt='k.', \
-        capsize = 0, ecolor = '.7')#, zorder=1)
+        capsize = 0, ecolor = '.7')
 # pl.scatter(temp_obs, 10**log_period_obs, c = logg_obs, s=50, vmin=min(logg_obs[logg_obs>0]), vmax=max(logg_obs), zorder=2)
 temp_plot = np.linspace(min(temp_obs), max(temp_obs))
 pl.plot(temp_plot, 10**log_period_model(par_true, np.log10(1.), temp_plot), 'r-')
@@ -171,12 +128,14 @@ pl.ylabel('$P_{rot}~\mathrm{(days)}$')
 # pl.colorbar()
 pl.savefig("init_teff")
 
+a = (temp_obs < 6250)*(logg_obs > .4) * (10**log_period_obs)/(10**(log_age_obs)**.5189) > 2.1
 pl.clf()
 pl.errorbar(temp_obs, 10**log_period_obs/(10**(log_age_obs)**.5189), xerr=temp_err, yerr=10**log_period_err, fmt='k.', \
-        capsize = 0, ecolor = '.7')#, zorder=1)
+        capsize = 0, ecolor = '.7', zorder=1)
 # pl.scatter(temp_obs, 10**log_period_obs/(10**(log_age_obs)**.5189), c = logg_obs, s=50, vmin=min(logg_obs[logg_obs>0]), vmax=max(logg_obs), zorder=2)
+pl.plot(temp_obs[a], 10**log_period_obs[a]/(10**(log_age_obs[a])**.5189), 'r.')
 temp_plot = np.linspace(min(temp_obs), max(temp_obs))
-pl.plot(temp_plot, (6250-temp_plot)**.2, 'r-')
+pl.plot(temp_plot, (6250-temp_plot)**.2, 'r-', zorder=2)
 pl.xlim(pl.gca().get_xlim()[::-1])
 pl.xlabel('$\mathrm{T_{eff}~(K)}$')
 pl.ylabel('$P_{rot}/A^n$')

@@ -13,8 +13,9 @@ def lnlike(par, log_age_samp, temp_samp, log_period_samp, logg_samp, \
     X, W = par[7], par[8]
     ll = np.zeros(nobs)
 
-    logg_cut = 4.
-    period_cut = 2.1
+#     logg_cut = 4.
+    logg_cut = 3.7
+    period_cut = 5.
 
     for i in np.arange(nobs):
 

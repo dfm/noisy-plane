@@ -20,12 +20,44 @@ def load_dat():
     p_err = data[2][l]
     t = data[3][l]
     t_err = data[4][l]
-    g = data[10]
-    g_errp = data[11]
-    g_errm = data[11]
+    g = data[10][l]
+    g_errp = data[11][l]
+    g_errm = data[12][l]
     a = data[13][l]#*1000
     a_errp = data[14][l]#*1000
     a_errm = data[15][l]#*1000
+
+    # 3d plot
+    p_cut = 5.
+    g_cut = 3.7
+    t_cut = 6250
+    coolMS = (t < t_cut) * (g > g_cut) * (p/a**.5189 > p_cut)
+    hotMS = (t > t_cut) * (g > g_cut) * (p/a**.5189 > p_cut)
+    subs = (g < 4.) * (p/a**.5189 > p_cut)
+    ufrs = (p/a**.5189 < p_cut)
+    ufrsubs = (g > g_cut) * (p/a**.5189 > p_cut)
+    pl.clf()
+    fig = pl.figure()
+    ax = fig.gca(projection='3d')
+    ax.scatter(p[ufrs], t[ufrs], a[ufrs], c = 'b', marker = 'o')
+    ax.scatter(p[coolMS], t[coolMS], a[coolMS], c = 'r', marker = 'o')
+    ax.scatter(p[hotMS], t[hotMS], a[hotMS], c = 'g', marker = 'o')
+    ax.scatter(p[subs], t[subs], a[subs], c = 'y', marker = 'o')
+    ax.set_xlabel('Rotational period (days)')
+    ax.set_ylabel('Temp')
+    ax.set_zlabel('Age (Gyr)')
+    pl.show()
+    raw_input('enter')
+
+#     dnu = data[17][l]
+#     dnu_err = data[18][l]
+
+#     pl.clf()
+#     pl.plot(t, dnu, 'k.')
+#     pl.ylim(pl.gca().get_ylim()[::-1])
+#     pl.xlim(pl.gca().get_xlim()[::-1])
+#     pl.savefig('t_dnu')
+#     raw_input('enter')
 
     # take logs
     log_p = np.log10(p)

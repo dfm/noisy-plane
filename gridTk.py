@@ -116,7 +116,7 @@ if __name__ == "__main__":
     coeffs = MS_poly()
 
     # Grid over Tk
-    K_temps = np.arange(6000, 7000, 100)
+    K_temps = np.arange(6100, 6700, 50)
 #     K_temps = np.ones(5)*6250
     L = np.empty_like(K_temps)
 
