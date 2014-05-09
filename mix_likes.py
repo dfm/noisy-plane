@@ -12,7 +12,8 @@ def lnlike(par, log_age_samp, temp_samp, log_period_samp, logg_samp, \
     Y, V = par[3], par[4]
     Z, U = par[5], par[6]
     X, W, P = par[7], par[8], par[9]
-    logg_cut = 4.
+#     logg_cut = 4.
+    logg_cut = 3.7
 
     ll = np.zeros(nobs)
     for i in np.arange(nobs):
@@ -24,8 +25,11 @@ def lnlike(par, log_age_samp, temp_samp, log_period_samp, logg_samp, \
             like11 = \
                 np.exp(-((log_period_obs[i] - log_period_pred[i,l1])/2.0/log_period_err[i])**2) \
                 / log_period_err[i]
+#             like12 = \
+#                 np.exp(-((log_period_obs[i] - X)**2/(2.0)**2/((log_period_err[i])**2 + W))) \
+#                 / (W + log_period_err[i])
             like12 = \
-                np.exp(-((log_period_obs[i] - X)**2/(2.0)**2/((log_period_err[i])**2 + W))) \
+                np.exp(-((log_period_obs[i] - X)**2/(2.0)**2/((log_period_err[i]+W)**2))) \
                 / (W + log_period_err[i])
             like1 = (1-P)*like11 + P*like12
             lik1 = np.sum(like1) / float(l1.sum())
