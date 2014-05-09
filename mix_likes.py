@@ -1,9 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as pl
 
-def log_period_model(par, log_age, temp, Tk):
-    return par[0] + par[1] * log_age + par[2] * np.log10(Tk - temp)
-
 def lnlike(par, log_age_samp, temp_samp, log_period_samp, logg_samp, \
                temp_obs, temp_err, log_period_obs, log_period_err, logg_obs, logg_err, coeffs, Tk):
     nobs,nsamp = log_age_samp.shape
@@ -35,7 +32,7 @@ def lnlike(par, log_age_samp, temp_samp, log_period_samp, logg_samp, \
         # hot MS stars
         l2 = (temp_samp[i,:] > Tk) * (logg_samp[i,:] > logg_cut)
         if l2.sum() > 0:
-            like2 = np.exp(-((log_period_obs[i] - Y)**2/2.0**2/((log_period_err[i])**2+V))) \
+            like2 = np.exp(-((log_period_obs[i] - Y)**2/2.0**2/((log_period_err[i] + V)**2))) \
                 / (log_period_err[i]+V)
             lik2 = np.sum(like2) / float(l2.sum())
         else:
@@ -44,7 +41,7 @@ def lnlike(par, log_age_samp, temp_samp, log_period_samp, logg_samp, \
         # subgiants
         l3 = (logg_samp[i,:] < logg_cut)
         if l3.sum() > 0:
-            like3 = np.exp(-((log_period_obs[i] - Z)**2/2.0**2/((log_period_err[i])**2+U))) \
+            like3 = np.exp(-((log_period_obs[i] - Z)**2/2.0**2/((log_period_err[i] + U)**2))) \
                 / (log_period_err[i]+U)
             lik3 = np.sum(like3) / float(l3.sum())
         else:
