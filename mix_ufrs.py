@@ -189,7 +189,7 @@ print("Burn-in")
 p0, lp, state = sampler.run_mcmc(p0, 500)
 sampler.reset()
 print("Production run")
-sampler.run_mcmc(p0, 4000)
+sampler.run_mcmc(p0, 2000)
 
 print("Plotting traces")
 pl.figure()
