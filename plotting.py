@@ -47,7 +47,7 @@ def load_dat():
     ax.set_ylabel('Temp')
     ax.set_zlabel('Age (Gyr)')
     pl.show()
-    raw_input('enter')
+#     raw_input('enter')
 
 #     dnu = data[17][l]
 #     dnu_err = data[18][l]

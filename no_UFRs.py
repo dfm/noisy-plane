@@ -6,7 +6,7 @@ import triangle
 from plotting import load_dat
 import pretty5
 from subgiants import MS_poly
-from lnlikes import lnlike
+from ufr_likes import lnlike
 
 ocols = ['#FF9933','#66CCCC' , '#FF33CC', '#3399FF', '#CC0066', '#99CC99', '#9933FF', '#CC0000']
 plotpar = {'axes.labelsize': 20,
@@ -158,7 +158,7 @@ pl.ylim(pl.gca().get_ylim()[::-1])
 pl.xlim(pl.gca().get_xlim()[::-1])
 pl.savefig('t_vs_l')
 
-raw_input('enter')
+# raw_input('enter')
 
 par_true = true_pars
 

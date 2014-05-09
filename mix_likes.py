@@ -1,6 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as pl
 
+def log_period_model(par, log_age, temp, Tk):
+    return par[0] + par[1] * log_age + par[2] * np.log10(Tk - temp)
+
 def lnlike(par, log_age_samp, temp_samp, log_period_samp, logg_samp, \
                temp_obs, temp_err, log_period_obs, log_period_err, logg_obs, logg_err, coeffs, Tk):
     nobs,nsamp = log_age_samp.shape
