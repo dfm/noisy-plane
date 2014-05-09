@@ -25,7 +25,7 @@ def lnlike(par, log_age_samp, temp_samp, log_period_samp, logg_samp, \
                 np.exp(-((log_period_obs[i] - log_period_pred[i,l1])/2.0/log_period_err[i])**2) \
                 / log_period_err[i]
             like12 = \
-                np.exp(-((log_period_obs[i] - X)**2/(2.0)**2/(W + log_period_err[i])**2)) \
+                np.exp(-((log_period_obs[i] - X)**2/(2.0)**2/((log_period_err[i])**2 + W))) \
                 / (W + log_period_err[i])
             like1 = (1-P)*like11 + P*like12
             lik1 = np.sum(like1) / float(l1.sum())
@@ -35,7 +35,7 @@ def lnlike(par, log_age_samp, temp_samp, log_period_samp, logg_samp, \
         # hot MS stars
         l2 = (temp_samp[i,:] > Tk) * (logg_samp[i,:] > logg_cut)
         if l2.sum() > 0:
-            like2 = np.exp(-((log_period_obs[i] - Y)**2/2.0**2/((log_period_err[i] + V)**2))) \
+            like2 = np.exp(-((log_period_obs[i] - Y)**2/2.0**2/((log_period_err[i])**2 + V))) \
                 / (log_period_err[i]+V)
             lik2 = np.sum(like2) / float(l2.sum())
         else:
@@ -44,7 +44,7 @@ def lnlike(par, log_age_samp, temp_samp, log_period_samp, logg_samp, \
         # subgiants
         l3 = (logg_samp[i,:] < logg_cut)
         if l3.sum() > 0:
-            like3 = np.exp(-((log_period_obs[i] - Z)**2/2.0**2/((log_period_err[i] + U)**2))) \
+            like3 = np.exp(-((log_period_obs[i] - Z)**2/2.0**2/((log_period_err[i])**2 + U))) \
                 / (log_period_err[i]+U)
             lik3 = np.sum(like3) / float(l3.sum())
         else:
