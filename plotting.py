@@ -2,13 +2,21 @@ import numpy as np
 import matplotlib.pyplot as pl
 from mpl_toolkits.mplot3d import Axes3D
 # from mixture import model
-import models
 
 def load_dat():
 
     # "load data"
     data = np.genfromtxt('/Users/angusr/Python/Gyro/data/data.txt').T
     KID = data[0]
+
+    # check for duplicates
+    n = 0
+    for i in KID:
+        match = np.where(KID == i)[0]
+        if len(match) > 1:
+            n+=1
+    print n, 'duplicates found'
+
     p = data[1]
     t = data[3]
     g = data[10]
@@ -47,7 +55,7 @@ def load_dat():
     ax.set_ylabel('Temp')
     ax.set_zlabel('Age (Gyr)')
     pl.show()
-#     raw_input('enter')
+    raw_input('enter')
 
 #     dnu = data[17][l]
 #     dnu_err = data[18][l]

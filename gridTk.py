@@ -6,7 +6,7 @@ import triangle
 from plotting import load_dat
 import pretty5
 from subgiants import MS_poly
-from lnlikes import lnlike, neglnlike
+from working_likes import lnlike, neglnlike, log_period_model
 from scipy.optimize import fmin
 
 ocols = ['#FF9933','#66CCCC' , '#FF33CC', '#3399FF', '#CC0066', '#99CC99', '#9933FF', '#CC0000']
@@ -22,8 +22,7 @@ def lnprior(m):
     if -10. < m[0] < 10. and .3 < m[1] < .8 and 0. < m[2] < 1. \
             and 0 < m[3] < np.log10(30.) and 0 < m[4] < np.log10(100.)\
             and 0 < m[5] < np.log10(30.) and 0 < m[6] < np.log10(100.):
-        return -.5*((m[1]-.5189)/.2)**2 -.5*((m[2]-.2)/.2)**2
-#         return 0.0
+        return 0.0
     return -np.inf
 
 def lnprob(m, log_age_samp, temp_samp, log_period_samp, \
@@ -34,6 +33,7 @@ def lnprob(m, log_age_samp, temp_samp, log_period_samp, \
     return lp + lnlike(m, log_age_samp, temp_samp, \
             log_period_samp, logg_samp, temp_obs, temp_err, log_period_obs, \
             log_period_err, logg_obs, logg_err, coeffs, Tk)
+
 def MCMC(par, log_age_samp, temp_samp, log_period_samp, logg_samp, temp_obs, \
         temp_err, log_period_obs, log_period_err, logg_obs, logg_err, coeffs, Tk):
 
