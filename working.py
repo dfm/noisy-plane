@@ -213,7 +213,7 @@ print 'mcmc result', mcmc_result
 print("Making triangle plot")
 fig_labels = ["$log(a)$", "$n$", "$b$", "$Y$", "$V$", "$Z$", "$U$", "$X$", "$W$", "$P$"]
 fig = triangle.corner(sampler.flatchain, truths=mcmc_result, labels=fig_labels[:len(par_true)])
-fig.savefig("triangle.png")
+fig.savefig("triangle2.png")
 
 mcmc_result = [mcmc_result[0], mcmc_result[1], mcmc_result[2], 6250, \
         mcmc_result[3], mcmc_result[4]]
