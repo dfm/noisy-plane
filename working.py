@@ -42,53 +42,18 @@ def lnprob(m, log_age_samp, temp_samp, log_period_samp, logg_samp, \
             log_period_err, logg_obs, logg_err, coeffs, Tk)
 
 # log(a), n, beta, Y, V, Z, U
-true_pars = [np.log10(0.7725), 0.5189, .2, np.log10(5.), np.log10(10.), \
+par_true = [np.log10(0.7725), 0.5189, .2, np.log10(5.), np.log10(10.), \
         np.log10(10.), np.log10(10.), np.log10(1.5), np.log10(5.), .5]
-plot_pars = [np.log10(0.7725), 0.5189, .2, 6250, np.log10(5.), np.log10(10.)]
-
-par_true = true_pars
 
 # load real data
 log_period_obs, temp_obs, log_age_obs, log_period_err, temp_err, log_age_err, log_age_errm, \
         logg_obs, logg_err, logg_errm = load_dat()
-
-# # Generate set of fake observations
-# nobs = len(log_period_obs)
-# nobs = 60
-# log_age_true = np.random.uniform(0,1,nobs)
-# log_age_true = np.zeros(nobs)
-# log_age_true[:20] = 0.0
-# log_age_true[20:40] = 0.3
-# log_age_true[40:] = 1.0
-#
-# temp_true = np.random.uniform(3500,7000,nobs)
-# logg_true = np.random.uniform(3.5,4.5,nobs)
-#
-# # First create noise-free values
-# log_period_true = log_period_model(par_true,log_age_true,temp_true)
-# l = np.isfinite(log_period_true) == False
-# n = l.sum()
-# log_period_true[l] = np.random.uniform(0,1,n)
-#
-# # Then add noise
-# log_age_err = np.zeros(nobs) + 0.05
-# log_period_err = np.zeros(nobs) + 0.05
-# temp_err = np.zeros(nobs) + 100
-# logg_err = np.zeros(nobs) + 0.05
-# log_age_err = np.ones(nobs)*np.mean(log_age_err)
-# log_age_obs = np.random.normal(log_age_true, log_age_err)
-# temp_err = np.ones(nobs)*np.mean(temp_err)
-# temp_obs = np.random.normal(temp_true, temp_err)
-# log_period_err = np.ones(nobs)*np.mean(log_period_err)
-# log_period_obs = np.random.normal(log_period_true, log_period_err)
-# logg_obs = np.random.normal(logg_true, logg_err)
 
 # plot period vs age
 pl.clf()
 pl.errorbar(10**log_age_obs, 10**log_period_obs, xerr=10**log_age_err, yerr=10**log_period_err, fmt='k.', \
         capsize = 0, ecolor = '.7')
 
-par_true = plot_pars
 log_age_plot = np.linspace(0, max(log_age_obs))
 pl.plot(10**log_age_plot, 10**log_period_model(par_true, log_age_plot, 6000.), 'r-')
 pl.plot(10**log_age_plot, 10**log_period_model(par_true, log_age_plot, 5500.), 'm-')
@@ -145,9 +110,6 @@ pl.savefig("init_teff2")
 
 raw_input('enter')
 
-plots = pretty5.plotting()
-plots.p_vs_t(par_true)
-
 # plot ms turnoff
 pl.clf()
 pl.plot(temp_obs, logg_obs, 'k.')
@@ -158,10 +120,6 @@ pl.plot(temp_obs, turnoff, 'ro')
 pl.ylim(pl.gca().get_ylim()[::-1])
 pl.xlim(pl.gca().get_xlim()[::-1])
 pl.savefig('t_vs_l')
-
-# raw_input('enter')
-
-par_true = true_pars
 
 # Now generate samples
 nsamp = 100
@@ -248,6 +206,3 @@ pl.xlim(pl.gca().get_xlim()[::-1])
 pl.xlabel('$\mathrm{T_{eff}~(K)}$')
 pl.ylabel('$P_{rot}~\mathrm{(days)}$')
 pl.savefig("result_teff")
-
-plots = pretty5.plotting()
-plots.p_vs_t(mcmc_result)
