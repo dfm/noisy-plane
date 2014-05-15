@@ -28,8 +28,6 @@ def lnprior(m):
             and 0 < m[5] < np.log10(30.) and 0 < m[6] < np.log10(100.)\
             and 0 < m[7] < np.log10(30.) and 0 < m[8] < np.log10(100.)\
             and 0. < m[9] < 1.:
-#         return -.5*((m[1]-.5189)/.2)**2 -.5*((m[2]-.2)/.2)**2
-#         return -.5*((m[1]-.5189)/.4)**2
         return 0.0
     return -np.inf
 
@@ -144,6 +142,8 @@ pl.ylabel('$P_{rot}/A^n$')
 pl.ylim(0, 15)
 # pl.colorbar()
 pl.savefig("init_teff2")
+
+raw_input('enter')
 
 plots = pretty5.plotting()
 plots.p_vs_t(par_true)
