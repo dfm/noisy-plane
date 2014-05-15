@@ -49,8 +49,8 @@ plot_pars = [np.log10(0.7725), 0.5189, .2, 6250, np.log10(5.), np.log10(10.)]
 par_true = true_pars
 
 # load real data
-log_period_obs, temp_obs, log_age_obs, log_period_err, temp_err, log_age_err, \
-        logg_obs, logg_err = load_dat()
+log_period_obs, temp_obs, log_age_obs, log_period_err, temp_err, log_age_err, log_age_errm, \
+        logg_obs, logg_err, logg_errm = load_dat()
 
 # # Generate set of fake observations
 # nobs = len(log_period_obs)
