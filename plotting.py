@@ -106,8 +106,7 @@ def load_dat():
     a = log_p_err < 0.01 #FIXME: should be able to remove this line
     log_p_err[a] = log_p_err[0]
 
-    print '>', len(log_a), len(log_p), len(log_a_errp), len(log_a_errm), len(log_p_err)
-    return log_p, t, log_a, log_p_err, t_err, log_a_errp, log_a_errm, g, g_errp, g_errm
+    return log_p, t, log_a, log_p_err, t_err, log_a_err, log_a_errp, log_a_errm, g, g_err, g_errp, g_errm
 
 def log_errorbar(y, errp, errm):
 #     log_errp = (np.log10(y)*errp)/y

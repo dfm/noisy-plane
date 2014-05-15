@@ -46,11 +46,8 @@ par_true = [np.log10(0.7725), 0.5189, .2, np.log10(5.), np.log10(10.), \
         np.log10(10.), np.log10(10.), np.log10(1.5), np.log10(5.), .5]
 
 # load real data
-log_period_obs, temp_obs, log_age_obs, log_period_err, temp_err, log_age_err, log_age_errm, \
-        logg_obs, logg_err, logg_errm = load_dat()
-
-print len(log_age_obs), len(log_period_obs), len(log_age_err), len(log_period_err)
-raw_input('enter')
+log_period_obs, temp_obs, log_age_obs, log_period_err, temp_err, log_age_err, log_age_errp, log_age_errm, \
+        logg_obs, logg_err, logg_errp, logg_errm = load_dat()
 
 # plot period vs age
 pl.clf()
@@ -73,7 +70,7 @@ pl.clf()
 pl.errorbar(10**log_age_obs, 10**log_period_obs/(6250-temp_obs)**0.2, xerr=10**log_age_err, yerr=10**log_period_err, fmt='k.', \
         capsize = 0, ecolor = '.7')
 pl.plot(10**log_age_obs[a], 10**log_period_obs[a]/(6250-temp_obs[a])**.2, 'r.')
-par_true = plot_pars
+
 log_age_plot = np.linspace(0, max(log_age_obs))
 pl.plot(10**log_age_plot, 10**(.5189*log_age_plot), 'r-')
 pl.xlabel('$\mathrm{Age~(Gyr)}$')
@@ -112,17 +109,6 @@ pl.ylim(0, 15)
 pl.savefig("init_teff2")
 
 raw_input('enter')
-
-# plot ms turnoff
-pl.clf()
-pl.plot(temp_obs, logg_obs, 'k.')
-coeffs = MS_poly()
-# turnoff = np.polyval(coeffs, temp_obs)-.1
-turnoff = np.polyval(coeffs, temp_obs)
-pl.plot(temp_obs, turnoff, 'ro')
-pl.ylim(pl.gca().get_ylim()[::-1])
-pl.xlim(pl.gca().get_xlim()[::-1])
-pl.savefig('t_vs_l')
 
 # Now generate samples
 nsamp = 100
