@@ -86,26 +86,27 @@ def load_dat():
     a = log_a > 0
     log_a = log_a[a]
     log_a_err = log_a_err[a]
+    log_a_errp = log_a_errp[a]
+    log_a_errm = log_a_errm[a]
     log_p = log_p[a]
     log_p_err = log_p_err[a]
     t = t[a]
     t_err = t_err[a]
     g = g[a]
     g_err = .5*(g_errp[a]+g_errm[a])
+    g_errm = g_errm[a]
+    g_errp = g_errp[a]
 
     # reduce errorbars if they go below zero
     diff = log_a - log_a_err
     a = diff < 0
 
     # really need to use asymmetric error bars!!!!
-    log_a_err[a] = log_a_err[a] + diff[a] - np.finfo(float).eps
-#     log_p_err = np.zeros_like(log_p) + 0.05
-    a = log_p_err < 0.01
+    log_a_err[a] = log_a_err[a] + diff[a] - np.finfo(float).eps #FIXME: might have to do this for neg_errs
+    a = log_p_err < 0.01 #FIXME: should be able to remove this line
     log_p_err[a] = log_p_err[0]
-#     log_p_err = np.ones_like(log_p_err)*log_p_err[0]
-#     print log_p_err
-#     raw_input('enter')
 
+    print '>', len(log_a), len(log_p), len(log_a_errp), len(log_a_errm), len(log_p_err)
     return log_p, t, log_a, log_p_err, t_err, log_a_errp, log_a_errm, g, g_errp, g_errm
 
 def log_errorbar(y, errp, errm):

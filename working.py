@@ -49,6 +49,9 @@ par_true = [np.log10(0.7725), 0.5189, .2, np.log10(5.), np.log10(10.), \
 log_period_obs, temp_obs, log_age_obs, log_period_err, temp_err, log_age_err, log_age_errm, \
         logg_obs, logg_err, logg_errm = load_dat()
 
+print len(log_age_obs), len(log_period_obs), len(log_age_err), len(log_period_err)
+raw_input('enter')
+
 # plot period vs age
 pl.clf()
 pl.errorbar(10**log_age_obs, 10**log_period_obs, xerr=10**log_age_err, yerr=10**log_period_err, fmt='k.', \
