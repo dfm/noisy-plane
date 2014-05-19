@@ -35,27 +35,29 @@ def load_dat():
     a_errp = data[14][l]#*1000
     a_errm = data[15][l]#*1000
 
-#     # 3d plot
-#     p_cut = 5.
-#     g_cut = 3.7
-#     t_cut = 6250
-#     coolMS = (t < t_cut) * (g > g_cut) * (p/a**.5189 > p_cut)
-#     hotMS = (t > t_cut) * (g > g_cut) * (p/a**.5189 > p_cut)
-#     subs = (g < 4.) * (p/a**.5189 > p_cut)
-#     ufrs = (p/a**.5189 < p_cut)
-#     ufrsubs = (g > g_cut) * (p/a**.5189 > p_cut)
-#     pl.clf()
-#     fig = pl.figure()
-#     ax = fig.gca(projection='3d')
-#     ax.scatter(p[ufrs], t[ufrs], a[ufrs], c = 'b', marker = 'o')
-#     ax.scatter(p[coolMS], t[coolMS], a[coolMS], c = 'r', marker = 'o')
-#     ax.scatter(p[hotMS], t[hotMS], a[hotMS], c = 'g', marker = 'o')
-#     ax.scatter(p[subs], t[subs], a[subs], c = 'y', marker = 'o')
-#     ax.set_xlabel('Rotational period (days)')
-#     ax.set_ylabel('Temp')
-#     ax.set_zlabel('Age (Gyr)')
-#     pl.show()
-#     raw_input('enter')
+    # 3d plot
+    p_cut = 5.
+    g_cut = 3.7
+    t_cut = 6250
+    coolMS = (t < t_cut) * (g > g_cut) * (p/a**.5189 > p_cut)
+    hotMS = (t > t_cut) * (g > g_cut) * (p/a**.5189 > p_cut)
+    subs = (g < 4.) * (p/a**.5189 > p_cut)
+    ufrs = (p/a**.5189 < p_cut)
+    ufrsubs = (g > g_cut) * (p/a**.5189 > p_cut)
+    pl.clf()
+    fig = pl.figure()
+    ax = fig.gca(projection='3d')
+    ax.scatter(p[ufrs], t[ufrs], a[ufrs], c = 'b', marker = 'o')
+    ax.scatter(p[coolMS], t[coolMS], a[coolMS], c = 'r', marker = 'o')
+    ax.scatter(p[hotMS], t[hotMS], a[hotMS], c = 'g', marker = 'o')
+    ax.scatter(p[subs], t[subs], a[subs], c = 'y', marker = 'o')
+    ax.set_xlabel('Rotational period (days)')
+    ax.set_ylabel('Temp')
+    ax.set_zlabel('Age (Gyr)')
+    pl.show()
+
+    print len(p)
+    raw_input('enter')
 
 #     dnu = data[17][l]
 #     dnu_err = data[18][l]
@@ -74,13 +76,19 @@ def load_dat():
     # logarithmic errorbars
     log_p_err = log_errorbar(p, data[2][l], data[2][l])[0]
     log_a_err, log_a_errp, log_a_errm  = log_errorbar(a, a_errp, a_errm)
+
 #     log_p_err = np.log10(p_err)
 #     log_a_err = np.log10(a_errp)
 
     # replace nans, zeros and infs in errorbars with means
     log_a_err[np.isnan(log_a_err)] = np.mean(log_a_err[np.isfinite(log_a_err)])
     log_a_err[log_a_err==np.inf] = np.mean(log_a_err[np.isfinite(log_a_err)])
+    log_a_err[log_a_err<=0] = np.mean(log_a_err[log_a_err>0])
+    log_p_err[np.isnan(log_p_err)] = np.mean(log_p_err[np.isfinite(log_p_err)])
     log_p_err[log_p_err<=0] = np.mean(log_p_err[log_p_err>0])
+
+    print log_p_err
+    print log_a_err
 
     # remove negative ages
     a = log_a > 0
