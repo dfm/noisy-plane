@@ -6,7 +6,7 @@ import triangle
 from plotting import load_dat, log_errorbar
 import pretty5
 from subgiants import MS_poly
-from working_likes import lnlike
+from bv_likes import lnlike
 from teff_bv import teff2bv
 
 ocols = ['#FF9933','#66CCCC' , '#FF33CC', '#3399FF', '#CC0066', '#99CC99', '#9933FF', '#CC0000']
@@ -21,7 +21,7 @@ pl.rcParams.update(plotpar)
 c = .4
 
 def log_period_model(par, log_age, bv):
-    return par[0] + par[1] * (log_age+3) + par[2] * np.log10(bv-c)
+     return par[0] + par[1] * (log_age+3) + par[2] * np.log10(bv-c)
 
 def lnprior(m):
     if -10. < m[0] < 10. and .3 < m[1] < .8 and 0. < m[2] < 1. \
@@ -51,42 +51,18 @@ def MCMC(fname):
     log_period_obs, temp_obs, log_age_obs, log_period_err, temp_err, log_age_err, log_age_errp, log_age_errm, \
             logg_obs, logg_err, logg_errp, logg_errm = load_dat()
 
-    # convert temps to bvs
-    bv_obs = teff2bv(temp_obs, logg_obs, np.ones_like(temp_obs)*-.2)
+    bv_obs = temp_obs
+    bv_err = temp_err
 
-    # add praesepe
-    data = np.genfromtxt("/Users/angusr/Python/Gyro/data/praesepe.txt").T
-    p = 1./data[3]
-    p_err = p*(data[4]/data[3])
-    bv = data[5]-data[6]
-    log_period_obs = np.concatenate((log_period_obs, np.log10(p)))
-    log_period_err = np.concatenate((log_period_err, (log_errorbar(p, p_err, p_err))[0]))
-    bv_obs = np.concatenate((bv_obs, bv))
-    bv_err = np.ones_like(bv_obs)*0.01 # made up for now
-    log_age_obs = np.concatenate((log_age_obs, np.ones_like(p)*np.log10(.59)))
-    log_age_err = np.concatenate((log_age_err, np.ones_like(p)*\
-            (log_errorbar(.59, .01, .01))[0])) # made up age errs
-
-    # add hyades
-    data = np.genfromtxt("/Users/angusr/Python/Gyro/data/hyades.txt", skip_header=2).T
-    bv_obs = np.concatenate((bv_obs, data[0]))
-    bv_err = np.concatenate((bv_err, data[1]))
-    log_period_obs = np.concatenate((log_period_obs, np.log10(data[2])))
-    log_period_err = np.concatenate((log_period_err, (log_errorbar(data[2], data[3], data[3]))[0]))
-    log_age_obs = np.concatenate((log_age_obs, np.log10(data[4])))
-    log_age_err = np.concatenate((log_age_err, (log_errorbar(data[4], data[5], data[5]))[0]))
-
-    # 3d plot
-    pl.clf()
-    fig = pl.figure()
-    ax = fig.gca(projection='3d')
-    ax.scatter(10**log_period_obs, bv_obs, 10**log_age_obs, c = 'b', marker = 'o')
-    ax.set_xlabel('Rotational period (days)')
-    ax.set_ylabel('bv')
-    ax.set_zlabel('Age (Gyr)')
-    pl.show()
-
-    raw_input('enter')
+#     # 3d plot
+#     pl.clf()
+#     fig = pl.figure()
+#     ax = fig.gca(projection='3d')
+#     ax.scatter(10**log_period_obs, bv_obs, 10**log_age_obs, c = 'b', marker = 'o')
+#     ax.set_xlabel('Rotational period (days)')
+#     ax.set_ylabel('bv')
+#     ax.set_zlabel('Age (Gyr)')
+#     pl.show()
 
     # plot period vs age
     pl.clf()
@@ -94,10 +70,10 @@ def MCMC(fname):
             capsize = 0, ecolor = '.7')
 
     log_age_plot = np.linspace(0, max(log_age_obs))
-    pl.plot(10**log_age_plot, 10**log_period_model(par_true, log_age_plot, 6000.), 'r-')
-    pl.plot(10**log_age_plot, 10**log_period_model(par_true, log_age_plot, 5500.), 'm-')
-    pl.plot(10**log_age_plot, 10**log_period_model(par_true, log_age_plot, 5000.), 'b-')
-    pl.plot(10**log_age_plot, 10**log_period_model(par_true, log_age_plot, 4000.), 'c-')
+    pl.plot(10**log_age_plot, 10**log_period_model(par_true, log_age_plot, .45), 'r-')
+    pl.plot(10**log_age_plot, 10**log_period_model(par_true, log_age_plot, 6.), 'm-')
+    pl.plot(10**log_age_plot, 10**log_period_model(par_true, log_age_plot, 8.), 'b-')
+    pl.plot(10**log_age_plot, 10**log_period_model(par_true, log_age_plot, 1.), 'c-')
     pl.xlabel('$\mathrm{Age~(Gyr)}$')
     pl.ylabel('$P_{rot}~\mathrm{(days)}$')
     pl.savefig("init_bv_ap")
@@ -117,8 +93,6 @@ def MCMC(fname):
     # pl.colorbar()
     pl.savefig("init_bv_p")
 
-    raw_input('enter')
-
     # Now generate samples
     nsamp = 100
     log_age_samp = np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(log_age_obs, log_age_err)])
@@ -127,12 +101,16 @@ def MCMC(fname):
     log_period_samp = np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(log_period_obs, log_period_err)])
     # FIXME: asymmetric errorbars for age and logg
 
+    raw_input('enter')
+
     # calculate ms turnoff coeffs
     coeffs = MS_poly()
 
     print 'initial likelihood = ', lnlike(par_true, log_age_samp, bv_samp, \
             log_period_samp, logg_samp, bv_obs, bv_err, log_period_obs, log_period_err, \
             logg_obs, logg_err, coeffs, c)
+
+    raw_input('enter')
 
     nwalkers, ndim = 32, len(par_true)
     p0 = [par_true+1e-4*np.random.rand(ndim) for i in range(nwalkers)]

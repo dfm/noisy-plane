@@ -3,9 +3,7 @@ import matplotlib.pyplot as pl
 
 # everywhere I've written temp, i mean bv.
 
-c = .4
-
-def log_period_model(par, log_age, bv):
+def log_period_model(par, log_age, bv, c):
     return par[0] + par[1] * (log_age+3) + par[2] * np.log10(bv-c)
 
 def lnlike(par, log_age_samp, temp_samp, log_period_samp, logg_samp, \
