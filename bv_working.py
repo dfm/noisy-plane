@@ -48,21 +48,28 @@ def MCMC(fname):
             np.log10(10.), np.log10(10.), np.log10(1.5), np.log10(5.), .5]
 
     # load real data
-    log_period_obs, temp_obs, log_age_obs, log_period_err, temp_err, log_age_err, log_age_errp, log_age_errm, \
+    log_period_obs, bv_obs, log_age_obs, log_period_err, bv_err, log_age_err, log_age_errp, log_age_errm, \
             logg_obs, logg_err, logg_errp, logg_errm = load_dat()
 
-    bv_obs = temp_obs
-    bv_err = temp_err
+    # 3d plot
+    pl.clf()
+    fig = pl.figure()
+    ax = fig.gca(projection='3d')
+    ax.scatter(10**log_period_obs, bv_obs, 10**log_age_obs, c = 'b', marker = 'o')
+    ax.set_xlabel('Rotational period (days)')
+    ax.set_ylabel('bv')
+    ax.set_zlabel('Age (Gyr)')
 
-#     # 3d plot
-#     pl.clf()
-#     fig = pl.figure()
-#     ax = fig.gca(projection='3d')
-#     ax.scatter(10**log_period_obs, bv_obs, 10**log_age_obs, c = 'b', marker = 'o')
-#     ax.set_xlabel('Rotational period (days)')
-#     ax.set_ylabel('bv')
-#     ax.set_zlabel('Age (Gyr)')
+#     fx, fy, fz = 10**log_period_obs, bv_obs, 10**log_age_obs
+#     xerror, yerror, zerror = 10**log_period_err, bv_err, 10**log_age_err
+#     #plot errorbars
+#     for i in np.arange(0, len(fx)):
+#         ax.plot([fx[i]+xerror[i], fx[i]-xerror[i]], [fy[i], fy[i]], [fz[i], fz[i]], marker="_")
+#         ax.plot([fx[i], fx[i]], [fy[i]+yerror[i], fy[i]-yerror[i]], [fz[i], fz[i]], marker="_")
+#         ax.plot([fx[i], fx[i]], [fy[i], fy[i]], [fz[i]+zerror[i], fz[i]-zerror[i]], marker="_")
+
 #     pl.show()
+#     raw_input('enter')
 
     # plot period vs age
     pl.clf()
@@ -101,7 +108,7 @@ def MCMC(fname):
     log_period_samp = np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(log_period_obs, log_period_err)])
     # FIXME: asymmetric errorbars for age and logg
 
-    raw_input('enter')
+#     raw_input('enter')
 
     # calculate ms turnoff coeffs
     coeffs = MS_poly()
@@ -110,7 +117,7 @@ def MCMC(fname):
             log_period_samp, logg_samp, bv_obs, bv_err, log_period_obs, log_period_err, \
             logg_obs, logg_err, coeffs, c)
 
-    raw_input('enter')
+#     raw_input('enter')
 
     nwalkers, ndim = 32, len(par_true)
     p0 = [par_true+1e-4*np.random.rand(ndim) for i in range(nwalkers)]
@@ -123,7 +130,7 @@ def MCMC(fname):
     p0, lp, state = sampler.run_mcmc(p0, 500)
     sampler.reset()
     print("Production run")
-    sampler.run_mcmc(p0, 10000)
+    sampler.run_mcmc(p0, 3000)
 
     print("Plotting traces")
     pl.figure()

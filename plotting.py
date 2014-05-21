@@ -6,7 +6,8 @@ from teff_bv import teff2bv
 def load_dat():
 
     # "load data"
-    data = np.genfromtxt('/Users/angusr/Python/Gyro/data/data.txt').T
+#     data = np.genfromtxt('/Users/angusr/Python/Gyro/data/data.txt').T
+    data = np.genfromtxt('/Users/angusr/Python/Gyro/data/new_data.txt').T
     KID = data[0]
 
     # check for duplicates
@@ -50,7 +51,7 @@ def load_dat():
     a = np.concatenate((a, np.ones_like(period)*.59))
     a_errp = np.concatenate((a_errp, np.ones_like(period)*.01)) # made up age errs
     a_errm = np.concatenate((a_errm, np.ones_like(period)*.01)) # made up age errs
-    g = np.concatenate((g, np.ones_like(period)*.45))
+    g = np.concatenate((g, np.ones_like(period)*4.5))
     g_errp = np.concatenate((g_errp, np.ones_like(p)*.001))
     g_errm = np.concatenate((g_errm, np.ones_like(p)*.001))
 
@@ -63,7 +64,7 @@ def load_dat():
     a = np.concatenate((a, data[4]))
     a_errp = np.concatenate((a_errp, data[5]))
     a_errm = np.concatenate((a_errm, data[5]))
-    g = np.concatenate((g, np.ones_like(data[0])*.45))
+    g = np.concatenate((g, np.ones_like(data[0])*4.5))
     g_errp = np.concatenate((g_errp, np.ones_like(data[0])*.001))
     g_errm = np.concatenate((g_errm, np.ones_like(data[0])*.001))
 
@@ -74,9 +75,12 @@ def load_dat():
 #     # 3d plot
 #     p_cut = 5.
 #     g_cut = 3.7
-#     t_cut = 6250
-#     coolMS = (t < t_cut) * (g > g_cut) * (p/a**.5189 > p_cut)
-#     hotMS = (t > t_cut) * (g > g_cut) * (p/a**.5189 > p_cut)
+# #     t_cut = 6250
+#     t_cut = .4
+# #     coolMS = (t < t_cut) * (g > g_cut) * (p/a**.5189 > p_cut)
+#     coolMS = (t > t_cut) * (g > g_cut) * (p/a**.5189 > p_cut)
+# #     hotMS = (t > t_cut) * (g > g_cut) * (p/a**.5189 > p_cut)
+#     hotMS = (t < t_cut) * (g > g_cut) * (p/a**.5189 > p_cut)
 #     subs = (g < 4.) * (p/a**.5189 > p_cut)
 #     ufrs = (p/a**.5189 < p_cut)
 #     ufrsubs = (g > g_cut) * (p/a**.5189 > p_cut)
@@ -91,6 +95,7 @@ def load_dat():
 #     ax.set_ylabel('Temp')
 #     ax.set_zlabel('Age (Gyr)')
 #     pl.show()
+#     raw_input('enter')
 
 #     dnu = data[17][l]
 #     dnu_err = data[18][l]
@@ -102,6 +107,22 @@ def load_dat():
 #     pl.savefig('t_dnu')
 #     raw_input('enter')
 
+
+    # replace nans, zeros and infs in errorbars with means
+    # find mean relative error
+    rel_a_errp = a[np.isfinite(a_errp)]/a_errp[np.isfinite(a_errp)]
+    rel_a_errm = a[np.isfinite(a_errm)]/a_errm[np.isfinite(a_errm)]
+    rel_p_err = p[np.isfinite(p_err)]/p_err[np.isfinite(p_err)]
+    a_errp[np.isnan(a_errp)] = np.mean(rel_a_errp)*a[np.isnan(a_errp)]
+    a_errm[np.isnan(a_errm)] = np.mean(rel_a_errm)*a[np.isnan(a_errm)]
+    a_errp[a_errp==np.inf] = np.mean(rel_a_errp)*a[np.isinf(a_errp)]
+    a_errm[a_errm==np.inf] = np.mean(rel_a_errm)*a[np.isinf(a_errm)]
+    a_errp[a_errp<=0] = np.mean(rel_a_errp)*a[a_errp<=0]
+    a_errm[a_errm<=0] = np.mean(rel_a_errm)*a[a_errm<=0]
+    p_err[np.isnan(p_err)] = np.mean(rel_p_err)*p[np.isnan(p_err)]
+    p_err[p_err<=0] = np.mean(rel_p_err)*p[p_err<=0]
+    p_err[p_err==np.inf] = np.mean(rel_p_err)*p[p_err==np.inf]
+
     # take logs
     log_p = np.log10(p)
     log_a = np.log10(a)
@@ -110,15 +131,19 @@ def load_dat():
     log_p_err = log_errorbar(p, p_err, p_err)[0]
     log_a_err, log_a_errp, log_a_errm  = log_errorbar(a, a_errp, a_errm)
 
+    print log_p_err
+
 #     log_p_err = np.log10(p_err)
 #     log_a_err = np.log10(a_errp)
 
     # replace nans, zeros and infs in errorbars with means
+    # find mean relative error
     log_a_err[np.isnan(log_a_err)] = np.mean(log_a_err[np.isfinite(log_a_err)])
     log_a_err[log_a_err==np.inf] = np.mean(log_a_err[np.isfinite(log_a_err)])
-    log_a_err[log_a_err<=0] = np.mean(log_a_err[log_a_err>0])
+#     log_a_err[log_a_err<=0] = np.mean(log_a_err[log_a_err>0])
     log_p_err[np.isnan(log_p_err)] = np.mean(log_p_err[np.isfinite(log_p_err)])
-    log_p_err[log_p_err<=0] = np.mean(log_p_err[log_p_err>0])
+#     log_p_err[log_p_err<=0] = np.mean(log_p_err[log_p_err>0])
+    log_p_err[log_p_err==np.inf] = np.mean(log_p_err[np.isfinite(log_p_err)])
 
     # remove negative ages and infinite periods
 #     a = (log_a > 0) * np.isfinite(log_p)
@@ -143,14 +168,19 @@ def load_dat():
 
     # really need to use asymmetric error bars!!!!
     log_a_err[a] = log_a_err[a] + diff[a] - np.finfo(float).eps #FIXME: might have to do this for neg_errs
-    a = log_p_err < 0.01 #FIXME: should be able to remove this line
-    log_p_err[a] = log_p_err[0]
+#     a = log_p_err < 0.01 #FIXME: should be able to remove this line
+#     log_p_err[a] = log_p_err[0]
 
     return log_p, t, log_a, log_p_err, t_err, log_a_err, log_a_errp, log_a_errm, g, g_err, g_errp, g_errm
 
 def log_errorbar(y, errp, errm):
 #     log_errp = (np.log10(y)*errp)/y
 #     log_errm = (np.log10(y)*errm)/y
+    for i in range(len(y)):
+        print y[i], errp[i]
+        print np.log10(y[i]), np.log10(errp[i])
+        print np.log10(y[i]), np.log10((y[i]+errp[i])/y[i])
+        raw_input('enter')
     log_errp = np.log10((y+errp)/y)
     log_errm = np.log10(y/(y-errm))
     log_err = .5*(log_errp + log_errm)
