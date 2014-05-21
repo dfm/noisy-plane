@@ -131,8 +131,6 @@ def load_dat():
     log_p_err = log_errorbar(p, p_err, p_err)[0]
     log_a_err, log_a_errp, log_a_errm  = log_errorbar(a, a_errp, a_errm)
 
-    print log_p_err
-
 #     log_p_err = np.log10(p_err)
 #     log_a_err = np.log10(a_errp)
 
@@ -146,41 +144,53 @@ def load_dat():
     log_p_err[log_p_err==np.inf] = np.mean(log_p_err[np.isfinite(log_p_err)])
 
     # remove negative ages and infinite periods
-#     a = (log_a > 0) * np.isfinite(log_p)
+#     l = (log_a > 0) * np.isfinite(log_p)
 
-    a = np.isfinite(log_p)
-    log_a = log_a[a]
-    log_a_err = log_a_err[a]
-    log_a_errp = log_a_errp[a]
-    log_a_errm = log_a_errm[a]
-    log_p = log_p[a]
-    log_p_err = log_p_err[a]
-    t = t[a]
-    t_err = t_err[a]
-    g = g[a]
-    g_err = .5*(g_errp[a]+g_errm[a])
-    g_errm = g_errm[a]
-    g_errp = g_errp[a]
+#     l = np.isfinite(log_p)
+#     log_a = log_a[l]
+#     log_a_err = log_a_err[l]
+#     log_a_errp = log_a_errp[l]
+#     log_a_errm = log_a_errm[l]
+#     log_p = log_p[l]
+#     log_p_err = log_p_err[l]
+#     t = t[l]
+#     t_err = t_err[l]
+#     g = g[l]
+#     g_err = .5*(g_errp[l]+g_errm[l])
+    g_err = .5*(g_errp+g_errm)
+#     g_errm = g_errm[l]
+#     g_errp = g_errp[l]
 
     # reduce errorbars if they go below zero
     diff = log_a - log_a_err
-    a = diff < 0
+    l = diff < 0
 
     # really need to use asymmetric error bars!!!!
-    log_a_err[a] = log_a_err[a] + diff[a] - np.finfo(float).eps #FIXME: might have to do this for neg_errs
-#     a = log_p_err < 0.01 #FIXME: should be able to remove this line
-#     log_p_err[a] = log_p_err[0]
+    log_a_err[l] = log_a_err[l] + diff[l] - np.finfo(float).eps #FIXME: might have to do this for neg_errs
+#     l = log_p_err < 0.01 #FIXME: should be able to remove this line
+#     log_p_err[l] = log_p_err[0]
 
-    return log_p, t, log_a, log_p_err, t_err, log_a_err, log_a_errp, log_a_errm, g, g_err, g_errp, g_errm
+#     p_err[p_err>10] = 5.
+
+    l = np.isfinite(p)
+    p = p[l]
+    a = a[l]
+    t = t[l]
+    p_err = p_err[l]
+    a_errp = a_errp[l]
+    a_errm = a_errm[l]
+    t_err = t_err[l]
+
+    return log_p, t, log_a, log_p_err, t_err, log_a_err, log_a_errp, log_a_errm, g, g_err, g_errp, g_errm, a, a_errp, a_errm, p, p_err
 
 def log_errorbar(y, errp, errm):
 #     log_errp = (np.log10(y)*errp)/y
 #     log_errm = (np.log10(y)*errm)/y
-    for i in range(len(y)):
-        print y[i], errp[i]
-        print np.log10(y[i]), np.log10(errp[i])
-        print np.log10(y[i]), np.log10((y[i]+errp[i])/y[i])
-        raw_input('enter')
+#     for i in range(len(y)):
+#         print y[i], errp[i]
+#         print np.log10(y[i]), np.log10(errp[i])
+#         print np.log10(y[i]), np.log10((y[i]+errp[i])/y[i])
+#         raw_input('enter')
     log_errp = np.log10((y+errp)/y)
     log_errm = np.log10(y/(y-errm))
     log_err = .5*(log_errp + log_errm)

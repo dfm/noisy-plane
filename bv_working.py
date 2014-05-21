@@ -49,7 +49,7 @@ def MCMC(fname):
 
     # load real data
     log_period_obs, bv_obs, log_age_obs, log_period_err, bv_err, log_age_err, log_age_errp, log_age_errm, \
-            logg_obs, logg_err, logg_errp, logg_errm = load_dat()
+            logg_obs, logg_err, logg_errp, logg_errm, age_err, period_err = load_dat()
 
     # 3d plot
     pl.clf()
@@ -102,10 +102,12 @@ def MCMC(fname):
 
     # Now generate samples
     nsamp = 100
-    log_age_samp = np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(log_age_obs, log_age_err)])
+#     log_age_samp = np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(log_age_obs, log_age_err)])
+    log_age_samp = np.log10(np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(age_obs, age_err)]))
     bv_samp = np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(bv_obs, bv_err)])
     logg_samp = np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(logg_obs, logg_err)])
-    log_period_samp = np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(log_period_obs, log_period_err)])
+#     log_period_samp = np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(log_period_obs, log_period_err)])
+    log_period_samp = np.log10(np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(period_obs, period_err)]))
     # FIXME: asymmetric errorbars for age and logg
 
 #     raw_input('enter')
