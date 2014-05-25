@@ -3,7 +3,7 @@ import numpy as np
 import scipy.optimize as spo
 import emcee
 import triangle
-from plotting import load_dat
+from plotting_working import load_dat
 import pretty5
 from subgiants import MS_poly
 from working_likes import lnlike
@@ -47,8 +47,10 @@ def MCMC(fname):
             np.log10(10.), np.log10(10.), np.log10(1.5), np.log10(5.), .5]
 
     # load real data
-    log_period_obs, temp_obs, log_age_obs, log_period_err, temp_err, log_age_err, log_age_errp, log_age_errm, \
-            logg_obs, logg_err, logg_errp, logg_errm = load_dat()
+    log_period_obs, temp_obs, log_age_obs, log_period_err, temp_err, log_age_err, \
+            log_age_errp, log_age_errm, \
+            logg_obs, logg_err, logg_errp, logg_errm, age, age_errp, \
+            age_errm, period, period_err = load_dat()
 
     # plot period vs age
     pl.clf()
