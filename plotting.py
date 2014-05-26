@@ -200,6 +200,7 @@ def load_dat():
     a_errp = a_errp[l]
     a_errm = a_errm[l]
     t_err = t_err[l]
+    a_err = a_err[l]
 
     # try reducing the errors a little
     p_err[p_err>10] = 5. #see if commenting this out helps?

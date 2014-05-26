@@ -127,14 +127,15 @@ def MCMC(fname):
     # Now generate samples
     nsamp = 100
     age_samp = np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(age_obs, age_err)])
+    age_samp[age_samp<0] = 0.1
     bv_samp = np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(bv_obs, bv_err)])
     logg_samp = np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(logg_obs, logg_err)])
     period_samp = np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(period_obs, period_err)])
     # FIXME: asymmetric errorbars for age and logg
 
-    print age_samp
-    print 'age'
-    raw_input('enter')
+#     print age_samp
+#     print 'age'
+#     raw_input('enter')
 
 #     raw_input('enter')
 
