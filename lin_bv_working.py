@@ -35,7 +35,8 @@ def lnprior(m):
             and 0 < m[5] < 30. and 0 < m[6] < 100.\
             and 0 < m[7] < 30. and 0 < m[8] < 100.\
             and 0. < m[9] < 1.:
-        return 0.0
+#         return 0.0
+        return -0.5*(m[1]+.2)**2 #-0.5*(m[3]+.2)**2
     return -np.inf
 
 def lnprob(m, age_samp, bv_samp, period_samp, logg_samp, \
@@ -53,7 +54,7 @@ def MCMC(fname):
 #     par_true = [0.7725, 0.5189, .601, 5., 10., \
 #             10., 10., 1.5, 5., .5]
     par_true = [0.7725, 0.5189, .601, 5., 10., \
-            10., 10., 1.5, 5., .5] # better initialisation
+            8., 5., 9., 3.5, .67] # better initialisation
 
 #     print period_model(par_true, np.array([1000,2000]), np.array([0.5, .6]))
 #     print period_model(par_true, np.array([1000,2000]), np.array([0.3, .45]))
