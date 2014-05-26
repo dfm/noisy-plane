@@ -6,7 +6,7 @@ import triangle
 from plotting import load_dat, log_errorbar
 import pretty5
 from subgiants import MS_poly
-from bv_likes import lnlike
+from lin_bv_likes import lnlike
 from teff_bv import teff2bv
 import plotting_working as pw
 
@@ -22,7 +22,12 @@ pl.rcParams.update(plotpar)
 c = .4
 
 def period_model(par, age, bv):
-    return par[0] * (age*1e3)**par[1] * (bv-c)**par[2]
+#     period = np.zeros_like(age)
+#     period[bv>c] = par[0] * (age*1e3)**par[1] * (bv-c)**par[2]
+#     period[bv < c] = np.nan
+    log_age = np.log10(age)
+    log_period = par[0] + par[1]*log_age + np.log10(bv-c) * par[2]
+    return 10**log_period
 
 def lnprior(m):
     if -10. < m[0] < 10. and .3 < m[1] < .8 and 0. < m[2] < 1. \
@@ -48,9 +53,13 @@ def MCMC(fname):
     par_true = [0.7725, 0.5189, .601, 5., 10., \
             10., 10., 1.5, 5., .5]
 
+#     print period_model(par_true, np.array([1000,2000]), np.array([0.5, .6]))
+#     print period_model(par_true, np.array([1000,2000]), np.array([0.3, .45]))
+#     raw_input('enter')
+
     # load real data
     log_period_obs, bv_obs, log_age_obs, log_period_err, bv_err, log_age_err, log_age_errp, log_age_errm, \
-            logg_obs, logg_err, logg_errp, logg_errm, age_obs, age_errp, age_errm, period_obs, period_err = load_dat()
+            logg_obs, logg_err, logg_errp, logg_errm, age_obs, age_errp, age_errm, age_err, period_obs, period_err = load_dat()
 
     # load real data
     log_period_obs2, temp_obs, log_age_obs2, log_period_err2, temp_err2, log_age_err2, \
@@ -59,8 +68,8 @@ def MCMC(fname):
             period_obs2, period_err2 = pw.load_dat()
 
     # FIXME
-    age_err = age_errp
-    print len(period_obs)
+#     age_err = age_errp
+#     print len(period_obs)
 
     # 3d colour plot
     pl.clf()
@@ -84,30 +93,6 @@ def MCMC(fname):
     ax.plot_surface(p_surf, c_surf, a_surf, alpha = 0.0)
 #     pl.show()
 #     raw_input('enter')
-
-    # 3d temp plot
-    pl.clf()
-    fig = pl.figure()
-    ax = fig.gca(projection='3d')
-    ax.scatter(period_obs2, temp_obs, age_obs2, c = 'b', marker = 'o')
-    ax.set_xlabel('Rotational period (days)')
-    ax.set_ylabel('T')
-    ax.set_zlabel('Age (Gyr)')
-#     fx, fy, fz = period_obs, temp_obs, age_obs
-#     xerror, yerror, zerror = period_err, temp_err, age_err
-#     #plot errorbars
-#     for i in np.arange(0, len(fx)):
-#         ax.plot([fx[i]+xerror[i], fx[i]-xerror[i]], [fy[i], fy[i]], [fz[i], fz[i]], marker="_")
-#         ax.plot([fx[i], fx[i]], [fy[i]+yerror[i], fy[i]-yerror[i]], [fz[i], fz[i]], marker="_")
-#         ax.plot([fx[i], fx[i]], [fy[i], fy[i]], [fz[i]+zerror[i], fz[i]-zerror[i]], marker="_")
-    a_surf = np.linspace(.65, 15, 100)
-    c_surf = np.linspace(.4, 1.4, 100)
-    a_surf, c_surf = np.meshgrid(a_surf, c_surf)
-    p_surf = period_model(par_true, a_surf, c_surf)
-    print p_surf
-    ax.plot_surface(c_surf, a_surf, p_surf, alpha = 0.0)
-    pl.show()
-    raw_input('enter')
 
     # plot period vs age
     pl.clf()
@@ -137,7 +122,7 @@ def MCMC(fname):
     pl.ylabel('$P_{rot}~\mathrm{(days)}$')
     # pl.colorbar()
     pl.savefig("init_bv_p")
-    raw_input('enter')
+#     raw_input('enter')
 
     # Now generate samples
     nsamp = 100
@@ -146,6 +131,10 @@ def MCMC(fname):
     logg_samp = np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(logg_obs, logg_err)])
     period_samp = np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(period_obs, period_err)])
     # FIXME: asymmetric errorbars for age and logg
+
+    print age_samp
+    print 'age'
+    raw_input('enter')
 
 #     raw_input('enter')
 

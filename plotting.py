@@ -8,6 +8,7 @@ def load_dat():
     # "load data"
 #     data = np.genfromtxt('/Users/angusr/Python/Gyro/data/data.txt').T
     data = np.genfromtxt('/Users/angusr/Python/Gyro/data/new_data.txt').T
+#     data = np.genfromtxt('/Users/angusr/Python/Gyro/data/matched_data.txt').T
     KID = data[0]
 
     # check for duplicates
@@ -56,6 +57,19 @@ def load_dat():
     g_errm = np.concatenate((g_errm, np.ones_like(p)*.001))
 
     # add hyades
+    data = np.genfromtxt("/Users/angusr/Python/Gyro/data/hyades.txt", skip_header=2).T
+    bv_obs = np.concatenate((bv_obs, data[0]))
+    bv_err = np.concatenate((bv_err, data[1]))
+    p = np.concatenate((p, data[2]))
+    p_err = np.concatenate((p_err, data[3]))
+    a = np.concatenate((a, data[4]))
+    a_errp = np.concatenate((a_errp, data[5]))
+    a_errm = np.concatenate((a_errm, data[5]))
+    g = np.concatenate((g, np.ones_like(data[0])*4.5))
+    g_errp = np.concatenate((g_errp, np.ones_like(data[0])*.001))
+    g_errm = np.concatenate((g_errm, np.ones_like(data[0])*.001))
+
+    # add the sun
     data = np.genfromtxt("/Users/angusr/Python/Gyro/data/hyades.txt", skip_header=2).T
     bv_obs = np.concatenate((bv_obs, data[0]))
     bv_err = np.concatenate((bv_err, data[1]))
@@ -134,13 +148,15 @@ def load_dat():
 #     log_p_err = np.log10(p_err)
 #     log_a_err = np.log10(a_errp)
 
+
+
     # replace nans, zeros and infs in errorbars with means
     # find mean relative error
     log_a_err[np.isnan(log_a_err)] = np.mean(log_a_err[np.isfinite(log_a_err)])
     log_a_err[log_a_err==np.inf] = np.mean(log_a_err[np.isfinite(log_a_err)])
 #     log_a_err[log_a_err<=0] = np.mean(log_a_err[log_a_err>0])
     log_p_err[np.isnan(log_p_err)] = np.mean(log_p_err[np.isfinite(log_p_err)])
-#     log_p_err[log_p_err<=0] = np.mean(log_p_err[log_p_err>0])
+#     log_p_err[log_p_err<=0] = np.mean(log_p_err[log_p_err>0]) # see if this helps
     log_p_err[log_p_err==np.inf] = np.mean(log_p_err[np.isfinite(log_p_err)])
 
     # remove negative ages and infinite periods
@@ -162,6 +178,7 @@ def load_dat():
 #     g_errp = g_errp[l]
 
     # reduce errorbars if they go below zero
+    a_err = .5*(a_errp + a_errm)
     diff = log_a - log_a_err
     l = diff < 0
 
@@ -170,7 +187,10 @@ def load_dat():
 #     l = log_p_err < 0.01 #FIXME: should be able to remove this line
 #     log_p_err[l] = log_p_err[0]
 
-#     p_err[p_err>10] = 5.
+    # do the same for linear ages
+    diff = a - a_err
+    l = diff < 0
+    a_err[l] = a_err[l] + diff[l] - np.finfo(float).eps
 
     l = np.isfinite(p)
     p = p[l]
@@ -181,7 +201,10 @@ def load_dat():
     a_errm = a_errm[l]
     t_err = t_err[l]
 
-    return log_p, t, log_a, log_p_err, t_err, log_a_err, log_a_errp, log_a_errm, g, g_err, g_errp, g_errm, a, a_errp, a_errm, p, p_err
+    # try reducing the errors a little
+    p_err[p_err>10] = 5. #see if commenting this out helps?
+
+    return log_p, t, log_a, log_p_err, t_err, log_a_err, log_a_errp, log_a_errm, g, g_err, g_errp, g_errm, a, a_errp, a_errm, a_err, p, p_err
 
 def log_errorbar(y, errp, errm):
 #     log_errp = (np.log10(y)*errp)/y
