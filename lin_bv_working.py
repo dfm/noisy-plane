@@ -50,8 +50,10 @@ def lnprob(m, age_samp, bv_samp, period_samp, logg_samp, \
 
 def MCMC(fname):
     # a, n, beta, Y, V, Z, U
+#     par_true = [0.7725, 0.5189, .601, 5., 10., \
+#             10., 10., 1.5, 5., .5]
     par_true = [0.7725, 0.5189, .601, 5., 10., \
-            10., 10., 1.5, 5., .5]
+            10., 10., 1.5, 5., .5] # better initialisation
 
 #     print period_model(par_true, np.array([1000,2000]), np.array([0.5, .6]))
 #     print period_model(par_true, np.array([1000,2000]), np.array([0.3, .45]))
@@ -127,6 +129,13 @@ def MCMC(fname):
     # Now generate samples
     nsamp = 100
     age_samp = np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(age_obs, age_err)])
+
+    # resample negative ages
+#     for j in range(len(age_samp)):
+#         while len(age_samp[j][age_samp[j]<0])>0:
+#             age_samp[j][age_samp[j]<0] = [x0+xe*np.random.randn(len(age_samp[j][age_samp[j]<0])) \
+#                     for x0, xe in zip(age_obs[j], age_err[j])]
+
     age_samp[age_samp<0] = 0.1
     bv_samp = np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(bv_obs, bv_err)])
     logg_samp = np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(logg_obs, logg_err)])
@@ -157,18 +166,18 @@ def MCMC(fname):
 
     print("Burn-in")
 #     p0, lp, state = sampler.run_mcmc(p0, 500)
-    p0, lp, state = sampler.run_mcmc(p0, 500)
+    p0, lp, state = sampler.run_mcmc(p0, 2000)
     sampler.reset()
     print("Production run")
     nstep = 10000
-    nruns = 10.
+    nruns = 1000.
 #     sampler.run_mcmc(p0, 10000)
 
     for j in range(int(nstep/nruns)):
 
         print 'run', j
 
-        p0, lp, state = sampler.run_mcmc(p0, nstep/nruns)
+        p0, lp, state = sampler.run_mcmc(p0, nruns)
 
         print("Plotting traces")
         pl.clf()
@@ -181,10 +190,19 @@ def MCMC(fname):
             pl.plot(sampler.chain[:, :, i].T, 'k-', alpha=0.3)
         pl.savefig("traces_morelik")
 
+        print("Plotting traces")
+        pl.figure()
+        for i in range(ndim):
+            pl.clf()
+            pl.axhline(par_true[i], color = "r")
+            pl.plot(sampler.chain[:, :, i].T, 'k-', alpha=0.3)
+            pl.savefig("{0}.png".format(i))
+
         flat = sampler.chain[:, 50:, :].reshape((-1, ndim))
         mcmc_result = map(lambda v: (v[1], v[2]-v[1], v[1]-v[0]),
                           zip(*np.percentile(flat, [16, 50, 84], axis=0)))
         mcmc_result = np.array(mcmc_result)[:, 0]
+        print 'mcmc_result = ', mcmc_result
 
         print("Making triangle plot")
         fig_labels = ["$a$", "$n$", "$b$", "$Y$", "$V$", "$Z$", "$U$", "$X$", "$W$", "$P$"]
