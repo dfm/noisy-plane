@@ -7,7 +7,8 @@ def load_dat():
 
     # "load data"
 #     data = np.genfromtxt('/Users/angusr/Python/Gyro/data/data.txt').T
-    data = np.genfromtxt('/Users/angusr/Python/Gyro/data/new_data.txt').T
+#     data = np.genfromtxt('/Users/angusr/Python/Gyro/data/new_data.txt').T
+    data = np.genfromtxt('/Users/angusr/Python/Gyro/data/recovered.txt').T
 #     data = np.genfromtxt('/Users/angusr/Python/Gyro/data/matched_data.txt').T
     KID = data[0]
 

@@ -36,7 +36,7 @@ def lnprior(m):
             and 0 < m[7] < 30. and 0 < m[8] < 100.\
             and 0. < m[9] < 1.:
 #         return 0.0
-        return -0.5*(m[1]+.2)**2 #-0.5*(m[3]+.2)**2
+        return -0.5*(m[1]+.02)**2 #-0.5*(m[3]+.2)**2
     return -np.inf
 
 def lnprob(m, age_samp, bv_samp, period_samp, logg_samp, \
@@ -171,7 +171,7 @@ def MCMC(fname):
     sampler.reset()
     print("Production run")
     nstep = 10000
-    nruns = 1000.
+    nruns = 500.
 #     sampler.run_mcmc(p0, 10000)
 
     for j in range(int(nstep/nruns)):
