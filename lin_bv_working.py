@@ -174,24 +174,11 @@ def MCMC(fname):
     print("Production run")
     nstep = 10000
     nruns = 500.
-#     sampler.run_mcmc(p0, 10000)
 
     for j in range(int(nstep/nruns)):
 
         print 'run', j
-
         p0, lp, state = sampler.run_mcmc(p0, nruns)
-
-        print("Plotting traces")
-        pl.clf()
-        pl.figure()
-        for i in range(ndim):
-            pl.subplot(ndim,1,i)
-            pl.axhline(par_true[i], color = "r")
-            pl.setp(ax.get_xticklabels(), visible=False)
-            pl.setp(ax.get_yticklabels(), visible=False)
-            pl.plot(sampler.chain[:, :, i].T, 'k-', alpha=0.3)
-        pl.savefig("traces_morelik")
 
         print("Plotting traces")
         pl.figure()
