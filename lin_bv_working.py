@@ -21,7 +21,7 @@ plotpar = {'axes.labelsize': 20,
            'text.usetex': True}
 pl.rcParams.update(plotpar)
 
-c = .45
+c = .5
 
 def period_model(par, age, bv):
 #     period = np.zeros_like(age)
@@ -111,7 +111,7 @@ def MCMC(fname):
     pl.plot(age_plot, period_model(par_true, age_plot, 1.), 'c-')
     pl.xlabel('$\mathrm{Age~(Gyr)}$')
     pl.ylabel('$P_{rot}~\mathrm{(days)}$')
-    pl.savefig("init_bv_ap")
+    pl.savefig("init_bv_ap%s" %fname)
 
     # plot period vs teff
     pl.clf()
@@ -126,7 +126,7 @@ def MCMC(fname):
     pl.xlabel('$\mathrm{T_{eff}~(K)}$')
     pl.ylabel('$P_{rot}~\mathrm{(days)}$')
     # pl.colorbar()
-    pl.savefig("init_bv_p")
+    pl.savefig("init_bv_p%s" %fname)
 #     raw_input('enter')
 
     # Now generate samples
@@ -169,7 +169,7 @@ def MCMC(fname):
 
     print("Burn-in")
 #     p0, lp, state = sampler.run_mcmc(p0, 500)
-    p0, lp, state = sampler.run_mcmc(p0, 500)
+    p0, lp, state = sampler.run_mcmc(p0, 1000)
     sampler.reset()
     print("Production run")
     nstep = 10000
@@ -186,7 +186,7 @@ def MCMC(fname):
             pl.clf()
             pl.axhline(par_true[i], color = "r")
             pl.plot(sampler.chain[:, :, i].T, 'k-', alpha=0.3)
-            pl.savefig("{0}.png".format(i))
+            pl.savefig("%s%s.png" %s(i, fname))
 
         flat = sampler.chain[:, 50:, :].reshape((-1, ndim))
         mcmc_result = map(lambda v: (v[1], v[2]-v[1], v[1]-v[0]),
@@ -197,7 +197,7 @@ def MCMC(fname):
         print("Making triangle plot")
         fig_labels = ["$a$", "$n$", "$b$", "$Y$", "$V$", "$Z$", "$U$", "$X$", "$W$", "$P$"]
         fig = triangle.corner(sampler.flatchain, truths=mcmc_result, labels=fig_labels[:len(par_true)])
-        fig.savefig("triangle_morelik%s.png" %fname)
+        fig.savefig("triangle%s.png" %fname)
 
     # Flatten chain
     samples = sampler.chain[:, 50:, :].reshape((-1, ndim))
@@ -209,12 +209,6 @@ def MCMC(fname):
     print 'initial values', par_true
     mcmc_result = np.array(mcmc_result)[:, 0]
     print 'mcmc result', mcmc_result
-
-#     print("Making triangle plot")
-#     fig_labels = ["$a$", "$n$", "$b$", "$Y$", "$V$", "$Z$", "$U$", "$X$", "$W$", "$P$"]
-#     fig = triangle.corner(sampler.flatchain, truths=mcmc_result, labels=fig_labels[:len(par_true)])
-#     fig.savefig("triangle_morelik%s.png" %fname)
-
     mcmc_result = [mcmc_result[0], mcmc_result[1], mcmc_result[2], c, \
             mcmc_result[3], mcmc_result[4]]
 
@@ -250,4 +244,4 @@ def MCMC(fname):
 
 if __name__ == "__main__":
 
-    MCMC('run')
+    MCMC('5')
