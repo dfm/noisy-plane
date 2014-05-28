@@ -24,9 +24,6 @@ pl.rcParams.update(plotpar)
 c = .5
 
 def period_model(par, age, bv):
-#     period = np.zeros_like(age)
-#     period[bv>c] = par[0] * (age*1e3)**par[1] * (bv-c)**par[2]
-#     period[bv < c] = np.nan
     log_age = np.log10(age)
     log_period = par[0] + par[1]*log_age + np.log10(bv-c) * par[2]
     return 10**log_period
@@ -37,8 +34,8 @@ def lnprior(m):
             and 0 < m[5] < 30. and 0 < m[6] < 100.\
             and 0 < m[7] < 30. and 0 < m[8] < 100.\
             and 0. < m[9] < 1.:
-#         return 0.0
-        return -0.01*(m[1]+.5189)**2 #-0.5*(m[3]+.2)**2
+        return 0.0
+#         return -0.01*(m[1]+.5189)**2 #-0.5*(m[3]+.2)**2
     return -np.inf
 
 def lnprob(m, age_samp, bv_samp, period_samp, logg_samp, \
@@ -58,10 +55,6 @@ def MCMC(fname):
     par_true = [0.7725, 0.5189, .601, 5., 10., \
             8., 5., 9., 3.5, .67] # better initialisation
 
-#     print period_model(par_true, np.array([1000,2000]), np.array([0.5, .6]))
-#     print period_model(par_true, np.array([1000,2000]), np.array([0.3, .45]))
-#     raw_input('enter')
-
     # load real data
     log_period_obs, bv_obs, log_age_obs, log_period_err, bv_err, log_age_err, log_age_errp, log_age_errm, \
             logg_obs, logg_err, logg_errp, logg_errm, age_obs, age_errp, age_errm, age_err, period_obs, period_err = load_dat()
@@ -71,10 +64,6 @@ def MCMC(fname):
             log_age_errp2, log_age_errm2, \
             logg_obs2, logg_err2, logg_errp2, logg_errm2, age_obs2, age_errp2, age_errm2, \
             period_obs2, period_err2 = pw.load_dat()
-
-    # FIXME
-#     age_err = age_errp
-#     print len(period_obs)
 
     # 3d colour plot
     pl.clf()
@@ -97,7 +86,6 @@ def MCMC(fname):
     p_surf = period_model(par_true, a_surf, c_surf)
     ax.plot_surface(p_surf, c_surf, a_surf, alpha = 0.0)
 #     pl.show()
-#     raw_input('enter')
 
     # plot period vs age
     pl.clf()
@@ -117,7 +105,6 @@ def MCMC(fname):
     pl.clf()
     pl.errorbar(bv_obs, period_obs, xerr=bv_err, yerr=period_err, fmt='k.', \
             capsize = 0, ecolor = '.7')
-    # pl.scatter(bv_obs, period_obs, c = logg_obs, s=50, vmin=min(logg_obs[logg_obs>0]), vmax=max(logg_obs), zorder=2)
     bv_plot = np.linspace(min(bv_obs), max(bv_obs))
     pl.plot(bv_plot, period_model(par_true, 1., bv_plot), 'r-')
     pl.plot(bv_plot, period_model(par_true, 2., bv_plot), 'm-')
@@ -125,9 +112,7 @@ def MCMC(fname):
     pl.plot(bv_plot, period_model(par_true, 10., bv_plot), 'c-')
     pl.xlabel('$\mathrm{T_{eff}~(K)}$')
     pl.ylabel('$P_{rot}~\mathrm{(days)}$')
-    # pl.colorbar()
     pl.savefig("init_bv_p%s" %fname)
-#     raw_input('enter')
 
     # Now generate samples
     nsamp = 100
@@ -143,13 +128,6 @@ def MCMC(fname):
     bv_samp = np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(bv_obs, bv_err)])
     logg_samp = np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(logg_obs, logg_err)])
     period_samp = np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(period_obs, period_err)])
-    # FIXME: asymmetric errorbars for age and logg
-
-#     print age_samp
-#     print 'age'
-#     raw_input('enter')
-
-#     raw_input('enter')
 
     # calculate ms turnoff coeffs
     coeffs = MS_poly()
@@ -158,17 +136,13 @@ def MCMC(fname):
             period_samp, logg_samp, bv_obs, bv_err, period_obs, period_err, \
             logg_obs, logg_err, coeffs, c)
 
-#     raw_input('enter')
-
     nwalkers, ndim = 32, len(par_true)
     p0 = [par_true+1e-4*np.random.rand(ndim) for i in range(nwalkers)]
     args = (age_samp, bv_samp, period_samp, logg_samp, bv_obs, \
             bv_err, period_obs, period_err, logg_obs, logg_err, coeffs, c)
     sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args = args)
-    # sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob)
 
     print("Burn-in")
-#     p0, lp, state = sampler.run_mcmc(p0, 500)
     p0, lp, state = sampler.run_mcmc(p0, 1000)
     sampler.reset()
     print("Production run")
