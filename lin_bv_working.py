@@ -1,3 +1,5 @@
+# Try adjusting Kraft break?
+
 import matplotlib.pyplot as pl
 import numpy as np
 import scipy.optimize as spo
@@ -19,7 +21,7 @@ plotpar = {'axes.labelsize': 20,
            'text.usetex': True}
 pl.rcParams.update(plotpar)
 
-c = .4
+c = .45
 
 def period_model(par, age, bv):
 #     period = np.zeros_like(age)
@@ -36,7 +38,7 @@ def lnprior(m):
             and 0 < m[7] < 30. and 0 < m[8] < 100.\
             and 0. < m[9] < 1.:
 #         return 0.0
-        return -0.5*(m[1]+.02)**2 #-0.5*(m[3]+.2)**2
+        return -0.01*(m[1]+.5189)**2 #-0.5*(m[3]+.2)**2
     return -np.inf
 
 def lnprob(m, age_samp, bv_samp, period_samp, logg_samp, \
@@ -167,7 +169,7 @@ def MCMC(fname):
 
     print("Burn-in")
 #     p0, lp, state = sampler.run_mcmc(p0, 500)
-    p0, lp, state = sampler.run_mcmc(p0, 2000)
+    p0, lp, state = sampler.run_mcmc(p0, 500)
     sampler.reset()
     print("Production run")
     nstep = 10000
