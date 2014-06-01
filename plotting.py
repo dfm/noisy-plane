@@ -8,8 +8,10 @@ def load_dat():
     # "load data"
 #     data = np.genfromtxt('/Users/angusr/Python/Gyro/data/data.txt').T
 #     data = np.genfromtxt('/Users/angusr/Python/Gyro/data/new_data.txt').T
-    data = np.genfromtxt('/Users/angusr/Python/Gyro/data/recovered.txt').T
+#    data = np.genfromtxt('/Users/angusr/Python/Gyro/data/recovered.txt').T
 #     data = np.genfromtxt('/Users/angusr/Python/Gyro/data/matched_data.txt').T
+    data = np.genfromtxt('/Users/angusr/Python/Gyro/data/new_matched.txt').T
+
     KID = data[0]
 
     # check for duplicates
@@ -39,26 +41,52 @@ def load_dat():
     a_errm = data[15][l]#*1000
 
     # convert temps to bvs
-    bv_obs = teff2bv(t, g, np.ones_like(t)*-.2)
+    bv_obs = teff2bv(t, g, np.ones_like(t)*-.2, t_err, g_errp, np.ones_like(t)*.001, error=False)
 
-    # add praesepe
-    data = np.genfromtxt("/Users/angusr/Python/Gyro/data/praesepe.txt").T
-    period = 1./data[3]
-    period_err = period*(data[4]/data[3])
-    bv = data[5]-data[6]
-    p = np.concatenate((p, period))
-    p_err = np.concatenate((p_err, period_err))
-    bv_obs = np.concatenate((bv_obs, bv))
-    bv_err = np.ones_like(bv_obs)*0.01 # made up for now
-    a = np.concatenate((a, np.ones_like(period)*.59))
-    a_errp = np.concatenate((a_errp, np.ones_like(period)*.01)) # made up age errs
-    a_errm = np.concatenate((a_errm, np.ones_like(period)*.01)) # made up age errs
-    g = np.concatenate((g, np.ones_like(period)*4.5))
-    g_errp = np.concatenate((g_errp, np.ones_like(p)*.001))
-    g_errm = np.concatenate((g_errm, np.ones_like(p)*.001))
+#     # add praesepe
+#     data = np.genfromtxt("/Users/angusr/Python/Gyro/data/praesepe.txt").T
+#     period = 1./data[3]
+#     period_err = period*(data[4]/data[3])
+#     bv = data[5]-data[6]
+#     p = np.concatenate((p, period))
+#     p_err = np.concatenate((p_err, period_err))
+#     bv_obs = np.concatenate((bv_obs, bv))
+#     bv_err = np.ones_like(bv_obs)*0.01 # made up for now
+#     a = np.concatenate((a, np.ones_like(period)*.59))
+#     a_errp = np.concatenate((a_errp, np.ones_like(period)*.01)) # made up age errs
+#     a_errm = np.concatenate((a_errm, np.ones_like(period)*.01)) # made up age errs
+#     g = np.concatenate((g, np.ones_like(period)*4.5))
+#     g_errp = np.concatenate((g_errp, np.ones_like(p)*.001))
+#     g_errm = np.concatenate((g_errm, np.ones_like(p)*.001))
+#
+#     # add hyades
+#     data = np.genfromtxt("/Users/angusr/Python/Gyro/data/hyades.txt", skip_header=2).T
+#     bv_obs = np.concatenate((bv_obs, data[0]))
+#     bv_err = np.concatenate((bv_err, data[1]))
+#     p = np.concatenate((p, data[2]))
+#     p_err = np.concatenate((p_err, data[3]))
+#     a = np.concatenate((a, data[4]))
+#     a_errp = np.concatenate((a_errp, data[5]))
+#     a_errm = np.concatenate((a_errm, data[5]))
+#     g = np.concatenate((g, np.ones_like(data[0])*4.5))
+#     g_errp = np.concatenate((g_errp, np.ones_like(data[0])*.001))
+#     g_errm = np.concatenate((g_errm, np.ones_like(data[0])*.001))
+#
+#     # add the sun
+#     data = np.genfromtxt("/Users/angusr/Python/Gyro/data/hyades.txt", skip_header=2).T
+#     bv_obs = np.concatenate((bv_obs, data[0]))
+#     bv_err = np.concatenate((bv_err, data[1]))
+#     p = np.concatenate((p, data[2]))
+#     p_err = np.concatenate((p_err, data[3]))
+#     a = np.concatenate((a, data[4]))
+#     a_errp = np.concatenate((a_errp, data[5]))
+#     a_errm = np.concatenate((a_errm, data[5]))
+#     g = np.concatenate((g, np.ones_like(data[0])*4.5))
+#     g_errp = np.concatenate((g_errp, np.ones_like(data[0])*.001))
+#     g_errm = np.concatenate((g_errm, np.ones_like(data[0])*.001))
 
-    # add hyades
-    data = np.genfromtxt("/Users/angusr/Python/Gyro/data/hyades.txt", skip_header=2).T
+    # add clusters
+    data = np.genfromtxt("/Users/angusr/Python/Gyro/data/clusters.txt", skip_header=1).T
     bv_obs = np.concatenate((bv_obs, data[0]))
     bv_err = np.concatenate((bv_err, data[1]))
     p = np.concatenate((p, data[2]))
@@ -66,22 +94,9 @@ def load_dat():
     a = np.concatenate((a, data[4]))
     a_errp = np.concatenate((a_errp, data[5]))
     a_errm = np.concatenate((a_errm, data[5]))
-    g = np.concatenate((g, np.ones_like(data[0])*4.5))
-    g_errp = np.concatenate((g_errp, np.ones_like(data[0])*.001))
-    g_errm = np.concatenate((g_errm, np.ones_like(data[0])*.001))
-
-    # add the sun
-    data = np.genfromtxt("/Users/angusr/Python/Gyro/data/hyades.txt", skip_header=2).T
-    bv_obs = np.concatenate((bv_obs, data[0]))
-    bv_err = np.concatenate((bv_err, data[1]))
-    p = np.concatenate((p, data[2]))
-    p_err = np.concatenate((p_err, data[3]))
-    a = np.concatenate((a, data[4]))
-    a_errp = np.concatenate((a_errp, data[5]))
-    a_errm = np.concatenate((a_errm, data[5]))
-    g = np.concatenate((g, np.ones_like(data[0])*4.5))
-    g_errp = np.concatenate((g_errp, np.ones_like(data[0])*.001))
-    g_errm = np.concatenate((g_errm, np.ones_like(data[0])*.001))
+    g = np.concatenate((g, data[6]))
+    g_errp = np.concatenate((g_errp, data[7]))
+    g_errm = np.concatenate((g_errm, data[7]))
 
     # obviously comment these lines out if you want to use temps
     t = bv_obs

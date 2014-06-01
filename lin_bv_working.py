@@ -21,7 +21,7 @@ plotpar = {'axes.labelsize': 20,
            'text.usetex': True}
 pl.rcParams.update(plotpar)
 
-c = .5
+c = .4
 
 def period_model(par, age, bv):
     log_age = np.log10(age)
@@ -143,11 +143,11 @@ def MCMC(fname):
     sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args = args)
 
     print("Burn-in")
-    p0, lp, state = sampler.run_mcmc(p0, 1000)
+    p0, lp, state = sampler.run_mcmc(p0, 2000)
     sampler.reset()
     print("Production run")
     nstep = 10000
-    nruns = 500.
+    nruns = 2000.
 
     for j in range(int(nstep/nruns)):
 
@@ -160,7 +160,7 @@ def MCMC(fname):
             pl.clf()
             pl.axhline(par_true[i], color = "r")
             pl.plot(sampler.chain[:, :, i].T, 'k-', alpha=0.3)
-            pl.savefig("%s%s.png" %s(i, fname))
+            pl.savefig("%s%s.png" %(i, fname))
 
         flat = sampler.chain[:, 50:, :].reshape((-1, ndim))
         mcmc_result = map(lambda v: (v[1], v[2]-v[1], v[1]-v[0]),
@@ -185,6 +185,7 @@ def MCMC(fname):
     print 'mcmc result', mcmc_result
     mcmc_result = [mcmc_result[0], mcmc_result[1], mcmc_result[2], c, \
             mcmc_result[3], mcmc_result[4]]
+    np.savetxt("parameters%s.txt" %fname, mcmc_result)
 
     # plot result
     pl.clf()
@@ -218,4 +219,4 @@ def MCMC(fname):
 
 if __name__ == "__main__":
 
-    MCMC('5')
+    MCMC('4')
