@@ -12,15 +12,22 @@ def load_dat():
 #     data = np.genfromtxt('/Users/angusr/Python/Gyro/data/matched_data.txt').T
     data = np.genfromtxt('/Users/angusr/Python/Gyro/data/new_matched.txt').T
 
-    KID = data[0]
-
     # check for duplicates
-    n = 0
-    for i in KID:
-        match = np.where(KID == i)[0]
+    KID = data[0]
+    print len(KID), 'targets found'
+    matches = []
+    for i, k in enumerate(KID):
+        match = np.where(KID == k)[0]
         if len(match) > 1:
-            n+=1
-    print n, 'duplicates found'
+            matches.append(KID[match][0])
+            data[:,i] = np.zeros(len(data[:,i]))
+    print len(matches), 'duplicates found'
+
+    # remove duplicates
+    new_data = np.zeros((len(data[:,0]), len(data[0][data[0] != 0])))
+    new_data[i] = [data[i][data[0]!=0] for i in range(len(data))]
+    data = new_data # comment this out if you don't want to remove duplicates
+    print len(data), 'targets remaining'
 
     p = data[1]
     t = data[3]
@@ -42,6 +49,7 @@ def load_dat():
 
     # convert temps to bvs
     bv_obs = teff2bv(t, g, np.ones_like(t)*-.2, t_err, g_errp, np.ones_like(t)*.001, error=False)
+    bv_err = np.ones_like(bv_obs)*0.01 # made up for now
 
 #     # add praesepe
 #     data = np.genfromtxt("/Users/angusr/Python/Gyro/data/praesepe.txt").T
