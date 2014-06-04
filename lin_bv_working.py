@@ -11,6 +11,7 @@ from subgiants import MS_poly
 from lin_bv_likes import lnlike
 from teff_bv import teff2bv
 import plotting_working as pw
+import h5py
 
 ocols = ['#FF9933','#66CCCC' , '#FF33CC', '#3399FF', '#CC0066', '#99CC99', '#9933FF', '#CC0000']
 plotpar = {'axes.labelsize': 20,
@@ -21,7 +22,7 @@ plotpar = {'axes.labelsize': 20,
            'text.usetex': True}
 pl.rcParams.update(plotpar)
 
-c = .4
+c = .45
 
 def period_model(par, age, bv):
     log_age = np.log10(age)
@@ -143,7 +144,7 @@ def MCMC(fname):
     sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args = args)
 
     print("Burn-in")
-    p0, lp, state = sampler.run_mcmc(p0, 2000)
+    p0, lp, state = sampler.run_mcmc(p0, 3000)
     sampler.reset()
     print("Production run")
     nstep = 10000
@@ -165,12 +166,12 @@ def MCMC(fname):
         flat = sampler.chain[:, 50:, :].reshape((-1, ndim))
         mcmc_result = map(lambda v: (v[1], v[2]-v[1], v[1]-v[0]),
                           zip(*np.percentile(flat, [16, 50, 84], axis=0)))
-        mcmc_result = np.array(mcmc_result)[:, 0]
-        print 'mcmc_result = ', mcmc_result
+        mres = np.array(mcmc_result)[:, 0]
+        print 'mcmc_result = ', mres
 
         print("Making triangle plot")
         fig_labels = ["$a$", "$n$", "$b$", "$Y$", "$V$", "$Z$", "$U$", "$X$", "$W$", "$P$"]
-        fig = triangle.corner(sampler.flatchain, truths=mcmc_result, labels=fig_labels[:len(par_true)])
+        fig = triangle.corner(sampler.flatchain, truths=mres, labels=fig_labels[:len(par_true)])
         fig.savefig("triangle%s.png" %fname)
 
     # Flatten chain
@@ -180,12 +181,20 @@ def MCMC(fname):
     mcmc_result = map(lambda v: (v[1], v[2]-v[1], v[1]-v[0]),
                       zip(*np.percentile(samples, [16, 50, 84], axis=0)))
 
+    # save parameters and print to screen
     print 'initial values', par_true
+    np.savetxt("parameters%s.txt" %fname, np.array(mcmc_result))
     mcmc_result = np.array(mcmc_result)[:, 0]
     print 'mcmc result', mcmc_result
     mcmc_result = [mcmc_result[0], mcmc_result[1], mcmc_result[2], c, \
             mcmc_result[3], mcmc_result[4]]
-    np.savetxt("parameters%s.txt" %fname, mcmc_result)
+
+    # save samples
+    print sampler.chain
+    f = h5py.File("samples_%s" %fname, "w")
+    data = f.create_dataset("samples", np.shape(sampler.chain))
+    data[:,:] = np.array(sampler.chain)
+    f.close()
 
     # plot result
     pl.clf()
@@ -219,4 +228,4 @@ def MCMC(fname):
 
 if __name__ == "__main__":
 
-    MCMC('4')
+    MCMC('45')
