@@ -14,20 +14,21 @@ def load_dat():
 
     # check for duplicates
     KID = data[0]
+    data2 = data
     print len(KID), 'targets found'
     matches = []
     for i, k in enumerate(KID):
         match = np.where(KID == k)[0]
         if len(match) > 1:
             matches.append(KID[match][0])
-            data[:,i] = np.zeros(len(data[:,i]))
+            data2[:,i] = np.zeros(len(data2[:,i]))
     print len(matches), 'duplicates found'
 
     # remove duplicates
-    new_data = np.zeros((len(data[:,0]), len(data[0][data[0] != 0])))
-    new_data[i] = [data[i][data[0]!=0] for i in range(len(data))]
+    new_data = np.zeros((len(data2[:,0]), len(data2[0][data2[0] != 0])))
+    new_data[i] = [data2[i][data2[0]!=0] for i in range(len(data2))]
     data = new_data # comment this out if you don't want to remove duplicates
-    print len(data), 'targets remaining'
+    print np.shape(data), 'targets remaining'
 
     p = data[1]
     t = data[3]
