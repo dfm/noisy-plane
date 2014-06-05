@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as pl
 from mpl_toolkits.mplot3d import Axes3D
-from teff_bv import teff2bv
+from teff_bv import teff2bv_orig
 
 def load_dat():
 
@@ -27,7 +27,7 @@ def load_dat():
     # remove duplicates
     new_data = np.zeros((len(data2[:,0]), len(data2[0][data2[0] != 0])))
     new_data[i] = [data2[i][data2[0]!=0] for i in range(len(data2))]
-    data = new_data # comment this out if you don't want to remove duplicates
+#     data = new_data # comment this out if you don't want to remove duplicates
     print np.shape(data), 'targets remaining'
 
     p = data[1]
@@ -49,7 +49,8 @@ def load_dat():
     a_errm = data[15][l]#*1000
 
     # convert temps to bvs
-    bv_obs = teff2bv(t, g, np.ones_like(t)*-.2, t_err, g_errp, np.ones_like(t)*.001, error=False)
+#     bv_obs = teff2bv(t, g, np.ones_like(t)*-.2, t_err, g_errp, np.ones_like(t)*.001, error=False)
+    bv_obs = teff2bv_orig(t, g, np.ones_like(t)*-.2)
     bv_err = np.ones_like(bv_obs)*0.01 # made up for now
 
 #     # add praesepe

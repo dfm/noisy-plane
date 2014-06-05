@@ -228,4 +228,4 @@ def MCMC(fname):
 
 if __name__ == "__main__":
 
-    MCMC('45')
+    MCMC('45_2')
