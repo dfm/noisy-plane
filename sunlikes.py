@@ -1,58 +1,38 @@
 import numpy as np
 import matplotlib.pyplot as pl
 
-# everywhere I've written temp, i mean bv.
+# everywhere i've written temp, i mean bv.
 
-# c = .45
+# def period_model(par, age, bv):
+#     return par[0] * (age*1e3)**par[1] * (bv-.45)**par[2]
 
 def period_model(par, age, bv):
-    return par[0] * (age*1e3)**par[1] * (bv-c)**par[2]
-
-# def period_model(par, age, bv):
-#     period = par[0] * (age*1e3)**par[1] * (bv-c)**par[2]
-#     period[bv < c] = np.nan
-#     return period
-
-# def period_model(par, age, bv):
-#     log_age = np.log10(age)
-#     log_period = par[0] + par[1]*log_age + np.log10(bv-c) * par[2]
-#     return 10**log_period
+    log_age = np.log10(age)
+    log_period = par[0] + par[1]*log_age + np.log10(bv-c) * par[2]
+    return 10**log_period
 
 def lnlike(par, age_samp, temp_samp, period_samp, logg_samp, \
                temp_obs, temp_err, period_obs, period_err, logg_obs, logg_err, coeffs, c):
     nobs,nsamp = age_samp.shape
     period_pred = period_model(par[:4], age_samp, temp_samp)
-#     print period_pred
-#     raw_input('enter')
     ll = np.zeros(nobs)
     Y, V = par[3], par[4]
     Z, U = par[5], par[6]
     X, W, P = par[7], par[8], par[9]
     logg_cut = 3.7
-#     logg_cut = 4.
-#     c = 0.4
 
     ll = np.zeros(nobs)
     for i in np.arange(nobs):
 
         # cool MS stars
-#         turnoff = np.polyval(coeffs, temp_samp[i,:])
         l1 = (temp_samp[i,:] > c) * (logg_samp[i,:] > logg_cut)
         if l1.sum() > 0:
             like11 = \
                 np.exp(-((period_obs[i] - period_pred[i,l1])/2.0/period_err[i])**2) \
                 / period_err[i]
-#             print like11
-#             print period_pred[i,l1]
-#             print age_samp[i,l1]
-#             raw_input('enter')
             like12 = \
                 np.exp(-((period_obs[i] - X)**2/(2.0)**2/(W + period_err[i])**2)) \
                 / (W + period_err[i]) # incorrect but works
-#             like12 = \
-#                 np.exp(-((period_obs[i] - X)**2/(2.0)**2/(period_err[i]**2+W))) \
-#                 / (W + period_err[i]) # 'correct' but doesn't work
-#             print period_err
             like1 = (1-P)*like11 + P*like12 # FIXME: not sure if this line is correct
             if i == nobs-1:
                 like1 = np.exp(-((period_obs[i] - period_pred[i,l1])/2.0/period_err[i])**2) \
@@ -78,11 +58,5 @@ def lnlike(par, age_samp, temp_samp, period_samp, logg_samp, \
             lik3 = np.sum(like3) / float(l3.sum())
         else:
             lik3 = 0.0
-#         print lik1, lik2, lik3
-#         if np.isnan(lik1): lik1 = 0.
-#         if np.isnan(lik2): lik2 = 0.
-#         if np.isnan(lik3): lik3 = 0.
         ll[i] = np.log10(lik1 + lik2 + lik3)
-#     ll[np.isnan(ll)] = -np.inf
-#     raw_input('enter')
     return np.sum(ll)
