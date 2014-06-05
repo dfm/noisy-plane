@@ -54,6 +54,9 @@ def lnlike(par, age_samp, temp_samp, period_samp, logg_samp, \
 #                 / (W + period_err[i]) # 'correct' but doesn't work
 #             print period_err
             like1 = (1-P)*like11 + P*like12 # FIXME: not sure if this line is correct
+            if i == nobs-1:
+                like1 = np.exp(-((period_obs[i] - period_pred[i,l1])/2.0/period_err[i])**2) \
+                / period_err[i]
             lik1 = np.sum(like1) / float(l1.sum())
         else:
             lik1 = 0.0

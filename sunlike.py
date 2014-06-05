@@ -8,7 +8,7 @@ import triangle
 from plotting import load_dat, log_errorbar
 import pretty5
 from subgiants import MS_poly
-from lin_bv_likes import lnlike
+from sun_likes import lnlike
 from teff_bv import teff2bv
 import plotting_working as pw
 import h5py
@@ -59,12 +59,6 @@ def MCMC(fname):
     # load real data
     log_period_obs, bv_obs, log_age_obs, log_period_err, bv_err, log_age_err, log_age_errp, log_age_errm, \
             logg_obs, logg_err, logg_errp, logg_errm, age_obs, age_errp, age_errm, age_err, period_obs, period_err = load_dat()
-
-    # load real data
-    log_period_obs2, temp_obs, log_age_obs2, log_period_err2, temp_err2, log_age_err2, \
-            log_age_errp2, log_age_errm2, \
-            logg_obs2, logg_err2, logg_errp2, logg_errm2, age_obs2, age_errp2, age_errm2, \
-            period_obs2, period_err2 = pw.load_dat()
 
     # 3d colour plot
     pl.clf()
@@ -228,4 +222,4 @@ def MCMC(fname):
 
 if __name__ == "__main__":
 
-    MCMC('45_2')
+    MCMC('sun')
