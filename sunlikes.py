@@ -6,15 +6,18 @@ import matplotlib.pyplot as pl
 # def period_model(par, age, bv):
 #     return par[0] * (age*1e3)**par[1] * (bv-.45)**par[2]
 
-def period_model(par, age, bv):
-    log_age = np.log10(age)
-    log_period = par[0] + par[1]*log_age + np.log10(bv-c) * par[2]
-    return 10**log_period
+# def period_model(par, age, bv, c):
+#     log_age = np.log10(age)
+#     log_period = par[0] + par[1]*log_age + np.log10(bv-c) * par[2]
+#     return 10**log_period
+
+def period_model(par, age, bv, c):
+    return par[0] * (age*1e3)**par[1] * (bv-c)**par[2]
 
 def lnlike(par, age_samp, temp_samp, period_samp, logg_samp, \
                temp_obs, temp_err, period_obs, period_err, logg_obs, logg_err, coeffs, c):
     nobs,nsamp = age_samp.shape
-    period_pred = period_model(par[:4], age_samp, temp_samp)
+    period_pred = period_model(par[:4], age_samp, temp_samp, c)
     ll = np.zeros(nobs)
     Y, V = par[3], par[4]
     Z, U = par[5], par[6]
@@ -35,8 +38,12 @@ def lnlike(par, age_samp, temp_samp, period_samp, logg_samp, \
                 / (W + period_err[i]) # incorrect but works
             like1 = (1-P)*like11 + P*like12 # FIXME: not sure if this line is correct
             if i == nobs-1:
+                period_err[i] = 1.
                 like1 = np.exp(-((period_obs[i] - period_pred[i,l1])/2.0/period_err[i])**2) \
                 / period_err[i]
+#                 print i, 'odds ratio', like11, like12
+#                 print period_obs[i], period_pred[i,l1], 'like1 = ', like1
+#                 raw_input('enter')
             lik1 = np.sum(like1) / float(l1.sum())
         else:
             lik1 = 0.0

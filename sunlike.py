@@ -6,12 +6,9 @@ import scipy.optimize as spo
 import emcee
 import triangle
 from plotting import load_dat, log_errorbar
-import pretty5
-from subgiants import MS_poly
-from sun_likes import lnlike
-from teff_bv import teff2bv
-import plotting_working as pw
+from sunlikes import lnlike
 import h5py
+from subgiants import MS_poly
 
 ocols = ['#FF9933','#66CCCC' , '#FF33CC', '#3399FF', '#CC0066', '#99CC99', '#9933FF', '#CC0000']
 plotpar = {'axes.labelsize': 20,
@@ -57,8 +54,10 @@ def MCMC(fname):
             8., 5., 9., 3.5, .67] # better initialisation
 
     # load real data
+    print '1'
     log_period_obs, bv_obs, log_age_obs, log_period_err, bv_err, log_age_err, log_age_errp, log_age_errm, \
             logg_obs, logg_err, logg_errp, logg_errm, age_obs, age_errp, age_errm, age_err, period_obs, period_err = load_dat()
+    print '2'
 
     # 3d colour plot
     pl.clf()
