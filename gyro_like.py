@@ -8,13 +8,12 @@ def period_model(par, age, bv, c):
 
 def lnlike(par, age_samp, temp_samp, period_samp, logg_samp, \
                temp_obs, temp_err, period_obs, period_err, logg_obs, logg_err, coeffs, c):
-    nobs,nsamp = age_samp.shape
-    period_pred = period_model(par[:4], age_samp, temp_samp, c)
-    ll = np.zeros(nobs)
+    nobs, nsamp = age_samp.shape
+    period_pred = period_model(par[:3], age_samp, temp_samp, c)
     Y, V = par[3], par[4]
     Z, U = par[5], par[6]
     X, W, P = par[7], par[8], par[9]
-    logg_cut = 3.7
+    logg_cut = 3.7 # FIXME
 
     ll = np.zeros(nobs)
     for i in np.arange(nobs):
