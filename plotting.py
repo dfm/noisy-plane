@@ -50,7 +50,9 @@ def load_dat():
 
     # convert temps to bvs
 #     bv_obs = teff2bv(t, g, np.ones_like(t)*-.2, t_err, g_errp, np.ones_like(t)*.001, error=False)
+    print '3'
     bv_obs = teff2bv_orig(t, g, np.ones_like(t)*-.2)
+    print '4'
     bv_err = np.ones_like(bv_obs)*0.01 # made up for now
 
 #     # add praesepe

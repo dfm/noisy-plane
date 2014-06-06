@@ -54,10 +54,8 @@ def MCMC(fname):
             8., 5., 9., 3.5, .67] # better initialisation
 
     # load real data
-    print '1'
     log_period_obs, bv_obs, log_age_obs, log_period_err, bv_err, log_age_err, log_age_errp, log_age_errm, \
             logg_obs, logg_err, logg_errp, logg_errm, age_obs, age_errp, age_errm, age_err, period_obs, period_err = load_dat()
-    print '2'
 
     # 3d colour plot
     pl.clf()
@@ -161,6 +159,8 @@ def MCMC(fname):
                           zip(*np.percentile(flat, [16, 50, 84], axis=0)))
         mres = np.array(mcmc_result)[:, 0]
         print 'mcmc_result = ', mres
+        print 'mcmc_result = ', mcmc_result
+
 
         print("Making triangle plot")
         fig_labels = ["$a$", "$n$", "$b$", "$Y$", "$V$", "$Z$", "$U$", "$X$", "$W$", "$P$"]
