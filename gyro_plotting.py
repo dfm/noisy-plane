@@ -5,7 +5,8 @@ from teff_bv import teff2bv_orig
 
 def load_dat():
 
-    data = np.genfromtxt('/Users/angusr/Python/Gyro/data/new_matched.txt').T
+#     data = np.genfromtxt('/Users/angusr/Python/Gyro/data/new_matched.txt').T
+    data = np.genfromtxt('/Users/angusr/Python/Gyro/data/p_errs.txt').T
 
     # check for duplicates FIXME: sort this out!
     KID = data[0]
