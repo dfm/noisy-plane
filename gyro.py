@@ -3,8 +3,8 @@ import numpy as np
 import scipy.optimize as spo
 import emcee
 import triangle
-from gyro_plotting import load_dat, log_errorbar, period_model
-from gyro_like import lnlike
+from gyro_plotting import load_dat
+from gyro_like import lnlike, period_model
 import h5py
 from subgiants import MS_poly
 
@@ -41,7 +41,8 @@ def MCMC(fname, c):
             8., 5., 9., 3.5, .67] # better initialisation
 
     # load real data
-    age_obs, age_err, age_errp, age_errm, period_obs, period_err, bv, bv_err, logg, logg_err, logg_errp, logg_errm = load_dat()
+    age_obs, age_err, age_errp, age_errm, period_obs, period_err, bv_obs, bv_err, \
+            logg_obs, logg_err, logg_errp, logg_errm = load_dat()
 
     # Now generate samples
     nsamp = 100
@@ -115,4 +116,4 @@ def MCMC(fname, c):
 
 if __name__ == "__main__":
 
-    MCMC('sun', .45)
+    MCMC('gyro', .45)
