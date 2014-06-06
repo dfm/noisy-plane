@@ -4,7 +4,7 @@ import scipy.optimize as spo
 import emcee
 import triangle
 from gyro_plotting import load_dat
-from gyro_like import lnlike, period_model
+from sunlikes import lnlike, period_model
 import h5py
 from subgiants import MS_poly
 
@@ -116,4 +116,4 @@ def MCMC(fname, c):
 
 if __name__ == "__main__":
 
-    MCMC('gyro', .45)
+    MCMC('gyrosun', .45)
