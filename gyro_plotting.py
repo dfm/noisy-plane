@@ -13,11 +13,11 @@ def load_dat():
     vic = np.genfromtxt('/Users/angusr/Python/Gyro/data/Victor_params.txt', \
             skip_header=1).T
 
-    for i in vic[0]:
-        print KID[KID==i], i
-        print data[1][KID==i], data[2][KID==i]
+#     for i in vic[0]:
+#         print KID[KID==i], i
 #         print data[1][KID==i], data[2][KID==i]
-    raw_input('enter')
+# #         print data[1][KID==i], data[2][KID==i]
+#     raw_input('enter')
 
     # check for duplicates FIXME: sort this out!
     data2 = data
@@ -26,15 +26,16 @@ def load_dat():
     for i, k in enumerate(KID):
         match = np.where(KID == k)[0]
         if len(match) > 1:
-            matches.append(KID[match][0])
+            matches.append(KID[match][1])
             data2[:,i] = np.zeros(len(data2[:,i]))
+#             print k, KID[match][1]
     print len(matches), 'duplicates found'
 
     # remove duplicates
     new_data = np.zeros((len(data2[:,0]), len(data2[0][data2[0] != 0])))
     new_data[i] = [data2[i][data2[0]!=0] for i in range(len(data2))]
-#     data = new_data # comment this out if you don't want to remove duplicates
-    print np.shape(data), 'targets remaining'
+    data = new_data # comment this out if you don't want to remove duplicates
+    print np.shape(data)[1], 'targets remaining'
 
     p = data[1]
     t = data[3]

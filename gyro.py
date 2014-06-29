@@ -116,4 +116,4 @@ def MCMC(fname, c):
 
 if __name__ == "__main__":
 
-    MCMC('gyrosun', .45)
+    MCMC('gyro', .45)
