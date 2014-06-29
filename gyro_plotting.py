@@ -7,9 +7,19 @@ def load_dat():
 
 #     data = np.genfromtxt('/Users/angusr/Python/Gyro/data/new_matched.txt').T
     data = np.genfromtxt('/Users/angusr/Python/Gyro/data/p_errs.txt').T
+    KID = data[0]
+
+    # replace victor's stars
+    vic = np.genfromtxt('/Users/angusr/Python/Gyro/data/Victor_params.txt', \
+            skip_header=1).T
+
+    for i in vic[0]:
+        print KID[KID==i], i
+        print data[1][KID==i], data[2][KID==i]
+#         print data[1][KID==i], data[2][KID==i]
+    raw_input('enter')
 
     # check for duplicates FIXME: sort this out!
-    KID = data[0]
     data2 = data
     print len(KID), 'targets found'
     matches = []
