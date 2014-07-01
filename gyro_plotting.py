@@ -9,10 +9,6 @@ def load_dat():
     data = np.genfromtxt('/Users/angusr/Python/Gyro/data/p_errs.txt').T
     KID = data[0]
 
-    # replace victor's stars
-    vic = np.genfromtxt('/Users/angusr/Python/Gyro/data/Victor_params.txt', \
-            skip_header=1).T
-
 #     for i in vic[0]:
 #         print KID[KID==i], i
 #         print data[1][KID==i], data[2][KID==i]
@@ -54,10 +50,31 @@ def load_dat():
     a = data[13][l]
     a_errp = data[14][l]
     a_errm = data[15][l]
+    feh = np.ones_like(t)*-.2
+    feh_err = np.ones_like(t)*.3
+
+    # replace victor's stars
+    vic = np.genfromtxt('/Users/angusr/Python/Gyro/data/Victor_params.txt', \
+            skip_header=1).T
+    name = vic[0]
+    t = np.concatenate((t, vic[3]))
+    t_err = np.concatenate((t_err, vic[4]))
+    g = np.concatenate((g, vic[11]))
+    g_errp = np.concatenate((g_errp, vic[12]))
+    g_errm = np.concatenate((g_errm, vic[13]))
+    a = np.concatenate((a, vic[14]))
+    a_errp = np.concatenate((a_errp, vic[15]))
+    a_errm = np.concatenate((a_errm, vic[16]))
+    vic = np.genfromtxt('/Users/angusr/Python/Gyro/data/victor_periods.txt').T
+    p = np.concatenate((p, vic[1]))
+    p_err = np.concatenate((p_err, vic[2]))
+    feh = np.concatenate((feh, vic[1]))
+    feh_err = np.concatenate(feh_err, vic[2]))
 
     # convert temps to bvs
-    bv_obs = teff2bv_orig(t, g, np.ones_like(t)*-.2)
-    bv_err = np.ones_like(bv_obs)*0.01 # made up for now
+#     bv_obs = teff2bv_orig(t, g, np.ones_like(t)*-.2)
+#     bv_err = np.ones_like(bv_obs)*0.01 # made up for now
+    bv_obs, bv_err = teff2bv_err(t, g, feh, t_err, .5*(g_errp+g_errm), feh_err) #FIXME: take mean g_err
 
     # add clusters FIXME: check all uncertainties on cluster values
     data = np.genfromtxt("/Users/angusr/Python/Gyro/data/clusters.txt", skip_header=1).T
