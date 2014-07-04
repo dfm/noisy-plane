@@ -8,7 +8,8 @@ import triangle
 from plotting import load_dat, log_errorbar
 import pretty5
 from subgiants import MS_poly
-from lin_bv_likes import lnlike
+# from lin_bv_likes import lnlike
+from gyro_likes import lnlike
 from teff_bv import teff2bv
 import plotting_working as pw
 import h5py
@@ -167,7 +168,7 @@ def MCMC(fname):
         mcmc_result = map(lambda v: (v[1], v[2]-v[1], v[1]-v[0]),
                           zip(*np.percentile(flat, [16, 50, 84], axis=0)))
         mres = np.array(mcmc_result)[:, 0]
-        print 'mcmc_result = ', mcmc_result
+        print 'mcmc_result = ', mres
 
         print("Making triangle plot")
         fig_labels = ["$a$", "$n$", "$b$", "$Y$", "$V$", "$Z$", "$U$", "$X$", "$W$", "$P$"]
@@ -228,4 +229,4 @@ def MCMC(fname):
 
 if __name__ == "__main__":
 
-    MCMC('45_2')
+    MCMC('45_2_gyrolike')
