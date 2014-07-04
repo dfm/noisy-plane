@@ -167,7 +167,7 @@ def MCMC(fname):
         mcmc_result = map(lambda v: (v[1], v[2]-v[1], v[1]-v[0]),
                           zip(*np.percentile(flat, [16, 50, 84], axis=0)))
         mres = np.array(mcmc_result)[:, 0]
-        print 'mcmc_result = ', mres
+        print 'mcmc_result = ', mcmc_result
 
         print("Making triangle plot")
         fig_labels = ["$a$", "$n$", "$b$", "$Y$", "$V$", "$Z$", "$U$", "$X$", "$W$", "$P$"]

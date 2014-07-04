@@ -116,4 +116,4 @@ def MCMC(fname, c):
 
 if __name__ == "__main__":
 
-    MCMC('gyro', .45)
+    MCMC('gyro_extra', .45)

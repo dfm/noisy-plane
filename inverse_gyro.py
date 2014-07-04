@@ -27,7 +27,7 @@ def lnprior(m):
     return -np.inf
 
 def lnprob(m, age_samp, bv_samp, period_samp, logg_samp, \
-        bv_obs, bv_err, period_obs, period_err, logg_obs, \
+        age_obs, age_err, bv_obs, bv_err, period_obs, period_err, logg_obs, \
         logg_err, coeffs, c):
     lp = lnprior(m)
     if not np.isfinite(lp):
@@ -116,4 +116,4 @@ def MCMC(fname, c):
 
 if __name__ == "__main__":
 
-    MCMC('gyro_extra', .45)
+    MCMC('inverse', .45)

@@ -13,7 +13,7 @@ def lnlike(par, age_samp, temp_samp, period_samp, logg_samp, \
     Y, V = par[3], par[4]
     Z, U = par[5], par[6]
     X, W, P = par[7], par[8], par[9]
-    logg_cut = 3.7 # FIXME
+    logg_cut = 4. # FIXME
 
     ll = np.zeros(nobs)
     for i in np.arange(nobs):

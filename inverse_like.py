@@ -38,7 +38,7 @@ def lnlike(par, age_samp, temp_samp, period_samp, logg_samp, age_obs, age_err, \
         # hot MS stars
         l2 = (temp_samp[i,:] < c) * (logg_samp[i,:] > logg_cut)
         if l2.sum() > 0:
-            like2 = np.exp(-((age[i] - Y)**2/2.0**2/((age_err[i])**2+V))) \
+            like2 = np.exp(-((age_obs[i] - Y)**2/2.0**2/((age_err[i])**2+V))) \
                 / (age_err[i]+V)
             lik2 = np.sum(like2) / float(l2.sum())
         else:

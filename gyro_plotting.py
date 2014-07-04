@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as pl
 from mpl_toolkits.mplot3d import Axes3D
-from teff_bv import teff2bv_orig
+from teff_bv import teff2bv_orig, teff2bv_err
 
 def load_dat():
 
@@ -30,7 +30,7 @@ def load_dat():
     # remove duplicates
     new_data = np.zeros((len(data2[:,0]), len(data2[0][data2[0] != 0])))
     new_data[i] = [data2[i][data2[0]!=0] for i in range(len(data2))]
-    data = new_data # comment this out if you don't want to remove duplicates
+#     data = new_data # comment this out if you don't want to remove duplicates
     print np.shape(data)[1], 'targets remaining'
 
     p = data[1]
@@ -40,6 +40,7 @@ def load_dat():
     # remove periods <= 0 and teff == 0 FIXME: why is this necessary?
     l = (p > 0.)*(t > 0.)*(g > 0.)#*(g > 4.2)*(t < 6300)
 
+    KID = data[0][l]
     p = data[1][l]
     p_err = data[2][l] # FIXME: check these!
     t = data[3][l]
@@ -53,23 +54,40 @@ def load_dat():
     feh = np.ones_like(t)*-.2
     feh_err = np.ones_like(t)*.3
 
-    # replace victor's stars
-    vic = np.genfromtxt('/Users/angusr/Python/Gyro/data/Victor_params.txt', \
-            skip_header=1).T
-    name = vic[0]
-    t = np.concatenate((t, vic[3]))
-    t_err = np.concatenate((t_err, vic[4]))
-    g = np.concatenate((g, vic[11]))
-    g_errp = np.concatenate((g_errp, vic[12]))
-    g_errm = np.concatenate((g_errm, vic[13]))
-    a = np.concatenate((a, vic[14]))
-    a_errp = np.concatenate((a_errp, vic[15]))
-    a_errm = np.concatenate((a_errm, vic[16]))
-    vic = np.genfromtxt('/Users/angusr/Python/Gyro/data/victor_periods.txt').T
-    p = np.concatenate((p, vic[1]))
-    p_err = np.concatenate((p_err, vic[2]))
-    feh = np.concatenate((feh, vic[1]))
-    feh_err = np.concatenate(feh_err, vic[2]))
+#     # replace victor's stars
+#     vic = np.genfromtxt('/Users/angusr/Python/Gyro/data/Victor_params.txt', \
+#             skip_header=1).T
+#     name = vic[0]
+#     for i, n in enumerate(name):
+#         if n in KID:
+#             l = KID==n
+#             KID[l] = vic[0][i]
+#             t[l] = vic[3][i]
+#             t_err[l] = vic[4][i]
+#             g[l] = vic[11][i]
+#             g_errp[l] = vic[12][i]
+#             g_errm[l] = vic[13][i]
+#             a[l] = vic[14][i]
+#             a_errp[l] = vic[15][i]
+#             a_errm[l] = vic[16][i]
+#             feh[l] = vic[1][i]
+#             feh_err[l] = vic[2][i]
+#             vic = np.genfromtxt('/Users/angusr/Python/Gyro/data/victor_periods.txt').T
+#             p[l] = vic[1][i]
+#             p_err[l] = vic[2][i]
+
+#     t = np.concatenate((t, vic[3]))
+#     t_err = np.concatenate((t_err, vic[4]))
+#     g = np.concatenate((g, vic[11]))
+#     g_errp = np.concatenate((g_errp, vic[12]))
+#     g_errm = np.concatenate((g_errm, vic[13]))
+#     a = np.concatenate((a, vic[14]))
+#     a_errp = np.concatenate((a_errp, vic[15]))
+#     a_errm = np.concatenate((a_errm, vic[16]))
+#     feh = np.concatenate((feh, vic[1]))
+#     feh_err = np.concatenate((feh_err, vic[2]))
+#     p = np.concatenate((p, vic[1]))
+#     p_err = np.concatenate((p_err, vic[2]))
 
     # convert temps to bvs
 #     bv_obs = teff2bv_orig(t, g, np.ones_like(t)*-.2)
