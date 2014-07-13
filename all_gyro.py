@@ -48,30 +48,6 @@ def MCMC(fname, c):
     age_obs, age_err, age_errp, age_errm, period_obs, period_err, bv_obs, bv_err, \
             logg_obs, logg_err, logg_errp, logg_errm = load_dat()
 
-    pars = [0.5189, 0.7725, 0.601, 0.4]
-    n, a, b, c = pars
-#     a_surf = np.linspace(.65, 15, 100)
-    p_surf = np.linspace(1, 70., 100)
-    c_surf = np.linspace(.4, 1.4, 100)
-#     a_surf, c_surf = np.meshgrid(a_surf, c_surf)
-    p_surf, c_surf = np.meshgrid(p_surf, c_surf)
-#     p_surf = a_surf**n * a * (c_surf - c)**b
-    a_surf = (p_surf)**(1./n) * (1./a)**(1./n) * (1./(c_surf)**(b/n))
-    a_surf /= 1000.
-    l = a_surf<14
-    a_surf = a_surf[l]
-    p_surf = p_surf[l]
-    c_surf = c_surf[l]
-    fig = pl.figure()
-    ax = fig.gca(projection='3d')
-    ax.scatter(bv_obs, age_obs, period_obs, color='k')
-    ax.set_zlabel('$P_{rot}~\mathrm{(days)}$')
-    ax.set_xlabel('$\mathrm{B-V}$')
-    ax.set_ylabel('$\mathrm{Age~(Gyr)}$')
-    ax.plot_surface(c_surf, a_surf, p_surf, alpha = 0.0)
-    pl.show()
-    raw_input('enter')
-
     # Now generate samples
     # this is the bit I need to change!
     nsamp = 100
@@ -94,13 +70,13 @@ def MCMC(fname, c):
     sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args = args)
 
     print("Burn-in")
-#     p0, lp, state = sampler.run_mcmc(p0, 3000)
-    p0, lp, state = sampler.run_mcmc(p0, 300)
+    p0, lp, state = sampler.run_mcmc(p0, 3000)
+#     p0, lp, state = sampler.run_mcmc(p0, 300)
     sampler.reset()
     print("Production run")
     nstep = 10000
-#     nruns = 2000.
-    nruns = 200.
+    nruns = 2000.
+#     nruns = 200.
 
     for j in range(int(nstep/nruns)):
 
