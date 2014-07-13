@@ -39,10 +39,11 @@ def lnlike(par, age_samp, temp_samp, period_samp, logg_samp, age_obs, age_err, \
         # cool MS stars
         l1 = (temp_samp[i,:] > c) * (logg_samp[i,:] > logg_cut)
         if l1.sum() > 0:
-            loglike11 = -.5*((age_obs[i]-age_pred[i,l1])**2/age_err[i]**2)
-            loglike12 = -.5*((age_obs[i]-X)**2/(U+age_err[i]**2))
-            loglike1 = loglike11 + np.log((1-P)/age_err[i]) \
-                    + loglike12 + np.log(P/np.sqrt(U+age_err[i]**2))
+#             loglike11 = -.5*((age_obs[i]-age_pred[i,l1])**2/age_err[i]**2)
+            loglike1 = -.5*((age_obs[i]-age_pred[i,l1])**2/age_err[i]**2) -.5*np.log(age_err[i])
+#             loglike12 = -.5*((age_obs[i]-X)**2/(U+age_err[i]**2))
+#             loglike1 = loglike11 + np.log((1-P)/age_err[i]) \
+#                     + loglike12 + np.log(P/np.sqrt(U+age_err[i]**2))
             lik1 = np.logaddexp.reduce(loglike1, axis=0) / float(l1.sum())
         else:
             lik1 = 0.

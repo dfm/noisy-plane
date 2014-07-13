@@ -7,6 +7,7 @@ from all_plotting import load_dat
 from all_like import lnlike, period_model
 import h5py
 from subgiants import MS_poly
+from mpl_toolkits.mplot3d import Axes3D
 
 ocols = ['#FF9933','#66CCCC' , '#FF33CC', '#3399FF', '#CC0066', '#99CC99', '#9933FF', '#CC0000']
 plotpar = {'axes.labelsize': 20,
@@ -20,7 +21,8 @@ pl.rcParams.update(plotpar)
 # def split_norm(mean, usig, lsig):
 
 def lnprior(m):
-    if -10. < m[0] < 10. and .3 < m[1] < .8 and 0. < m[2] < 1. \
+#     if -10. < m[0] < 10. and .3 < m[1] < .8 and 0. < m[2] < 1. \
+    if -10. < m[0] < 10. and 0. < m[1] < 1. and 0. < m[2] < 1. \
             and 0 < m[3] < 30. and 0 < m[4] < 100.\
             and 0 < m[5] < 30. and 0 < m[6] < 100.\
             and 0 < m[7] < 30. and 0 < m[8] < 100.\
@@ -46,6 +48,30 @@ def MCMC(fname, c):
     age_obs, age_err, age_errp, age_errm, period_obs, period_err, bv_obs, bv_err, \
             logg_obs, logg_err, logg_errp, logg_errm = load_dat()
 
+    pars = [0.5189, 0.7725, 0.601, 0.4]
+    n, a, b, c = pars
+#     a_surf = np.linspace(.65, 15, 100)
+    p_surf = np.linspace(1, 70., 100)
+    c_surf = np.linspace(.4, 1.4, 100)
+#     a_surf, c_surf = np.meshgrid(a_surf, c_surf)
+    p_surf, c_surf = np.meshgrid(p_surf, c_surf)
+#     p_surf = a_surf**n * a * (c_surf - c)**b
+    a_surf = (p_surf)**(1./n) * (1./a)**(1./n) * (1./(c_surf)**(b/n))
+    a_surf /= 1000.
+    l = a_surf<14
+    a_surf = a_surf[l]
+    p_surf = p_surf[l]
+    c_surf = c_surf[l]
+    fig = pl.figure()
+    ax = fig.gca(projection='3d')
+    ax.scatter(bv_obs, age_obs, period_obs, color='k')
+    ax.set_zlabel('$P_{rot}~\mathrm{(days)}$')
+    ax.set_xlabel('$\mathrm{B-V}$')
+    ax.set_ylabel('$\mathrm{Age~(Gyr)}$')
+    ax.plot_surface(c_surf, a_surf, p_surf, alpha = 0.0)
+    pl.show()
+    raw_input('enter')
+
     # Now generate samples
     # this is the bit I need to change!
     nsamp = 100
@@ -53,7 +79,6 @@ def MCMC(fname, c):
     bv_samp = np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(bv_obs, bv_err)])
     logg_samp = np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(logg_obs, logg_err)])
     period_samp = np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(period_obs, period_err)])
-    period_samp[period_samp<0] == 0. # FIXME
 
     # calculate ms turnoff coeffs
     coeffs = MS_poly()
