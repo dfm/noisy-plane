@@ -5,11 +5,12 @@ import numpy as np
 import scipy.optimize as spo
 import emcee
 import triangle
-from plotting import load_dat, log_errorbar
+# from plotting import load_dat, log_errorbar #change
+from gyro_plotting import load_dat
 import pretty5
 from subgiants import MS_poly
-# from lin_bv_likes import lnlike
-from gyro_likes import lnlike
+from lin_bv_likes import lnlike
+# from gyro_like import lnlike #change
 from teff_bv import teff2bv
 import plotting_working as pw
 import h5py
@@ -57,9 +58,12 @@ def MCMC(fname):
     par_true = [0.7725, 0.5189, .601, 5., 10., \
             8., 5., 9., 3.5, .67] # better initialisation
 
+#     # load real data
+#     log_period_obs, bv_obs, log_age_obs, log_period_err, bv_err, log_age_err, log_age_errp, log_age_errm, \
+#             logg_obs, logg_err, logg_errp, logg_errm, age_obs, age_errp, age_errm, age_err, period_obs, period_err = load_dat() #change
+
     # load real data
-    log_period_obs, bv_obs, log_age_obs, log_period_err, bv_err, log_age_err, log_age_errp, log_age_errm, \
-            logg_obs, logg_err, logg_errp, logg_errm, age_obs, age_errp, age_errm, age_err, period_obs, period_err = load_dat()
+    age_obs, age_err, age_errp, age_errm, period_obs, period_err, bv_obs, bv_err, logg_obs, logg_err, logg_errp, logg_errm = load_dat()
 
     # load real data
     log_period_obs2, temp_obs, log_age_obs2, log_period_err2, temp_err2, log_age_err2, \
@@ -229,4 +233,5 @@ def MCMC(fname):
 
 if __name__ == "__main__":
 
-    MCMC('45_2_gyrolike')
+#     MCMC('45_2_gyrolike') #change
+    MCMC('45_2_gyroplot')

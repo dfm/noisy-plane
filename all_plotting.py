@@ -3,6 +3,13 @@ import matplotlib.pyplot as pl
 from mpl_toolkits.mplot3d import Axes3D
 from teff_bv import teff2bv_orig, teff2bv_err
 
+# def test_errorbar(x, x_errp, x_errm):
+#     x = np.random.randn(1000)+100
+#     pl.clf()
+#     pl.hist(np.log(x), 50)
+#     pl.savefig('test')
+#     raw_input('enter')
+
 def load_dat():
 
 #     KID[0], t[1], t_err[2], a[3], a_errp[4], a_errm[5], p[6], p_err[7], logg[8], logg_errp[9], logg_errm[10], feh[11], feh_err[12]

@@ -17,6 +17,8 @@ plotpar = {'axes.labelsize': 20,
            'text.usetex': True}
 pl.rcParams.update(plotpar)
 
+# def split_norm(mean, usig, lsig):
+
 def lnprior(m):
     if -10. < m[0] < 10. and .3 < m[1] < .8 and 0. < m[2] < 1. \
             and 0 < m[3] < 30. and 0 < m[4] < 100.\
@@ -26,19 +28,17 @@ def lnprior(m):
         return 0.0
     return -np.inf
 
-def lnprob(m, age_samp, bv_samp, period_samp, logg_samp, \
+def lnprob(m, age_samp, bv_samp, period_samp, logg_samp, age_obs, age_err, \
         bv_obs, bv_err, period_obs, period_err, logg_obs, \
         logg_err, coeffs, c):
     lp = lnprior(m)
     if not np.isfinite(lp):
         return -np.inf
     return lp + lnlike(m, age_samp, bv_samp, \
-            period_samp, logg_samp, bv_obs, bv_err, period_obs, \
+            period_samp, logg_samp, age_obs, age_err, bv_obs, bv_err, period_obs, \
             period_err, logg_obs, logg_err, coeffs, c)
 
 def MCMC(fname, c):
-    par_true = [0.7725, 0.5189, .601, 5., 10., \
-            8., 5., 9., 3.5, .67] # better initialisation
     par_true = [0.7725, 0.5189, .601, 5., 10., \
             8., 3.5, 9., 5., .67] # better initialisation
 
@@ -47,32 +47,35 @@ def MCMC(fname, c):
             logg_obs, logg_err, logg_errp, logg_errm = load_dat()
 
     # Now generate samples
+    # this is the bit I need to change!
     nsamp = 100
     age_samp = np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(age_obs, age_err)])
-    age_samp[age_samp<0] = 0.1 # FIXME
     bv_samp = np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(bv_obs, bv_err)])
     logg_samp = np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(logg_obs, logg_err)])
     period_samp = np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(period_obs, period_err)])
+    period_samp[period_samp<0] == 0. # FIXME
 
     # calculate ms turnoff coeffs
     coeffs = MS_poly()
 
     print 'initial likelihood = ', lnlike(par_true, age_samp, bv_samp, \
-            period_samp, logg_samp, bv_obs, bv_err, period_obs, period_err, \
+            period_samp, logg_samp, age_obs, age_err, bv_obs, bv_err, period_obs, period_err, \
             logg_obs, logg_err, coeffs, c)
 
     nwalkers, ndim = 32, len(par_true)
     p0 = [par_true+1e-4*np.random.rand(ndim) for i in range(nwalkers)]
-    args = (age_samp, bv_samp, period_samp, logg_samp, bv_obs, \
+    args = (age_samp, bv_samp, period_samp, logg_samp, age_obs, age_err, bv_obs, \
             bv_err, period_obs, period_err, logg_obs, logg_err, coeffs, c)
     sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args = args)
 
     print("Burn-in")
-    p0, lp, state = sampler.run_mcmc(p0, 3000)
+#     p0, lp, state = sampler.run_mcmc(p0, 3000)
+    p0, lp, state = sampler.run_mcmc(p0, 300)
     sampler.reset()
     print("Production run")
     nstep = 10000
-    nruns = 2000.
+#     nruns = 2000.
+    nruns = 200.
 
     for j in range(int(nstep/nruns)):
 
@@ -87,8 +90,7 @@ def MCMC(fname, c):
             pl.plot(sampler.chain[:, :, i].T, 'k-', alpha=0.3)
             pl.savefig("%s%s.png" %(i, fname))
 
-        flat1 = sampler.chain[:, 50:, :].reshape((-1, ndim))
-        flat2 = sampler.chain[:, 50:, :].reshape((-1, 3))
+        flat = sampler.chain[:, 50:, :].reshape((-1, ndim))
         mcmc_result = map(lambda v: (v[1], v[2]-v[1], v[1]-v[0]),
                           zip(*np.percentile(flat, [16, 50, 84], axis=0)))
         mres = np.array(mcmc_result)[:, 0]

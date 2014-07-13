@@ -4,7 +4,8 @@ import scipy.optimize as spo
 import emcee
 import triangle
 from gyro_plotting import load_dat
-from sunlikes import lnlike, period_model
+# from sunlikes import lnlike, period_model
+from gyro_like import lnlike, period_model
 import h5py
 from subgiants import MS_poly
 
@@ -86,6 +87,7 @@ def MCMC(fname, c):
             pl.savefig("%s%s.png" %(i, fname))
 
         flat = sampler.chain[:, 50:, :].reshape((-1, ndim))
+        flat2 = sampler.chain[:, 50:, :].reshape((-1, 3))
         mcmc_result = map(lambda v: (v[1], v[2]-v[1], v[1]-v[0]),
                           zip(*np.percentile(flat, [16, 50, 84], axis=0)))
         mres = np.array(mcmc_result)[:, 0]
@@ -116,4 +118,4 @@ def MCMC(fname, c):
 
 if __name__ == "__main__":
 
-    MCMC('gyro_extra', .45)
+    MCMC('gyro_test', .45)
