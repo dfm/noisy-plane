@@ -122,4 +122,4 @@ def MCMC(fname, c):
 
 if __name__ == "__main__":
 
-    MCMC('all_test', .45)
+    MCMC('small_changes', .45)
