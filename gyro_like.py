@@ -6,13 +6,14 @@ import matplotlib.pyplot as pl
 def period_model(par, age, bv, c):
     return par[0] * (age*1e3)**par[1] * (bv-c)**par[2]
 
-def lnlike(par, age_samp, temp_samp, period_samp, logg_samp, \
+def lnlike(par, age_samp, temp_samp, period_samp, logg_samp, age_obs, age_err, \
                temp_obs, temp_err, period_obs, period_err, logg_obs, logg_err, coeffs, c):
     nobs, nsamp = age_samp.shape
+
     period_pred = period_model(par[:3], age_samp, temp_samp, c)
     Y, V = par[3], par[4]
-    Z, U = par[5], par[6]
-    X, W, P = par[7], par[8], par[9]
+    Z, W = par[5], par[6]
+    X, U, P = par[7], par[8], par[9]
     logg_cut = 4. # FIXME
 
     ll = np.zeros(nobs)
@@ -24,6 +25,7 @@ def lnlike(par, age_samp, temp_samp, period_samp, logg_samp, \
             like11 = \
                 np.exp(-((period_obs[i] - period_pred[i,l1])/2.0/period_err[i])**2) \
                 / period_err[i]
+            like11[np.isnan(like11)] = 0.
             like12 = \
                 np.exp(-((period_obs[i] - X)**2/(2.0)**2/(W + period_err[i])**2)) \
                 / (W + period_err[i]) # incorrect but works FIXME

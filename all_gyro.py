@@ -4,7 +4,7 @@ import scipy.optimize as spo
 import emcee
 import triangle
 from all_plotting import load_dat
-from all_like import lnlike, period_model
+from gyro_like import lnlike, period_model
 import h5py
 from subgiants import MS_poly
 from mpl_toolkits.mplot3d import Axes3D
