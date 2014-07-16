@@ -13,7 +13,8 @@ from teff_bv import teff2bv_orig, teff2bv_err
 def load_dat():
 
 #     KID[0], t[1], t_err[2], a[3], a_errp[4], a_errm[5], p[6], p_err[7], logg[8], logg_errp[9], logg_errm[10], feh[11], feh_err[12]
-    data = np.genfromtxt('/Users/angusr/Python/Gyro/data/all_astero.txt', skip_header=1).T
+#     data = np.genfromtxt('/Users/angusr/Python/Gyro/data/all_astero.txt', skip_header=1).T
+    data = np.genfromtxt('/Users/angusr/Python/Gyro/data/garcia_all_astero.txt', skip_header=1).T
     KID = data[0]
     t = data[1]
     p = data[6]
