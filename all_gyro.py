@@ -41,8 +41,10 @@ def lnprob(m, age_samp, bv_samp, period_samp, logg_samp, age_obs, age_err, \
             period_err, logg_obs, logg_err, coeffs, c)
 
 def MCMC(fname, c):
+#     par_true = [0.7725, 0.5189, .601, 5., 10., \
+#             8., 3.5, 9., 5., .67] # better initialisation
     par_true = [0.7725, 0.5189, .601, 5., 10., \
-            8., 3.5, 9., 5., .67] # better initialisation
+            8., 30., 9., 5., .67] # better initialisation
 
     # load real data
     age_obs, age_err, age_errp, age_errm, period_obs, period_err, bv_obs, bv_err, \
@@ -62,6 +64,7 @@ def MCMC(fname, c):
     print 'initial likelihood = ', lnlike(par_true, age_samp, bv_samp, \
             period_samp, logg_samp, age_obs, age_err, bv_obs, bv_err, period_obs, period_err, \
             logg_obs, logg_err, coeffs, c)
+    raw_input('enter')
 
     nwalkers, ndim = 32, len(par_true)
     p0 = [par_true+1e-4*np.random.rand(ndim) for i in range(nwalkers)]
@@ -83,13 +86,13 @@ def MCMC(fname, c):
         print 'run', j
         p0, lp, state = sampler.run_mcmc(p0, nruns)
 
-        print("Plotting traces")
-        pl.figure()
-        for i in range(ndim):
-            pl.clf()
-            pl.axhline(par_true[i], color = "r")
-            pl.plot(sampler.chain[:, :, i].T, 'k-', alpha=0.3)
-            pl.savefig("%s%s.png" %(i, fname))
+#         print("Plotting traces")
+#         pl.figure()
+#         for i in range(ndim):
+#             pl.clf()
+#             pl.axhline(par_true[i], color = "r")
+#             pl.plot(sampler.chain[:, :, i].T, 'k-', alpha=0.3)
+#             pl.savefig("%s%s.png" %(i, fname))
 
         flat = sampler.chain[:, 50:, :].reshape((-1, ndim))
         mcmc_result = map(lambda v: (v[1], v[2]-v[1], v[1]-v[0]),
@@ -97,13 +100,19 @@ def MCMC(fname, c):
         mres = np.array(mcmc_result)[:, 0]
         print 'mcmc_result = ', mres
 
-        print("Making triangle plot")
-        fig_labels = ["$a$", "$n$", "$b$", "$Y$", "$V$", "$Z$", "$W$", "$X$", "$U$", "$P$"]
-        fig = triangle.corner(sampler.flatchain, truths=mres, labels=fig_labels[:len(par_true)])
-        fig.savefig("triangle%s.png" %fname)
+#         print("Making triangle plot")
+#         fig_labels = ["$a$", "$n$", "$b$", "$Y$", "$V$", "$Z$", "$W$", "$X$", "$U$", "$P$"]
+#         fig = triangle.corner(sampler.flatchain, truths=mres, labels=fig_labels[:len(par_true)])
+#         fig.savefig("triangle%s.png" %fname)
 
-    # Flatten chain
-    samples = sampler.chain[:, 50:, :].reshape((-1, ndim))
+        print "saving samples"
+        print sampler.chain
+        f = h5py.File("samples_%s" %fname, "w")
+        data = f.create_dataset("samples", np.shape(sampler.chain))
+        data[:,:] = np.array(sampler.chain)
+        f.close()
+        # Flatten chain
+        samples = sampler.chain[:, 50:, :].reshape((-1, ndim))
 
     # save parameters and print to screen
     print 'initial values', par_true
@@ -122,4 +131,4 @@ def MCMC(fname, c):
 
 if __name__ == "__main__":
 
-    MCMC('small_changes', .45)
+    MCMC('garcia', .45)
