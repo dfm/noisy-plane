@@ -14,7 +14,7 @@ def load_dat():
 
 #     KID[0], t[1], t_err[2], a[3], a_errp[4], a_errm[5], p[6], p_err[7], logg[8], logg_errp[9], logg_errm[10], feh[11], feh_err[12]
 #     data = np.genfromtxt('/Users/angusr/Python/Gyro/data/all_astero.txt', skip_header=1).T
-    data = np.genfromtxt('/Users/angusr/Python/Gyro/data/garcia_all_astero.txt', skip_header=1).T
+    data = np.genfromtxt('/Users/angusr/Python/Gyro/data/garcia_all_astero.txt')
     KID = data[0]
     t = data[1]
     p = data[6]
@@ -66,3 +66,18 @@ def load_dat():
     a_err[l] = a_err[l] + diff[l] - np.finfo(float).eps
 
     return a, a_err, a_errp, a_errm, p, p_err, t, t_err, g, g_err, g_errp, g_errm
+
+if __name__ == "__main__":
+
+    # test the hot stars
+    a, a_err, a_errp, a_errm, p, p_err, bv, bv_err, g, g_err, g_errp, g_errm = load_dat()
+
+    c = .45; logg_cut = 4.
+    l = (bv < .45) * (g > logg_cut)
+
+    pl.clf()
+    pl.subplot(2, 1, 1)
+    pl.plot(bv, p, 'k.')
+    pl.subplot(2, 1, 2)
+    pl.plot(a, p, 'k.')
+    pl.savefig('test')
