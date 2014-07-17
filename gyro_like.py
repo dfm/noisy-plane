@@ -29,10 +29,6 @@ def lnlike(par, age_samp, temp_samp, period_samp, logg_samp, age_obs, age_err, \
             like12 = \
                 np.exp(-.5*((period_obs[i] - X)/(U + period_err[i]))**2) \
                 / (U + period_err[i]) # FIXME here U is sig, not var
-            if like12 > 1e3:
-                print like12, period_obs[i], period_err[i]
-            if like12 ==0:
-                print like12, period_obs[i], period_err[i], X, U
             like1 = (1-P)*like11 + P*like12
 #             loglike1 = np.log((1-P)*like11 + P*like12)
 #             loglik1 = np.logaddexp.reduce(loglike1, axis=0)/float(l1.sum())
@@ -54,16 +50,17 @@ def lnlike(par, age_samp, temp_samp, period_samp, logg_samp, age_obs, age_err, \
         # subgiants
         l3 = (logg_samp[i,:] < logg_cut)
         if l3.sum() > 0:
-            like3 = np.exp(-.5*((period_obs[i] - Z)/(period_err[i]+U))**2) \
+            like3 = np.exp(-.5*((period_obs[i] - Z)/(period_err[i]+W))**2) \
                 / (W + period_err[i]) # FIXME now W is sig, not var
 #             loglike3 = np.log(like3)
 #             loglik3 = np.logaddexp.reduce(loglike3, axis=0) # don't divide by J!
             lik3 = np.sum(like3) / float(l3.sum())
         else:
             lik3 = 0.0
-        ll[i] = np.log10(lik1 + lik2 + lik3)
+
+        ll[i] = np.log(lik1 + lik2 + lik3)
+
     loglike = np.sum(ll)
-    if np.isnan(loglike) == True:
-        loglike = -np.inf
-        print lik1, lik2, lik3, like12
+#     if np.isnan(loglike) == True:
+#         loglike = -np.inf
     return loglike
