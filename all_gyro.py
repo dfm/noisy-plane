@@ -86,24 +86,11 @@ def MCMC(fname, c):
         print 'run', j
         p0, lp, state = sampler.run_mcmc(p0, nruns)
 
-#         print("Plotting traces")
-#         pl.figure()
-#         for i in range(ndim):
-#             pl.clf()
-#             pl.axhline(par_true[i], color = "r")
-#             pl.plot(sampler.chain[:, :, i].T, 'k-', alpha=0.3)
-#             pl.savefig("%s%s.png" %(i, fname))
-
         flat = sampler.chain[:, 50:, :].reshape((-1, ndim))
         mcmc_result = map(lambda v: (v[1], v[2]-v[1], v[1]-v[0]),
                           zip(*np.percentile(flat, [16, 50, 84], axis=0)))
         mres = np.array(mcmc_result)[:, 0]
         print 'mcmc_result = ', mres
-
-#         print("Making triangle plot")
-#         fig_labels = ["$a$", "$n$", "$b$", "$Y$", "$V$", "$Z$", "$W$", "$X$", "$U$", "$P$"]
-#         fig = triangle.corner(sampler.flatchain, truths=mres, labels=fig_labels[:len(par_true)])
-#         fig.savefig("triangle%s.png" %fname)
 
         print "saving samples"
         print sampler.chain
@@ -131,4 +118,4 @@ def MCMC(fname, c):
 
 if __name__ == "__main__":
 
-    MCMC('garcia', .45)
+    MCMC('_45', .45)

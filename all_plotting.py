@@ -19,6 +19,7 @@ def load_dat():
     t = data[1]
     p = data[6]
     g = data[8]
+    print len(p)
 
     # remove periods <= 0 and teff == 0 FIXME: why is this necessary?
     l = (p > 0.)*(t > 0.)*(g > 0.)
@@ -81,3 +82,9 @@ if __name__ == "__main__":
     pl.subplot(2, 1, 2)
     pl.plot(a, p, 'k.')
     pl.savefig('test')
+
+    # find the mean b-v uncertainty
+    l = (bv_err!=0.01) * (bv_err!=0.001)
+    print np.mean(bv_err[l])
+
+    print g_err[l]
