@@ -61,6 +61,6 @@ def lnlike(par, age_samp, temp_samp, period_samp, logg_samp, age_obs, age_err, \
         ll[i] = np.log(lik1 + lik2 + lik3)
 
     loglike = np.sum(ll)
-#     if np.isnan(loglike) == True:
-#         loglike = -np.inf
+    if np.isnan(loglike) == True:
+        loglike = -np.inf
     return loglike

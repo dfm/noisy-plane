@@ -64,7 +64,6 @@ def MCMC(fname, c):
     print 'initial likelihood = ', lnlike(par_true, age_samp, bv_samp, \
             period_samp, logg_samp, age_obs, age_err, bv_obs, bv_err, period_obs, period_err, \
             logg_obs, logg_err, coeffs, c)
-    raw_input('enter')
 
     nwalkers, ndim = 32, len(par_true)
     p0 = [par_true+1e-4*np.random.rand(ndim) for i in range(nwalkers)]
