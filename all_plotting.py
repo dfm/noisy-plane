@@ -14,7 +14,8 @@ def load_dat():
 
 #     KID[0], t[1], t_err[2], a[3], a_errp[4], a_errm[5], p[6], p_err[7], logg[8], logg_errp[9], logg_errm[10], feh[11], feh_err[12]
 #     data = np.genfromtxt('/Users/angusr/Python/Gyro/data/all_astero.txt', skip_header=1).T
-    data = np.genfromtxt('/Users/angusr/Python/Gyro/data/garcia_all_astero.txt')
+#     data = np.genfromtxt('/Users/angusr/Python/Gyro/data/garcia_all_astero.txt')
+    data = np.genfromtxt('/Users/angusr/Python/Gyro/data/all_astero_plusgarcia.txt')
     KID = data[0]
     t = data[1]
     p = data[6]
@@ -78,13 +79,18 @@ if __name__ == "__main__":
 
     pl.clf()
     pl.subplot(2, 1, 1)
-    pl.plot(bv, p, 'k.')
+    pl.errorbar(bv, p, xerr=bv_err, yerr=p_err, fmt='k.', capsize=0, ecolor='.7', \
+            markersize=2)
+    pl.xlabel('colour')
     pl.subplot(2, 1, 2)
-    pl.plot(a, p, 'k.')
+    pl.errorbar(a, p, xerr=(a_errp, a_errm), yerr=p_err, fmt='k.', capsize=0, ecolor='.7', \
+            markersize=2)
+    pl.xlabel('age')
+    pl.show()
     pl.savefig('test')
 
     # find the mean b-v uncertainty
     l = (bv_err!=0.01) * (bv_err!=0.001)
     print np.mean(bv_err[l])
 
-    print g_err[l]
+#     print g_err[l]

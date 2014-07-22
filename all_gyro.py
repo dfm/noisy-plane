@@ -72,12 +72,12 @@ def MCMC(fname, c):
     sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args = args)
 
     print("Burn-in")
-    p0, lp, state = sampler.run_mcmc(p0, 3000)
+    p0, lp, state = sampler.run_mcmc(p0, 2000)
 #     p0, lp, state = sampler.run_mcmc(p0, 300)
     sampler.reset()
     print("Production run")
     nstep = 50000
-    nruns = 5000.
+    nruns = 2000.
 #     nruns = 500.
 
     for j in range(int(nstep/nruns)):
@@ -117,4 +117,4 @@ def MCMC(fname, c):
 
 if __name__ == "__main__":
 
-    MCMC('_45', .45)
+    MCMC('_45acf', .45)
