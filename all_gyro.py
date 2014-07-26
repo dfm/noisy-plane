@@ -117,4 +117,4 @@ def MCMC(fname, c):
 
 if __name__ == "__main__":
 
-    MCMC('_45acf', .45)
+    MCMC('_45_2acf', .45)
