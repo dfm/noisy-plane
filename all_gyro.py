@@ -117,4 +117,6 @@ def MCMC(fname, c):
 
 if __name__ == "__main__":
 
-    MCMC('_45_2acf', .45)
+#     MCMC('_45_2acf', .45) # last full run
+#     MCMC('no_NGC6811', .45)
+    MCMC('hyades', .45)
