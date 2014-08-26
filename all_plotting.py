@@ -46,21 +46,37 @@ def load_dat():
     # remove clusters but leave field
     # add clusters FIXME: reddening
     data = np.genfromtxt("/Users/angusr/Python/Gyro/data/clusters.txt", skip_header=1).T
-    l = (data[4]!=1.1) * (data[4]!=0.588) * (data[4]!=0.5)
-    bv_obs = np.concatenate((bv_obs, data[0][l]))
-    bv_err = np.concatenate((bv_err, data[1][l]))
-    p = np.concatenate((p, data[2][l]))
-    p_err = np.concatenate((p_err, data[3][l]))
-    a = np.concatenate((a, data[4][l]))
-    a_errp = np.concatenate((a_errp, data[5][l]))
-    a_errm = np.concatenate((a_errm, data[5][l]))
-    g = np.concatenate((g, data[6][l]))
-    g_errp = np.concatenate((g_errp, data[7][l]))
-    g_errm = np.concatenate((g_errm, data[7][l]))
+#     l = (data[4]!=1.1) * (data[4]!=0.588)
+#     l = (data[4]!=1.1) * (data[4]!=0.588) * (data[4]!=0.5)
+#     l1 = g < -10
+    bv_obs = np.concatenate((bv_obs, data[0]))
+    bv_err = np.concatenate((bv_err, data[1]))
+    p = np.concatenate((p, data[2]))
+    p_err = np.concatenate((p_err, data[3]))
+    a = np.concatenate((a, data[4]))
+    a_errp = np.concatenate((a_errp, data[5]))
+    a_errm = np.concatenate((a_errm, data[5]))
+    g = np.concatenate((g, data[6]))
+    g_errp = np.concatenate((g_errp, data[7]))
+    g_errm = np.concatenate((g_errm, data[7]))
 
     # obviously comment these lines out if you want to use temps
     t = bv_obs
     t_err = bv_err
+
+#     # just_clusters_no_NGC
+#     l = (a!=0.5) * (a!=0.588) * (a!=.625)
+#     for b in range(-5,0):
+#         l[b] = False
+#     l = l==False
+
+    # all_no_NGC
+    l = a!=1.1
+
+    t = t[l]; t_err = t_err[l]
+    p = p[l]; p_err = p_err[l]
+    a = a[l]; a_errp = a_errp[l]; a_errm = a_errm[l]
+    g = g[l]; g_errp = g_errp[l]; g_errm = g_errm[l]
 
     # using clusters only
     # using field stars only
@@ -92,9 +108,6 @@ if __name__ == "__main__":
     # test the hot stars
     a, a_err, a_errp, a_errm, p, p_err, bv, bv_err, g, g_err, g_errp, g_errm = load_dat()
 
-    c = .45; logg_cut = 4.
-    l = (bv < .45) * (g > logg_cut)
-
     pl.clf()
     pl.subplot(2, 1, 1)
     pl.errorbar(bv, p, xerr=bv_err, yerr=p_err, fmt='k.', capsize=0, ecolor='.7', \
@@ -106,6 +119,10 @@ if __name__ == "__main__":
     pl.xlabel('age')
     pl.show()
     pl.savefig('test')
+
+#     c = .45; logg_cut = 4.
+#     l = (bv < .45) * (g > logg_cut)
+
 
     # find the mean b-v uncertainty
     l = (bv_err!=0.01) * (bv_err!=0.001)
