@@ -46,9 +46,10 @@ def load_dat():
     # remove clusters but leave field
     # add clusters FIXME: reddening
     data = np.genfromtxt("/Users/angusr/Python/Gyro/data/clusters.txt", skip_header=1).T
-#     l = (data[4]!=1.1) * (data[4]!=0.588)
+# #     l = (data[4]!=1.1) * (data[4]!=0.588)
 #     l = (data[4]!=1.1) * (data[4]!=0.588) * (data[4]!=0.5)
 #     l1 = g < -10
+
     bv_obs = np.concatenate((bv_obs, data[0]))
     bv_err = np.concatenate((bv_err, data[1]))
     p = np.concatenate((p, data[2]))
@@ -60,9 +61,26 @@ def load_dat():
     g_errp = np.concatenate((g_errp, data[7]))
     g_errm = np.concatenate((g_errm, data[7]))
 
+#     bv_obs = np.concatenate((bv_obs[l1], data[0][l]))
+#     bv_err = np.concatenate((bv_err[l1], data[1][l]))
+#     p = np.concatenate((p[l1], data[2][l]))
+#     p_err = np.concatenate((p_err[l1], data[3][l]))
+#     a = np.concatenate((a[l1], data[4][l]))
+#     a_errp = np.concatenate((a_errp[l1], data[5][l]))
+#     a_errm = np.concatenate((a_errm[l1], data[5][l]))
+#     g = np.concatenate((g[l1], data[6][l]))
+#     g_errp = np.concatenate((g_errp[l1], data[7][l]))
+#     g_errm = np.concatenate((g_errm[l1], data[7][l]))
+
     # obviously comment these lines out if you want to use temps
     t = bv_obs
     t_err = bv_err
+
+#     # hyades
+#     l = (a!=0.5) * (a!=0.588) * (a!=1.1)
+
+    # all_hyadesComa
+    l = (a!=0.588) * (a!=1.1)
 
 #     # just_clusters_no_NGC
 #     l = (a!=0.5) * (a!=0.588) * (a!=.625)
@@ -70,8 +88,41 @@ def load_dat():
 #         l[b] = False
 #     l = l==False
 
-    # all_no_NGC
-    l = a!=1.1
+#     # just_clusters_no_praesepe
+#     l = (a!=0.5) * (a!=.625) * (a!=1.1)
+#     for b in range(-5,0):
+#         l[b] = False
+#     l = l==False
+
+#     # praesepe_field
+#     l = (a!=0.588)
+#     for b in range(-5,0):
+#         l[b] = False
+#     l = l==False
+
+#     # hyadesComa
+#     l = (a!=0.5) * (a!=.625)
+#     for b in range(-5,0):
+#         l[b] = False
+#     l = l==False
+
+#     # no_clusters
+#     l = (a!=0.5) * (a!=.625) * (a!=.588) * (a!=1.1)
+
+#     # hyadesNGC
+#     l = (a!=0.5) * (a!=.588)
+
+#     # just_hyadesNGC
+#     l = (a!=0.625) * (a!=1.1)
+#     for b in range(-5,0):
+#         l[b] = False
+#     l = l==False
+
+#     # all_no_praesepe
+#     l = (a!=0.588)
+
+#     # all_no_NGC
+#     l = a!=1.1
 
     t = t[l]; t_err = t_err[l]
     p = p[l]; p_err = p_err[l]

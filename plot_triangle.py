@@ -13,11 +13,19 @@ import h5py
 # fname = "just_clusters"
 # fname = "no_NGC6811"
 # fname = "just_field"
-# fname = "no_clusters"
-# fname = "hyades"
-# fname = "hyadesComa"
 # fname = "hyadesSun"
-fname = "just_clusters_no_NGC"
+# fname = "just_clusters_no_NGC"
+# fname = "no_praesepe_no_NGC"
+# fname = "all_no_praesepe"
+# fname = "all_no_NGC"
+# fname = "praesepe_field"
+# fname = "just_clusters_no_praesepe"
+# fname = "just_hyadesNGC"
+
+fname = "no_clusters"
+# fname = "hyadesComa"
+# fname = "hyades"
+# fname = "all_hyadesComa"
 
 with h5py.File("samples_%s" %fname, "r") as f:
     samples = f["samples"][:, 50:, :]

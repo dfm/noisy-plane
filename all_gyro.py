@@ -8,6 +8,7 @@ from gyro_like import lnlike, period_model
 import h5py
 from subgiants import MS_poly
 from mpl_toolkits.mplot3d import Axes3D
+import datetime
 
 ocols = ['#FF9933','#66CCCC' , '#FF33CC', '#3399FF', '#CC0066', '#99CC99', '#9933FF', '#CC0000']
 plotpar = {'axes.labelsize': 20,
@@ -43,8 +44,16 @@ def lnprob(m, age_samp, bv_samp, period_samp, logg_samp, age_obs, age_err, \
 def MCMC(fname, c):
 #     par_true = [0.7725, 0.5189, .601, 5., 10., \
 #             8., 3.5, 9., 5., .67] # better initialisation
-    par_true = [0.7725, 0.5189, .601, 5., 10., \
-            8., 30., 9., 5., .67] # better initialisation
+
+    # load MAP values
+    try:
+        params = np.genfromtxt('parameters%s.txt'%fname).T
+        par_true = params[0]
+        print par_true
+    except:
+        par_true = [0.7725, 0.5189, .601, 5., 10., \
+                8., 30., 9., 5., .67] # better initialisation
+        print par_true
 
     # load real data
     age_obs, age_err, age_errp, age_errm, period_obs, period_err, bv_obs, bv_err, \
@@ -82,6 +91,8 @@ def MCMC(fname, c):
 
     for j in range(int(nstep/nruns)):
 
+        print fname
+        print datetime.datetime.now()
         print 'run', j
         p0, lp, state = sampler.run_mcmc(p0, nruns)
 
@@ -119,4 +130,17 @@ if __name__ == "__main__":
 
 #     MCMC('_45_2acf', .45) # last full run
 #     MCMC('no_NGC6811', .45)
-    MCMC('all_no_NGC', .45)
+#     MCMC('just_clusters_no_NGC', .45)
+#     MCMC('all_no_NGC', .45)
+#     MCMC('no_praesepe_no_NGC', .45)
+#     MCMC('all_no_praesepe', .45)
+#     MCMC('praesepe_field', .45)
+#     MCMC('hyadesNGC', .45)
+#     MCMC('just_clusters_no_praesepe', .45)
+#     MCMC('just_hyadesNGC', .45)
+
+#     MCMC('no_clusters', .45)
+#     MCMC('hyadesComa', .45)
+#     MCMC('hyades', .45)
+#     MCMC('all_hyadesComa', .45)
+    MCMC('PF5', .5)
