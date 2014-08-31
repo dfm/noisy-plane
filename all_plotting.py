@@ -3,14 +3,7 @@ import matplotlib.pyplot as pl
 from mpl_toolkits.mplot3d import Axes3D
 from teff_bv import teff2bv_orig, teff2bv_err
 
-# def test_errorbar(x, x_errp, x_errm):
-#     x = np.random.randn(1000)+100
-#     pl.clf()
-#     pl.hist(np.log(x), 50)
-#     pl.savefig('test')
-#     raw_input('enter')
-
-def load_dat():
+def load_dat(fname):
 
 #     KID[0], t[1], t_err[2], a[3], a_errp[4], a_errm[5], p[6], p_err[7], logg[8], logg_errp[9], logg_errm[10], feh[11], feh_err[12]
 #     data = np.genfromtxt('/Users/angusr/Python/Gyro/data/all_astero.txt', skip_header=1).T
@@ -20,7 +13,6 @@ def load_dat():
     t = data[1]
     p = data[6]
     g = data[8]
-    print len(p)
 
     # remove periods <= 0 and teff == 0 FIXME: why is this necessary?
     l = (p > 0.)*(t > 0.)*(g > 0.)
@@ -38,18 +30,14 @@ def load_dat():
     a_errm = data[5][l]
     feh = data[11][l]
     feh_err = data[12][l]
+    flag = data[13][l]
 
     # convert temps to bvs
     bv_obs, bv_err = teff2bv_err(t, g, feh, t_err, .5*(g_errp+g_errm), feh_err) #FIXME: should really use asymmetric errorbars
     l = len(bv_obs)
 
-    # remove clusters but leave field
     # add clusters FIXME: reddening
     data = np.genfromtxt("/Users/angusr/Python/Gyro/data/clusters.txt", skip_header=1).T
-# #     l = (data[4]!=1.1) * (data[4]!=0.588)
-#     l = (data[4]!=1.1) * (data[4]!=0.588) * (data[4]!=0.5)
-#     l1 = g < -10
-
     bv_obs = np.concatenate((bv_obs, data[0]))
     bv_err = np.concatenate((bv_err, data[1]))
     p = np.concatenate((p, data[2]))
@@ -60,88 +48,25 @@ def load_dat():
     g = np.concatenate((g, data[6]))
     g_errp = np.concatenate((g_errp, data[7]))
     g_errm = np.concatenate((g_errm, data[7]))
-
-#     bv_obs = np.concatenate((bv_obs[l1], data[0][l]))
-#     bv_err = np.concatenate((bv_err[l1], data[1][l]))
-#     p = np.concatenate((p[l1], data[2][l]))
-#     p_err = np.concatenate((p_err[l1], data[3][l]))
-#     a = np.concatenate((a[l1], data[4][l]))
-#     a_errp = np.concatenate((a_errp[l1], data[5][l]))
-#     a_errm = np.concatenate((a_errm[l1], data[5][l]))
-#     g = np.concatenate((g[l1], data[6][l]))
-#     g_errp = np.concatenate((g_errp[l1], data[7][l]))
-#     g_errm = np.concatenate((g_errm[l1], data[7][l]))
+    flag = np.concatenate((flag, data[8]))
 
     # obviously comment these lines out if you want to use temps
     t = bv_obs
     t_err = bv_err
 
-#     # hyades
-#     l = (a!=0.5) * (a!=0.588) * (a!=1.1)
-
-    # all_hyadesComa
-    l = (a!=0.588) * (a!=1.1)
-
-#     # just_clusters_no_NGC
-#     l = (a!=0.5) * (a!=0.588) * (a!=.625)
-#     for b in range(-5,0):
-#         l[b] = False
-#     l = l==False
-
-#     # just_clusters_no_praesepe
-#     l = (a!=0.5) * (a!=.625) * (a!=1.1)
-#     for b in range(-5,0):
-#         l[b] = False
-#     l = l==False
-
-#     # praesepe_field
-#     l = (a!=0.588)
-#     for b in range(-5,0):
-#         l[b] = False
-#     l = l==False
-
-#     # hyadesComa
-#     l = (a!=0.5) * (a!=.625)
-#     for b in range(-5,0):
-#         l[b] = False
-#     l = l==False
-
-#     # no_clusters
-#     l = (a!=0.5) * (a!=.625) * (a!=.588) * (a!=1.1)
-
-#     # hyadesNGC
-#     l = (a!=0.5) * (a!=.588)
-
-#     # just_hyadesNGC
-#     l = (a!=0.625) * (a!=1.1)
-#     for b in range(-5,0):
-#         l[b] = False
-#     l = l==False
-
-#     # all_no_praesepe
-#     l = (a!=0.588)
-
-#     # all_no_NGC
-#     l = a!=1.1
-
+    # select star group
+    flag -= 3
+    flag[flag<0] = 0
+    fnames = ['A', 'H', 'P', 'N', 'C', 'F']
+    flist = []
+    for i in range(len(fnames)):
+        if fname.find(fnames[i]) >= 0:
+            flist.append(i)
+    l = (np.sum([flag == i for i in flist], axis=0)) == 1
     t = t[l]; t_err = t_err[l]
     p = p[l]; p_err = p_err[l]
     a = a[l]; a_errp = a_errp[l]; a_errm = a_errm[l]
     g = g[l]; g_errp = g_errp[l]; g_errm = g_errm[l]
-
-    # using clusters only
-    # using field stars only
-#     l = -5
-#     t = t[l:]; t_err = t_err[l:]
-#     p = p[l:]; p_err = p_err[l:]
-#     a = a[l:]; a_errp = a_errp[l:]; a_errm = a_errm[l:]
-#     g = g[l:]; g_errp = g_errp[l:]; g_errm = g_errm[l:]
-#     # removing meibom
-#     l = a!=1.1
-#     t = t[l]; t_err = t_err[l]
-#     p = p[l]; p_err = p_err[l]
-#     a = a[l]; a_errp = a_errp[l]; a_errm = a_errm[l]
-#     g = g[l]; g_errp = g_errp[l]; g_errm = g_errm[l]
 
     # reduce errorbars if they go below zero FIXME
     # This is only necessary if you don't use asym
@@ -156,8 +81,7 @@ def load_dat():
 
 if __name__ == "__main__":
 
-    # test the hot stars
-    a, a_err, a_errp, a_errm, p, p_err, bv, bv_err, g, g_err, g_errp, g_errm = load_dat()
+    a, a_err, a_errp, a_errm, p, p_err, bv, bv_err, g, g_err, g_errp, g_errm = load_dat('PF')
 
     pl.clf()
     pl.subplot(2, 1, 1)
@@ -168,15 +92,4 @@ if __name__ == "__main__":
     pl.errorbar(a, p, xerr=(a_errp, a_errm), yerr=p_err, fmt='k.', capsize=0, ecolor='.7', \
             markersize=2)
     pl.xlabel('age')
-    pl.show()
     pl.savefig('test')
-
-#     c = .45; logg_cut = 4.
-#     l = (bv < .45) * (g > logg_cut)
-
-
-    # find the mean b-v uncertainty
-    l = (bv_err!=0.01) * (bv_err!=0.001)
-#      print np.mean(bv_err[l])
-
-#     print g_err[l]

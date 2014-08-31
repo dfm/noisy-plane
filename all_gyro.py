@@ -19,10 +19,7 @@ plotpar = {'axes.labelsize': 20,
            'text.usetex': True}
 pl.rcParams.update(plotpar)
 
-# def split_norm(mean, usig, lsig):
-
 def lnprior(m):
-#     if -10. < m[0] < 10. and .3 < m[1] < .8 and 0. < m[2] < 1. \
     if -10. < m[0] < 10. and 0. < m[1] < 1. and 0. < m[2] < 1. \
             and 0 < m[3] < 30. and 0 < m[4] < 100.\
             and 0 < m[5] < 30. and 0 < m[6] < 100.\
@@ -33,17 +30,15 @@ def lnprior(m):
 
 def lnprob(m, age_samp, bv_samp, period_samp, logg_samp, age_obs, age_err, \
         bv_obs, bv_err, period_obs, period_err, logg_obs, \
-        logg_err, coeffs, c):
+        logg_err, c):
     lp = lnprior(m)
     if not np.isfinite(lp):
         return -np.inf
     return lp + lnlike(m, age_samp, bv_samp, \
             period_samp, logg_samp, age_obs, age_err, bv_obs, bv_err, period_obs, \
-            period_err, logg_obs, logg_err, coeffs, c)
+            period_err, logg_obs, logg_err, c)
 
 def MCMC(fname, c):
-#     par_true = [0.7725, 0.5189, .601, 5., 10., \
-#             8., 3.5, 9., 5., .67] # better initialisation
 
     # load MAP values
     try:
@@ -57,27 +52,23 @@ def MCMC(fname, c):
 
     # load real data
     age_obs, age_err, age_errp, age_errm, period_obs, period_err, bv_obs, bv_err, \
-            logg_obs, logg_err, logg_errp, logg_errm = load_dat()
+            logg_obs, logg_err, logg_errp, logg_errm = load_dat(fname)
 
     # Now generate samples
-    # this is the bit I need to change!
     nsamp = 100
     age_samp = np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(age_obs, age_err)])
     bv_samp = np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(bv_obs, bv_err)])
     logg_samp = np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(logg_obs, logg_err)])
     period_samp = np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(period_obs, period_err)])
 
-    # calculate ms turnoff coeffs
-    coeffs = MS_poly()
-
     print 'initial likelihood = ', lnlike(par_true, age_samp, bv_samp, \
             period_samp, logg_samp, age_obs, age_err, bv_obs, bv_err, period_obs, period_err, \
-            logg_obs, logg_err, coeffs, c)
+            logg_obs, logg_err, c)
 
     nwalkers, ndim = 32, len(par_true)
     p0 = [par_true+1e-4*np.random.rand(ndim) for i in range(nwalkers)]
     args = (age_samp, bv_samp, period_samp, logg_samp, age_obs, age_err, bv_obs, \
-            bv_err, period_obs, period_err, logg_obs, logg_err, coeffs, c)
+            bv_err, period_obs, period_err, logg_obs, logg_err, c)
     sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args = args)
 
     print("Burn-in")
@@ -103,7 +94,6 @@ def MCMC(fname, c):
         print 'mcmc_result = ', mres
 
         print "saving samples"
-        print sampler.chain
         f = h5py.File("samples_%s" %fname, "w")
         data = f.create_dataset("samples", np.shape(sampler.chain))
         data[:,:] = np.array(sampler.chain)
@@ -115,7 +105,6 @@ def MCMC(fname, c):
     print 'initial values', par_true
     np.savetxt("parameters%s.txt" %fname, np.array(mcmc_result))
     mcmc_result = np.array(mcmc_result)[:, 0]
-    print 'mcmc result', mcmc_result
     mcmc_result = [mcmc_result[0], mcmc_result[1], mcmc_result[2], c, \
             mcmc_result[3], mcmc_result[4]]
 
@@ -128,19 +117,4 @@ def MCMC(fname, c):
 
 if __name__ == "__main__":
 
-#     MCMC('_45_2acf', .45) # last full run
-#     MCMC('no_NGC6811', .45)
-#     MCMC('just_clusters_no_NGC', .45)
-#     MCMC('all_no_NGC', .45)
-#     MCMC('no_praesepe_no_NGC', .45)
-#     MCMC('all_no_praesepe', .45)
-#     MCMC('praesepe_field', .45)
-#     MCMC('hyadesNGC', .45)
-#     MCMC('just_clusters_no_praesepe', .45)
-#     MCMC('just_hyadesNGC', .45)
-
-#     MCMC('no_clusters', .45)
-#     MCMC('hyadesComa', .45)
-#     MCMC('hyades', .45)
-#     MCMC('all_hyadesComa', .45)
     MCMC('PF5', .5)

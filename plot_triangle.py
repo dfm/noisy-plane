@@ -22,7 +22,7 @@ import h5py
 # fname = "just_clusters_no_praesepe"
 # fname = "just_hyadesNGC"
 
-fname = "no_clusters"
+# fname = "no_clusters"
 # fname = "hyadesComa"
 # fname = "hyades"
 # fname = "all_hyadesComa"

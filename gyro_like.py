@@ -7,7 +7,7 @@ def period_model(par, age, bv, c):
     return par[0] * (age*1e3)**par[1] * (bv-c)**par[2]
 
 def lnlike(par, age_samp, temp_samp, period_samp, logg_samp, age_obs, age_err, \
-               temp_obs, temp_err, period_obs, period_err, logg_obs, logg_err, coeffs, c):
+               temp_obs, temp_err, period_obs, period_err, logg_obs, logg_err, c):
     nobs, nsamp = age_samp.shape
 
     period_pred = period_model(par[:3], age_samp, temp_samp, c)
