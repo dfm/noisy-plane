@@ -55,7 +55,7 @@ def MCMC(fname, c):
             logg_obs, logg_err, logg_errp, logg_errm = load_dat(fname)
 
     # Now generate samples
-    nsamp = 100
+    nsamp = 50 # FIXME
     age_samp = np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(age_obs, age_err)])
     bv_samp = np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(bv_obs, bv_err)])
     logg_samp = np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(logg_obs, logg_err)])
@@ -117,4 +117,10 @@ def MCMC(fname, c):
 
 if __name__ == "__main__":
 
-    MCMC('PF5', .5)
+#     MCMC('PF5', .5)
+#     MCMC('NF5', .5)
+#     MCMC('CF45', .45)
+#     MCMC('NF45', .45)
+#     MCMC('HF45', .45)
+#     MCMC('PF45', .45)
+    MCMC('PF55', .5)
