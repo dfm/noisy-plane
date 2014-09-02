@@ -20,7 +20,8 @@ plotpar = {'axes.labelsize': 20,
 pl.rcParams.update(plotpar)
 
 def lnprior(m):
-    if -10. < m[0] < 10. and 0. < m[1] < 1. and 0. < m[2] < 1. \
+#     if -10. < m[0] < 10. and 0. < m[1] < 1. and 0. < m[2] < 1. \
+    if 0. < m[0] < .65 and .5 < m[1] < 1. and 0. < m[2] < 1. \
             and 0 < m[3] < 30. and 0 < m[4] < 100.\
             and 0 < m[5] < 30. and 0 < m[6] < 100.\
             and 0 < m[7] < 30. and 0 < m[8] < 100.\
@@ -46,7 +47,8 @@ def MCMC(fname, c):
         par_true = params[0]
         print par_true
     except:
-        par_true = [0.7725, 0.5189, .601, 5., 10., \
+#         par_true = [0.7725, 0.5189, .601, 5., 10., \ # Barnes
+        par_true = [0.6, 0.5189, .601, 5., 10., \
                 8., 30., 9., 5., .67] # better initialisation
         print par_true
 
