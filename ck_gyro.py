@@ -105,7 +105,7 @@ def MCMC(fname):
     print 'initial values', par_true
     np.savetxt("parameters%s.txt" %fname, np.array(mcmc_result))
     mcmc_result = np.array(mcmc_result)[:, 0]
-    mcmc_result = [mcmc_result[0], mcmc_result[1], mcmc_result[2], c, \
+    mcmc_result = [mcmc_result[0], mcmc_result[1], mcmc_result[2], \
             mcmc_result[3], mcmc_result[4]]
 
     # save samples
@@ -119,8 +119,12 @@ if __name__ == "__main__":
 
 #     MCMC('PF5', .5)
 #     MCMC('NF5', .5)
-    MCMC('ck_CF45')
 #     MCMC('NF45', .45)
 #     MCMC('HF45', .45)
 #     MCMC('PF45', .45)
 #     MCMC('PF55', .5)
+
+#     MCMC('ck_CF45')
+    MCMC('ck_PF')
+#     MCMC('ck_NF')
+#     MCMC('ck_HF')
