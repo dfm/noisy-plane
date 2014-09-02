@@ -123,4 +123,6 @@ if __name__ == "__main__":
 #     MCMC('NF45', .45)
 #     MCMC('HF45', .45)
 #     MCMC('PF45', .45)
-    MCMC('PF55', .5)
+#     MCMC('PF55', .5)
+
+    MCMC('p_PF45', .45)

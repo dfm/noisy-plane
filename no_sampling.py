@@ -104,8 +104,10 @@ if __name__ == "__main__":
 
 #     MCMC('ns_PF5', .5)
 #     MCMC('ns_NF5', .5)
-    MCMC('ns_CF45', .45)
-    MCMC('ns_NF45', .45)
-    MCMC('ns_HF45', .45)
+#     MCMC('ns_CF45', .45)
+#     MCMC('ns_NF45', .45)
+#     MCMC('ns_HF45', .45)
 #     MCMC('ns_PF45', .45)
 #     MCMC('ns_PF55', .5)
+
+
