@@ -16,9 +16,11 @@ import h5py
 # fname = "ck_NF"
 # fname = "ck_HF"
 
-fname = "ns_CF45"
+# fname = "ns_CF45"
 # fname = "ns_HF45"
 # fname = "ns_NF45"
+# fname = "ns_p_PF45"
+fname = "p_PF45"
 
 ck = fname.find('ck')
 
@@ -51,17 +53,16 @@ for i in range(npars):
     pl.xlim(xlims[i])
     pl.legend()
 pl.savefig("hist%s"%fname)
-raw_input('enter')
 
-# fig_labels = ["$a$", "$n$", "$b$", "$Y$", "$V$", "$Z$", "$W$", "$X$", "$U$", "$P$"]
-# if ck >= 0:
-#     fig_labels = ["$a$", "$n$", "$b$", "$c_k$", "$Y$", "$V$", "$Z$", "$W$", "$X$", "$U$", "$P$"]
-# fig = triangle.corner(flatchain, truths=mres, labels=fig_labels)
-# fig.savefig("triangle%s.png" %fname)
+fig_labels = ["$a$", "$n$", "$b$", "$Y$", "$V$", "$Z$", "$W$", "$X$", "$U$", "$P$"]
+if ck >= 0:
+    fig_labels = ["$a$", "$n$", "$b$", "$c_k$", "$Y$", "$V$", "$Z$", "$W$", "$X$", "$U$", "$P$"]
+fig = triangle.corner(flatchain, truths=mres, labels=fig_labels)
+fig.savefig("triangle%s.png" %fname)
 
-# print("Plotting traces")
-# pl.figure()
-# for i in range(ndim):
-#     pl.clf()
-#     pl.plot(samples[:, :, i].T, 'k-', alpha=0.3)
-#     pl.savefig("%s%s.png" %(i, fname))
+print("Plotting traces")
+pl.figure()
+for i in range(ndim):
+    pl.clf()
+    pl.plot(samples[:, :, i].T, 'k-', alpha=0.3)
+    pl.savefig("%s%s.png" %(i, fname))

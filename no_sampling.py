@@ -20,7 +20,8 @@ plotpar = {'axes.labelsize': 20,
 pl.rcParams.update(plotpar)
 
 def lnprior(m):
-    if -10. < m[0] < 10. and 0. < m[1] < 1. and 0. < m[2] < 1. \
+#     if -10. < m[0] < 10. and 0. < m[1] < 1. and 0. < m[2] < 1. \
+    if 0. < m[0] < .65 and .5 < m[1] < 1. and 0. < m[2] < 1. \
             and 0 < m[3] < 30. and 0 < m[4] < 100.\
             and 0 < m[5] < 30. and 0 < m[6] < 100.\
             and 0 < m[7] < 30. and 0 < m[8] < 100.\
@@ -41,13 +42,14 @@ def MCMC(fname, c):
         par_true = params[0]
         print par_true
     except:
-        par_true = [0.7725, 0.5189, .601, 5., 10., \
+#         par_true = [0.7725, 0.5189, .601, 5., 10., \
+        par_true = [0.6, 0.5189, .601, 5., 10., \
                 8., 30., 9., 5., .67] # better initialisation
         print par_true
 
     # load real data
     age_obs, age_err, age_errp, age_errm, period_obs, period_err, bv_obs, bv_err, \
-            logg_obs, logg_err, logg_errp, logg_errm = load_dat(fname)
+            logg_obs, logg_err, logg_errp, logg_errm, flag = load_dat(fname)
 
     print 'initial likelihood = ', lnlike(par_true, age_obs, bv_obs, period_obs, \
             period_err, logg_obs, c)
@@ -107,7 +109,6 @@ if __name__ == "__main__":
 #     MCMC('ns_CF45', .45)
 #     MCMC('ns_NF45', .45)
 #     MCMC('ns_HF45', .45)
-#     MCMC('ns_PF45', .45)
+#     MCMC('ns_p_PF45', .45)
 #     MCMC('ns_PF55', .5)
-
-
+#     MCMC('ns_APF45', .45)

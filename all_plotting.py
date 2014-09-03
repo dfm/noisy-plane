@@ -2,8 +2,16 @@ import numpy as np
 import matplotlib.pyplot as pl
 from mpl_toolkits.mplot3d import Axes3D
 from teff_bv import teff2bv_orig, teff2bv_err
+from sklearn.cross_validation import StratifiedKFold
 
-def load_dat(fname):
+# stratified k-fold is useful when you have populations with different numbers
+# of members
+def stratifiedkfold(folds):
+    a, a_err, a_errp, a_errm, p, p_err, bv, bv_err, g, g_err, \
+            g_errp, g_errm, flag = load_dat('ACNHPF', tn=False, cv=False)
+    return StratifiedKFold(flag, folds)
+
+def load_dat(fname, tn, cv):
 
 #     KID[0], t[1], t_err[2], a[3], a_errp[4], a_errm[5], p[6], p_err[7], logg[8], logg_errp[9], logg_errm[10], feh[11], feh_err[12]
 #     data = np.genfromtxt('/Users/angusr/Python/Gyro/data/all_astero.txt', skip_header=1).T
@@ -76,8 +84,12 @@ def load_dat(fname):
     l = diff < 0
     a_err[l] = a_err[l] + diff[l] - np.finfo(float).eps
 
+    if cv:
+        print len(p[tn])
+        return a[tn], a_err[tn], a_errp[tn], a_errm[tn], p[tn], p_err[tn], \
+                t[tn], t_err[tn], g[tn], g_err[tn], g_errp[tn], g_errm[tn], flag[tn]
     print len(p)
-    return a, a_err, a_errp, a_errm, p, p_err, t, t_err, g, g_err, g_errp, g_errm
+    return a, a_err, a_errp, a_errm, p, p_err, t, t_err, g, g_err, g_errp, g_errm, flag
 
 if __name__ == "__main__":
 
