@@ -3,12 +3,13 @@ import numpy as np
 import scipy.optimize as spo
 import emcee
 import triangle
-from all_plotting import load_dat
-from gyro_like import lnlike, period_model
+from all_plotting import load_dat, stratifiedkfold
 import h5py
 from subgiants import MS_poly
 from mpl_toolkits.mplot3d import Axes3D
 import datetime
+from gyro_like import lnlike, period_model
+from no_sampling_like import nslnlike
 
 ocols = ['#FF9933','#66CCCC' , '#FF33CC', '#3399FF', '#CC0066', '#99CC99', '#9933FF', '#CC0000']
 plotpar = {'axes.labelsize': 20,
@@ -31,15 +32,20 @@ def lnprior(m):
 
 def lnprob(m, age_samp, bv_samp, period_samp, logg_samp, age_obs, age_err, \
         bv_obs, bv_err, period_obs, period_err, logg_obs, \
-        logg_err, c):
+        logg_err, c, sampling):
     lp = lnprior(m)
     if not np.isfinite(lp):
         return -np.inf
-    return lp + lnlike(m, age_samp, bv_samp, \
-            period_samp, logg_samp, age_obs, age_err, bv_obs, bv_err, period_obs, \
-            period_err, logg_obs, logg_err, c)
+    if sampling:
+        return lp + lnlike(m, age_samp, bv_samp, \
+                period_samp, logg_samp, age_obs, age_err, bv_obs, bv_err, period_obs, \
+                period_err, logg_obs, logg_err, c)
+    else:
+        return lp + nslnlike(m, age_samp, bv_samp, \
+                period_samp, logg_samp, age_obs, age_err, bv_obs, bv_err, period_obs, \
+                period_err, logg_obs, logg_err, c)
 
-def MCMC(fname, c):
+def MCMC(fname, c, sampling):
 
     # load MAP values
     try:
@@ -54,7 +60,11 @@ def MCMC(fname, c):
 
     # load real data
     age_obs, age_err, age_errp, age_errm, period_obs, period_err, bv_obs, bv_err, \
-            logg_obs, logg_err, logg_errp, logg_errm = load_dat(fname)
+            logg_obs, logg_err, logg_errp, logg_errm, flag = load_dat(fname)
+
+#     # select training set
+#     age_obs, age_err, age_errp, age_errm, period_obs, period_err, bv_obs, bv_err, \
+#             logg_obs, logg_err, logg_errp, logg_errm, flag = stratifiedkfold(True)
 
     # Now generate samples
     nsamp = 50 # FIXME
@@ -63,14 +73,19 @@ def MCMC(fname, c):
     logg_samp = np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(logg_obs, logg_err)])
     period_samp = np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(period_obs, period_err)])
 
-    print 'initial likelihood = ', lnlike(par_true, age_samp, bv_samp, \
-            period_samp, logg_samp, age_obs, age_err, bv_obs, bv_err, period_obs, period_err, \
-            logg_obs, logg_err, c)
+    if sampling:
+        print 'initial likelihood = ', lnlike(par_true, age_samp, bv_samp, \
+                period_samp, logg_samp, age_obs, age_err, bv_obs, bv_err, period_obs, period_err, \
+                logg_obs, logg_err, c)
+    else:
+        print 'initial likelihood = ', nslnlike(par_true, age_samp, bv_samp, \
+                period_samp, logg_samp, age_obs, age_err, bv_obs, bv_err, period_obs, period_err, \
+                logg_obs, logg_err, c)
 
     nwalkers, ndim = 32, len(par_true)
     p0 = [par_true+1e-4*np.random.rand(ndim) for i in range(nwalkers)]
     args = (age_samp, bv_samp, period_samp, logg_samp, age_obs, age_err, bv_obs, \
-            bv_err, period_obs, period_err, logg_obs, logg_err, c)
+            bv_err, period_obs, period_err, logg_obs, logg_err, c, sampling)
     sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args = args)
 
     print("Burn-in")
@@ -123,8 +138,13 @@ if __name__ == "__main__":
 #     MCMC('NF5', .5)
 #     MCMC('CF45', .45)
 #     MCMC('NF45', .45)
-#     MCMC('HF45', .45)
+    MCMC('HF45', .45, sampling=True)
 #     MCMC('PF45', .45)
 #     MCMC('PF55', .5)
 
-    MCMC('p_PF45', .45)
+#     MCMC('p_PF45', .45)
+#     MCMC('p_ACNHPF45', .45, sampling=True)
+
+#     # select train and test data
+#     skf = stratifiedkfold()
+#     for train, test in skf:
