@@ -46,11 +46,11 @@ def lnprob(m, age_samp, bv_samp, period_samp, logg_samp, age_obs, age_err, \
                 period_samp, logg_samp, age_obs, age_err, bv_obs, bv_err, period_obs, \
                 period_err, logg_obs, logg_err, c)
 
-def MCMC(fname, c, train, sampling, cv):
+def MCMC(fname, n, c, train, sampling, cv):
 
     # load MAP values
     try:
-        params = np.genfromtxt('parameters%s.txt'%fname).T
+        params = np.genfromtxt('parameters*%s.txt'%fname).T
         par_true = params[0]
         print par_true
     except:
@@ -86,17 +86,17 @@ def MCMC(fname, c, train, sampling, cv):
     sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args = args)
 
     print("Burn-in")
-    p0, lp, state = sampler.run_mcmc(p0, 2000)
-#     p0, lp, state = sampler.run_mcmc(p0, 300)
+#     p0, lp, state = sampler.run_mcmc(p0, 2000)
+    p0, lp, state = sampler.run_mcmc(p0, 300)
     sampler.reset()
     print("Production run")
-    nstep = 50000
-    nruns = 2000.
-#     nruns = 500.
+    nstep = 3000
+#     nruns = 2000.
+    nruns = 500.
 
     for j in range(int(nstep/nruns)):
 
-        print fname
+        print fname, n
         print datetime.datetime.now()
         print 'run', j
         p0, lp, state = sampler.run_mcmc(p0, nruns)
@@ -117,14 +117,14 @@ def MCMC(fname, c, train, sampling, cv):
 
     # save parameters and print to screen
     print 'initial values', par_true
-    np.savetxt("parameters%s.txt" %fname, np.array(mcmc_result))
+    np.savetxt("parameters%s%s.txt" %(n, fname), np.array(mcmc_result))
     mcmc_result = np.array(mcmc_result)[:, 0]
     mcmc_result = [mcmc_result[0], mcmc_result[1], mcmc_result[2], c, \
             mcmc_result[3], mcmc_result[4]]
 
     # save samples
-    print sampler.chain
-    f = h5py.File("samples_%s" %fname, "w")
+#     print sampler.chain
+    f = h5py.File("samples_%s%s" %(n, fname), "w")
     data = f.create_dataset("samples", np.shape(sampler.chain))
     data[:,:] = np.array(sampler.chain)
     f.close()
@@ -142,16 +142,24 @@ if __name__ == "__main__":
 #     MCMC('p_PF45', .45)
 #     MCMC('p_ACNHPF45', .45, sampling=True)
 
-    fname = 'p_ACNHPF45'
-    # cross validation
-    folds = 5; n=0
-    skf = stratifiedkfold(folds)
-    scores = []
-    for train, test in skf:
-        MCMC(fname, .45, train, cv=True, sampling=False)
-        scores.append(scoring(fname, test))
-        print scores[n]
-        np.savetxt('train%s_%s.txt'%fname, train)
-        np.savetxt('test%s_%s.txt'%fname, test)
-        n+=1
-    np.savetxt('scores_%s.txt'%fname, scores)
+    # SKF tests
+#     fname = 'p_ACNHPF45'
+    fname = 'p_ACHF45'
+
+    cross_v = True
+    if cross_v:
+        # cross validation
+        folds = 5; n=0
+        skf = stratifiedkfold(folds, fname)
+        scores = []
+        for train, test in skf:
+            if n>0:
+                MCMC(fname, n, .45, train, cross_v, True)
+            scores.append(scoring(fname, n, test))
+            print scores[n]
+            np.savetxt('train%s_%s.txt'%(n, fname), train)
+            np.savetxt('test%s_%s.txt'%(n, fname), test)
+            n+=1
+        np.savetxt('scores_%s.txt'%fname, scores)
+    else:
+        MCMC(fname, '_', .45, False, False, sampling=True)
