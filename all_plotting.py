@@ -6,17 +6,16 @@ from sklearn.cross_validation import StratifiedKFold
 
 # stratified k-fold is useful when you have populations with different numbers
 # of members
-def stratifiedkfold(folds):
+def stratifiedkfold(folds, fname):
     a, a_err, a_errp, a_errm, p, p_err, bv, bv_err, g, g_err, \
-            g_errp, g_errm, flag = load_dat('ACNHPF', tn=False, cv=False)
+            g_errp, g_errm, flag = load_dat('%s'%fname, tn=False, cv=False)
     return StratifiedKFold(flag, folds)
 
 def load_dat(fname, tn, cv):
 
-#     KID[0], t[1], t_err[2], a[3], a_errp[4], a_errm[5], p[6], p_err[7], logg[8], logg_errp[9], logg_errm[10], feh[11], feh_err[12]
-#     data = np.genfromtxt('/Users/angusr/Python/Gyro/data/all_astero.txt', skip_header=1).T
-#     data = np.genfromtxt('/Users/angusr/Python/Gyro/data/garcia_all_astero.txt')
-    data = np.genfromtxt('/Users/angusr/Python/Gyro/data/all_astero_plusgarcia.txt')
+#     KID[0], t[1], t_err[2], a[3], a_errp[4], a_errm[5], p[6], p_err[7]
+#     logg[8], logg_errp[9], logg_errm[10], feh[11], feh_err[12], flag[13]
+    data = np.genfromtxt('/Users/angusr/Python/Gyro/data/garcia_all_astero.txt')
     KID = data[0]
     t = data[1]
     p = data[6]
@@ -27,7 +26,7 @@ def load_dat(fname, tn, cv):
 
     KID = data[0][l]
     p = p[l]
-    p_err = data[7][l] # FIXME: check these!
+    p_err = data[7][l]
     t = t[l]
     t_err = data[2][l]
     g = g[l]
@@ -41,7 +40,7 @@ def load_dat(fname, tn, cv):
     flag = data[13][l]
 
     # convert temps to bvs
-    bv_obs, bv_err = teff2bv_err(t, g, feh, t_err, .5*(g_errp+g_errm), feh_err) #FIXME: should really use asymmetric errorbars
+    bv_obs, bv_err = teff2bv_err(t, g, feh, t_err, .5*(g_errp+g_errm), feh_err)
     l = len(bv_obs)
 
     # add clusters FIXME: reddening
@@ -75,6 +74,7 @@ def load_dat(fname, tn, cv):
     p = p[l]; p_err = p_err[l]
     a = a[l]; a_errp = a_errp[l]; a_errm = a_errm[l]
     g = g[l]; g_errp = g_errp[l]; g_errm = g_errm[l]
+    flag = flag[l]
 
     # reduce errorbars if they go below zero FIXME
     # This is only necessary if you don't use asym
@@ -85,7 +85,6 @@ def load_dat(fname, tn, cv):
     a_err[l] = a_err[l] + diff[l] - np.finfo(float).eps
 
     if cv:
-        print len(p[tn])
         return a[tn], a_err[tn], a_errp[tn], a_errm[tn], p[tn], p_err[tn], \
                 t[tn], t_err[tn], g[tn], g_err[tn], g_errp[tn], g_errm[tn], flag[tn]
     print len(p)
@@ -93,15 +92,32 @@ def load_dat(fname, tn, cv):
 
 if __name__ == "__main__":
 
-    a, a_err, a_errp, a_errm, p, p_err, bv, bv_err, g, g_err, g_errp, g_errm = load_dat('PF')
+    fname = 'p_ACNHPF45'
+    n = 2
+    train = np.genfromtxt('train%s_%s.txt'%(n, fname))
+    train = [int(i) for i in train]
+    test = np.genfromtxt('test%s_%s.txt'%(n, fname))
+    test = [int(i) for i in test]
+
+    a, a_err, a_errp, a_errm, p, p_err, bv, bv_err, g, g_err, g_errp, g_errm, \
+            flag = load_dat('ACNHPF', np.array(train), cv=True)
+    a2, a_err2, a_errp2, a_errm2, p2, p_err2, bv2, bv_err2, g2, g_err2, \
+            g_errp2, g_errm2, flag2 = load_dat('ACNHPF', np.array(test), cv=True)
 
     pl.clf()
     pl.subplot(2, 1, 1)
     pl.errorbar(bv, p, xerr=bv_err, yerr=p_err, fmt='k.', capsize=0, ecolor='.7', \
             markersize=2)
+    pl.errorbar(bv2, p2, xerr=bv_err2, yerr=p_err2, fmt='r.', capsize=0, ecolor='.7', \
+            markersize=2)
     pl.xlabel('colour')
     pl.subplot(2, 1, 2)
     pl.errorbar(a, p, xerr=(a_errp, a_errm), yerr=p_err, fmt='k.', capsize=0, ecolor='.7', \
             markersize=2)
+    pl.errorbar(a2, p2, xerr=(a_errp2, a_errm2), yerr=p_err2, fmt='r.', capsize=0, ecolor='.7', \
+            markersize=2)
     pl.xlabel('age')
-    pl.savefig('test')
+    pl.show()
+#     pl.savefig('test')
+
+
