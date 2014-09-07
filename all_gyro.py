@@ -50,8 +50,9 @@ def MCMC(fname, n, c, train, cv, sampling):
 
     # load MAP values
     try:
-        params = np.genfromtxt('parameters*%s.txt'%fname).T
+        params = np.genfromtxt('parameters%s.txt'%fname).T
         par_true = params[0]
+        print 'initialising with MAP values'
         print par_true
     except:
 #         par_true = [0.7725, 0.5189, .601, 5., 10., \ # Barnes
@@ -92,7 +93,7 @@ def MCMC(fname, n, c, train, cv, sampling):
     print("Production run")
 #     nstep = 3000
 #     nruns = 500.
-    nstep = 10000
+    nstep = 20000
     nruns = 2000.
 
     for j in range(int(nstep/nruns)):
@@ -134,8 +135,14 @@ if __name__ == "__main__":
 
     # SKF tests
 #     fname = 'pg_ACNHPF45'
-#     fname = 'pg_ACHF45'
-    fname = 'p_PF5'
+    fname = 'pg_ACHF45'
+#     fname = 'p_ACHF45'
+
+#     fname = 'p_PF45'
+#     fname = 'p_PF5'
+#     fname = 'p_PF55'
+#     fname = 'p_NF5'
+#     fname = 'p_NF55'
 
     cross_v = False
     if cross_v:
@@ -154,3 +161,4 @@ if __name__ == "__main__":
         np.savetxt('scores_%s.txt'%fname, scores)
     else:
         MCMC(fname, '_', .45, False, False, True)
+#         MCMC(fname, '_', .5, False, False, True)
