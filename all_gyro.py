@@ -46,7 +46,7 @@ def lnprob(m, age_samp, bv_samp, period_samp, logg_samp, age_obs, age_err, \
                 period_samp, logg_samp, age_obs, age_err, bv_obs, bv_err, period_obs, \
                 period_err, logg_obs, logg_err, c)
 
-def MCMC(fname, n, c, train, sampling, cv):
+def MCMC(fname, n, c, train, cv, sampling):
 
     # load MAP values
     try:
@@ -86,13 +86,14 @@ def MCMC(fname, n, c, train, sampling, cv):
     sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args = args)
 
     print("Burn-in")
-#     p0, lp, state = sampler.run_mcmc(p0, 2000)
-    p0, lp, state = sampler.run_mcmc(p0, 300)
+    p0, lp, state = sampler.run_mcmc(p0, 2000)
+#     p0, lp, state = sampler.run_mcmc(p0, 300)
     sampler.reset()
     print("Production run")
-    nstep = 3000
-#     nruns = 2000.
-    nruns = 500.
+#     nstep = 3000
+#     nruns = 500.
+    nstep = 10000
+    nruns = 2000.
 
     for j in range(int(nstep/nruns)):
 
@@ -131,22 +132,12 @@ def MCMC(fname, n, c, train, sampling, cv):
 
 if __name__ == "__main__":
 
-#     MCMC('PF5', .5)
-#     MCMC('NF5', .5)
-#     MCMC('CF45', .45)
-#     MCMC('NF45', .45)
-#     MCMC('HF45', .45, sampling=True)
-#     MCMC('PF45', .45)
-#     MCMC('PF55', .5)
-
-#     MCMC('p_PF45', .45)
-#     MCMC('p_ACNHPF45', .45, sampling=True)
-
     # SKF tests
-#     fname = 'p_ACNHPF45'
-    fname = 'p_ACHF45'
+#     fname = 'pg_ACNHPF45'
+#     fname = 'pg_ACHF45'
+    fname = 'p_PF5'
 
-    cross_v = True
+    cross_v = False
     if cross_v:
         # cross validation
         folds = 5; n=0
@@ -162,4 +153,4 @@ if __name__ == "__main__":
             n+=1
         np.savetxt('scores_%s.txt'%fname, scores)
     else:
-        MCMC(fname, '_', .45, False, False, sampling=True)
+        MCMC(fname, '_', .45, False, False, True)
