@@ -20,7 +20,7 @@ plotpar = {'axes.labelsize': 20,
 pl.rcParams.update(plotpar)
 
 def lnprior(m):
-    if -10. < m[0] < 10. and 0. < m[1] < 1. and 0. < m[2] < 1. \
+    if 0. < m[0] < .65 and .5 < m[1] < 1. and 0. < m[2] < 1. \
             and 0. < m[3] < 1. \
             and 0 < m[4] < 30. and 0 < m[5] < 100.\
             and 0 < m[6] < 30. and 0 < m[7] < 100.\
@@ -46,13 +46,13 @@ def MCMC(fname):
         par_true = params[0]
         print par_true
     except:
-        par_true = [0.7725, 0.5189, .601, .45, 5., 10., \
+        par_true = [0.6, 0.5189, .601, .45, 5., 10., \
                 8., 30., 9., 5., .67] # better initialisation
         print par_true
 
     # load real data
     age_obs, age_err, age_errp, age_errm, period_obs, period_err, bv_obs, bv_err, \
-            logg_obs, logg_err, logg_errp, logg_errm = load_dat(fname)
+            logg_obs, logg_err, logg_errp, logg_errm, flag = load_dat(fname, False, False)
 
     # Now generate samples
     nsamp = 50 # FIXME
@@ -117,14 +117,4 @@ def MCMC(fname):
 
 if __name__ == "__main__":
 
-#     MCMC('PF5', .5)
-#     MCMC('NF5', .5)
-#     MCMC('NF45', .45)
-#     MCMC('HF45', .45)
-#     MCMC('PF45', .45)
-#     MCMC('PF55', .5)
-
-#     MCMC('ck_CF45')
-    MCMC('ck_PF')
-#     MCMC('ck_NF')
-#     MCMC('ck_HF')
+    MCMC('ck_p_PF')

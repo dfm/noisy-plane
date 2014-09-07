@@ -20,7 +20,15 @@ import h5py
 # fname = "ns_HF45"
 # fname = "ns_NF45"
 # fname = "ns_p_PF45"
-fname = "p_PF45"
+# fname = "p_PF45"
+
+fname = 'p_ACNHPF45'
+fname = 'ck_p_PF'
+
+# fname = 'p_PF5'
+# fname = 'p_PF55'
+# fname = 'p_NF5'
+fname = 'p_NF55'
 
 ck = fname.find('ck')
 
