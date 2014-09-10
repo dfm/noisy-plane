@@ -39,6 +39,14 @@ def load_dat(fname, tn, cv):
     feh_err = data[12][l]
     flag = data[13][l]
 
+#     pl.clf()
+#     l = feh!=-0.2
+#     print feh[l]
+#     print feh_err[l]
+#     pl.hist(feh[l]+0.2, 20)
+#     pl.show()
+#     raw_input('enter')
+
     # convert temps to bvs
     bv_obs, bv_err = teff2bv_err(t, g, feh, t_err, .5*(g_errp+g_errm), feh_err)
     l = len(bv_obs)

@@ -66,9 +66,13 @@ def MCMC(fname, n, c, train, cv, sampling):
 
     # Now generate samples
     nsamp = 50 # FIXME
+    np.random.seed(1234)
     age_samp = np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(age_obs, age_err)])
+    np.random.seed(1234)
     bv_samp = np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(bv_obs, bv_err)])
+    np.random.seed(1234)
     logg_samp = np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(logg_obs, logg_err)])
+    np.random.seed(1234)
     period_samp = np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(period_obs, period_err)])
 
     if sampling:
@@ -117,6 +121,12 @@ def MCMC(fname, n, c, train, cv, sampling):
         # Flatten chain
         samples = sampler.chain[:, 50:, :].reshape((-1, ndim))
 
+        likelihood = lnlike(mres, age_samp, bv_samp, \
+                period_samp, logg_samp, age_obs, age_err, bv_obs, bv_err, period_obs, period_err, \
+                logg_obs, logg_err, c)
+        print 'likelihood = ', likelihood
+        np.savetxt('likelihood%s%s.txt'%(n, fname), likelihood)
+
     # save parameters and print to screen
     print 'initial values', par_true
     np.savetxt("parameters%s%s.txt" %(n, fname), np.array(mcmc_result))
@@ -135,7 +145,7 @@ if __name__ == "__main__":
 
     # SKF tests
 #     fname = 'pg_ACNHPF45'
-    fname = 'pg_ACHF45'
+#     fname = 'pg_ACHF45'
 #     fname = 'p_ACHF45'
 
 #     fname = 'p_PF45'
@@ -143,6 +153,11 @@ if __name__ == "__main__":
 #     fname = 'p_PF55'
 #     fname = 'p_NF5'
 #     fname = 'p_NF55'
+
+    # proper runs
+#     fname = 'pg_ACHF5'
+    fname = 'pg_ACHF45'
+#     fname = 'pg_ACHF475'
 
     cross_v = False
     if cross_v:
@@ -160,5 +175,6 @@ if __name__ == "__main__":
             n+=1
         np.savetxt('scores_%s.txt'%fname, scores)
     else:
-        MCMC(fname, '_', .45, False, False, True)
+#         MCMC(fname, '_', .475, False, False, True)
 #         MCMC(fname, '_', .5, False, False, True)
+        MCMC(fname, '_', .45, False, False, True)

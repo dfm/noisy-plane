@@ -22,13 +22,16 @@ import h5py
 # fname = "ns_p_PF45"
 # fname = "p_PF45"
 
-fname = 'p_ACNHPF45'
-fname = 'ck_p_PF'
+# fname = 'p_ACNHPF45'
+# fname = 'pg_ACHF45'
+# fname = 'ck_p_PF'
 
 # fname = 'p_PF5'
 # fname = 'p_PF55'
 # fname = 'p_NF5'
-fname = 'p_NF55'
+# fname = 'p_NF55'
+
+fname = 'simple_ACFHPN'
 
 ck = fname.find('ck')
 
