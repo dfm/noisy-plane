@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as pl
 from mpl_toolkits.mplot3d import Axes3D
 from teff_bv import teff2bv_orig, teff2bv_err
-from sklearn.cross_validation import StratifiedKFold
+# from sklearn.cross_validation import StratifiedKFold
 
 # stratified k-fold is useful when you have populations with different numbers
 # of members

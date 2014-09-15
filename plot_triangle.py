@@ -3,36 +3,9 @@ import matplotlib.pyplot as pl
 import triangle
 import h5py
 
-# fname = "CF45"
-# fname = "HF45"
-# fname = "NF45"
-# fname = "PF5"
-# fname = "NF5"
-# fname = "PF45"
-# fname = "PF55"
+fname = 'pg_ACHF45'
 
-# fname = "ck_CF45"
-# fname = "ck_PF"
-# fname = "ck_NF"
-# fname = "ck_HF"
-
-# fname = "ns_CF45"
-# fname = "ns_HF45"
-# fname = "ns_NF45"
-# fname = "ns_p_PF45"
-# fname = "p_PF45"
-
-# fname = 'p_ACNHPF45'
-# fname = 'pg_ACHF45'
-# fname = 'ck_p_PF'
-
-# fname = 'p_PF5'
-# fname = 'p_PF55'
-# fname = 'p_NF5'
-# fname = 'p_NF55'
-
-fname = 'simple_ACFHPN'
-
+print fname
 ck = fname.find('ck')
 
 with h5py.File("samples_%s" %fname, "r") as f:

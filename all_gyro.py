@@ -23,7 +23,7 @@ pl.rcParams.update(plotpar)
 
 def lnprior(m):
 #     if -10. < m[0] < 10. and 0. < m[1] < 1. and 0. < m[2] < 1. \
-    if 0. < m[0] < .65 and .5 < m[1] < 1. and 0. < m[2] < 1. \
+    if -10. < m[0] < 10. and .0< m[1] < 1. and 0. < m[2] < 1. \
             and 0 < m[3] < 30. and 0 < m[4] < 100.\
             and 0 < m[5] < 30. and 0 < m[6] < 100.\
             and 0 < m[7] < 30. and 0 < m[8] < 100.\
@@ -64,6 +64,9 @@ def MCMC(fname, n, c, train, cv, sampling):
     age_obs, age_err, age_errp, age_errm, period_obs, period_err, bv_obs, bv_err, \
             logg_obs, logg_err, logg_errp, logg_errm, flag = load_dat(fname, train, cv)
 
+#     LOO specification
+
+
     # Now generate samples
     nsamp = 50 # FIXME
     np.random.seed(1234)
@@ -91,14 +94,14 @@ def MCMC(fname, n, c, train, cv, sampling):
     sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args = args)
 
     print("Burn-in")
-    p0, lp, state = sampler.run_mcmc(p0, 2000)
-#     p0, lp, state = sampler.run_mcmc(p0, 300)
+#     p0, lp, state = sampler.run_mcmc(p0, 2000)
+    p0, lp, state = sampler.run_mcmc(p0, 300)
     sampler.reset()
     print("Production run")
-#     nstep = 3000
-#     nruns = 500.
-    nstep = 20000
-    nruns = 2000.
+    nstep = 3000
+    nruns = 500.
+#     nstep = 20000
+#     nruns = 2000.
 
     for j in range(int(nstep/nruns)):
 
@@ -125,7 +128,7 @@ def MCMC(fname, n, c, train, cv, sampling):
                 period_samp, logg_samp, age_obs, age_err, bv_obs, bv_err, period_obs, period_err, \
                 logg_obs, logg_err, c)
         print 'likelihood = ', likelihood
-        np.savetxt('likelihood%s%s.txt'%(n, fname), likelihood)
+#         np.savetxt('likelihood%s%s.txt'%(n, fname), likelihood)
 
     # save parameters and print to screen
     print 'initial values', par_true
@@ -148,16 +151,13 @@ if __name__ == "__main__":
 #     fname = 'pg_ACHF45'
 #     fname = 'p_ACHF45'
 
-#     fname = 'p_PF45'
-#     fname = 'p_PF5'
-#     fname = 'p_PF55'
-#     fname = 'p_NF5'
-#     fname = 'p_NF55'
-
     # proper runs
-#     fname = 'pg_ACHF5'
-    fname = 'pg_ACHF45'
-#     fname = 'pg_ACHF475'
+#     fname = 'pg_ACHF45'
+    fname = 'loo_1ACHF45'
+#     fname = 'loo_2ACHF45'
+#     fname = 'loo_3ACHF45'
+#     fname = 'loo_4ACHF45'
+#     fname = 'loo_5ACHF45'
 
     cross_v = False
     if cross_v:
@@ -175,6 +175,4 @@ if __name__ == "__main__":
             n+=1
         np.savetxt('scores_%s.txt'%fname, scores)
     else:
-#         MCMC(fname, '_', .475, False, False, True)
-#         MCMC(fname, '_', .5, False, False, True)
         MCMC(fname, '_', .45, False, False, True)
