@@ -28,8 +28,7 @@ def lnlike(par, age_samp, temp_samp, period_samp, logg_samp, age_obs, age_err, \
             like11[np.isnan(like11)] = 0. # catching <0 samples
             like12 = \
                 np.exp(-.5*((period_samp[i,l1] - X)/(U + period_err[i]))**2) \
-                / (U + period_err[i]) # FIXME here U is sig, not var
-#                 np.exp(-.5*((period_obs[i] - X)/(U + period_err[i]))**2) \
+                / (U + period_err[i])
             like1 = (1-P)*like11 + P*like12
             lik1 = np.sum(like1) / float(l1.sum())
         else:
@@ -39,8 +38,7 @@ def lnlike(par, age_samp, temp_samp, period_samp, logg_samp, age_obs, age_err, \
         l2 = (temp_samp[i,:] < c) * (logg_samp[i,:] > logg_cut)
         if l2.sum() > 0:
             like2 = np.exp(-.5*((period_samp[i,l2] - Y)/(period_err[i]+V))**2) \
-                / (V + period_err[i]) # FIXME now V is sig, not var
-#             like2 = np.exp(-.5*((period_obs[i] - Y)/(period_err[i]+V))**2) \
+                / (V + period_err[i])
             lik2 = np.sum(like2) / float(l2.sum())
         else:
             lik2 = 0.0
@@ -49,8 +47,7 @@ def lnlike(par, age_samp, temp_samp, period_samp, logg_samp, age_obs, age_err, \
         l3 = (logg_samp[i,:] < logg_cut)
         if l3.sum() > 0:
             like3 = np.exp(-.5*((period_samp[i,l3] - Z)/(period_err[i]+W))**2) \
-                / (W + period_err[i]) # FIXME now W is sig, not var
-#             like3 = np.exp(-.5*((period_obs[i] - Z)/(period_err[i]+W))**2) \
+                / (W + period_err[i])
             lik3 = np.sum(like3) / float(l3.sum())
         else:
             lik3 = 0.0
@@ -59,7 +56,5 @@ def lnlike(par, age_samp, temp_samp, period_samp, logg_samp, age_obs, age_err, \
 
     loglike = np.sum(ll)
     if np.isnan(loglike) == True:
-#         print loglike
-#         print ll
         loglike = -np.inf
     return loglike
