@@ -49,7 +49,6 @@ def load_dat(fname, tn, cv):
 
     # convert temps to bvs
     bv_obs, bv_err = teff2bv_err(t, g, feh, t_err, .5*(g_errp+g_errm), feh_err)
-    l = len(bv_obs)
 
     # add clusters FIXME: reddening
     data = np.genfromtxt("/Users/angusr/Python/Gyro/data/clusters.txt", skip_header=1).T
@@ -84,14 +83,23 @@ def load_dat(fname, tn, cv):
     g = g[l]; g_errp = g_errp[l]; g_errm = g_errm[l]
     flag = flag[l]
 
-    # reduce errorbars if they go below zero FIXME
-    # This is only necessary if you don't use asym
+    # reduce errorbars if they go below zero
+    # (only necessary if you don't use asym)
     g_err = .5*(g_errp+g_errm)
     a_err = .5*(a_errp + a_errm)
     diff = a - a_err
     l = diff < 0
     a_err[l] = a_err[l] + diff[l] - np.finfo(float).eps
 
+#     LOO
+#     cv = True
+#     tn = np.ones_like(a)
+#     select = -5
+#     print select
+#     tn[select] = 0
+#     tn = tn==1
+
+#     print len(p), len(p[tn])
     if cv:
         return a[tn], a_err[tn], a_errp[tn], a_errm[tn], p[tn], p_err[tn], \
                 t[tn], t_err[tn], g[tn], g_err[tn], g_errp[tn], g_errm[tn], flag[tn]
