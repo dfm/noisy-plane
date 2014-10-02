@@ -15,14 +15,15 @@ def load_dat(fname, tn, cv):
 
 #     KID[0], t[1], t_err[2], a[3], a_errp[4], a_errm[5], p[6], p_err[7]
 #     logg[8], logg_errp[9], logg_errm[10], feh[11], feh_err[12], flag[13]
-    data = np.genfromtxt('/Users/angusr/Python/Gyro/data/garcia_all_astero.txt')
+#     data = np.genfromtxt('/Users/angusr/Python/Gyro/data/garcia_all_astero.txt')
+    data = np.genfromtxt('/Users/angusr/Python/Gyro/data/garcia_irfm.txt')
     KID = data[0]
     t = data[1]
     p = data[6]
     g = data[8]
 
     # remove periods <= 0 and teff == 0 FIXME: why is this necessary?
-    l = (p > 0.)*(t > 0.)*(g > 0.)
+    l = (p > 0.)*(t > 100.)*(g > 0.)
 
     KID = data[0][l]
     p = p[l]
@@ -69,12 +70,14 @@ def load_dat(fname, tn, cv):
     t_err = bv_err
 
     # select star group
+    flag[flag==2] = 9
     flag -= 3
     flag[flag<0] = 0
-    fnames = ['A', 'H', 'P', 'N', 'C', 'F']
+    fnames = ['A', 'H', 'P', 'N', 'C', 'F', 'V']
     flist = []
     for i in range(len(fnames)):
         if fname.find(fnames[i]) >= 0:
+            print fnames[i], i
             flist.append(i)
     l = (np.sum([flag == i for i in flist], axis=0)) == 1
     t = t[l]; t_err = t_err[l]
@@ -104,6 +107,10 @@ def load_dat(fname, tn, cv):
         return a[tn], a_err[tn], a_errp[tn], a_errm[tn], p[tn], p_err[tn], \
                 t[tn], t_err[tn], g[tn], g_err[tn], g_errp[tn], g_errm[tn], flag[tn]
     print len(p)
+
+    pl.plot(a, p, 'k.')
+    pl.savefig('testing')
+
     return a, a_err, a_errp, a_errm, p, p_err, t, t_err, g, g_err, g_errp, g_errm, flag
 
 if __name__ == "__main__":

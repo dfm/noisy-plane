@@ -22,7 +22,8 @@ plotpar = {'axes.labelsize': 20,
 pl.rcParams.update(plotpar)
 
 def lnprior(m):
-#     if -10. < m[0] < 10. and 0. < m[1] < 1. and 0. < m[2] < 1. \
+#     if 0. < m[0] < .6 and 0. < m[1] < 1. and 0. < m[2] < 1. \
+#     if 0. < m[0] < .65 and .5 < m[1] < 1. and 0. < m[2] < 1. \
     if -10. < m[0] < 10. and .0< m[1] < 1. and 0. < m[2] < 1. \
             and 0 < m[3] < 30. and 0 < m[4] < 100.\
             and 0 < m[5] < 30. and 0 < m[6] < 100.\
@@ -64,18 +65,20 @@ def MCMC(fname, n, c, train, cv, sampling):
     age_obs, age_err, age_errp, age_errm, period_obs, period_err, bv_obs, bv_err, \
             logg_obs, logg_err, logg_errp, logg_errm, flag = load_dat(fname, train, cv)
 
-#     LOO specification
-
+    pl.clf()
+    pl.errorbar(age_obs, period_obs, xerr=age_err, yerr=period_err, fmt='k.',
+                 capsize=0, ecolor='.8')
+    pl.show()
 
     # Now generate samples
     nsamp = 50 # FIXME
-    np.random.seed(1234)
+    np.random.seed(12)
     age_samp = np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(age_obs, age_err)])
-    np.random.seed(1234)
+    np.random.seed(12)
     bv_samp = np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(bv_obs, bv_err)])
-    np.random.seed(1234)
+    np.random.seed(12)
     logg_samp = np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(logg_obs, logg_err)])
-    np.random.seed(1234)
+    np.random.seed(12)
     period_samp = np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(period_obs, period_err)])
 
     if sampling:
@@ -121,12 +124,12 @@ def MCMC(fname, n, c, train, cv, sampling):
         data = f.create_dataset("samples", np.shape(sampler.chain))
         data[:,:] = np.array(sampler.chain)
         f.close()
-        # Flatten chain
+
         samples = sampler.chain[:, 50:, :].reshape((-1, ndim))
 
-        likelihood = lnlike(mres, age_samp, bv_samp, \
-                period_samp, logg_samp, age_obs, age_err, bv_obs, bv_err, period_obs, period_err, \
-                logg_obs, logg_err, c)
+        likelihood = lnlike(mres, age_samp, bv_samp, period_samp,
+                            logg_samp, age_obs, age_err, bv_obs, bv_err,
+                            period_obs, period_err, logg_obs, logg_err, c)
         print 'likelihood = ', likelihood
 #         np.savetxt('likelihood%s%s.txt'%(n, fname), likelihood)
 
@@ -138,7 +141,6 @@ def MCMC(fname, n, c, train, cv, sampling):
             mcmc_result[3], mcmc_result[4]]
 
     # save samples
-#     print sampler.chain
     f = h5py.File("samples_%s%s" %(n, fname), "w")
     data = f.create_dataset("samples", np.shape(sampler.chain))
     data[:,:] = np.array(sampler.chain)
@@ -153,26 +155,37 @@ if __name__ == "__main__":
 
     # proper runs
 #     fname = 'pg_ACHF45'
-    fname = 'loo_1ACHF45'
+#     fname = 'loo_1ACHF45'
 #     fname = 'loo_2ACHF45'
 #     fname = 'loo_3ACHF45'
 #     fname = 'loo_4ACHF45'
 #     fname = 'loo_5ACHF45'
 
-    cross_v = False
-    if cross_v:
-        # cross validation
-        folds = 5; n=0
-        skf = stratifiedkfold(folds, fname)
-        scores = []
-        for train, test in skf:
-            if n>0:
-                MCMC(fname, n, .45, train, cross_v, True)
-            scores.append(scoring(fname, n, test))
-            print scores[n]
-            np.savetxt('train%s_%s.txt'%(n, fname), train)
-            np.savetxt('test%s_%s.txt'%(n, fname), test)
-            n+=1
-        np.savetxt('scores_%s.txt'%fname, scores)
-    else:
-        MCMC(fname, '_', .45, False, False, True)
+#     fname = "CF5"
+#     fname = "HF5"
+#     fname = "p_PF5"
+
+# The final run!
+#     fname = "HVF45"
+    fname = "ACHF45irfm"
+
+    print fname, "fname"
+    MCMC(fname, '_', .45, False, False, True)
+
+#     cross_v = False
+#     if cross_v:
+#         # cross validation
+#         folds = 5; n=0
+#         skf = stratifiedkfold(folds, fname)
+#         scores = []
+#         for train, test in skf:
+#             if n>0:
+#                 MCMC(fname, n, .45, train, cross_v, True)
+#             scores.append(scoring(fname, n, test))
+#             print scores[n]
+#             np.savetxt('train%s_%s.txt'%(n, fname), train)
+#             np.savetxt('test%s_%s.txt'%(n, fname), test)
+#             n+=1
+#         np.savetxt('scores_%s.txt'%fname, scores)
+#     else:
+#         MCMC(fname, '_', .45, False, False, True)

@@ -3,7 +3,7 @@ import matplotlib.pyplot as pl
 import triangle
 import h5py
 
-fname = 'pg_ACHF45'
+fname = "HVF45"
 
 print fname
 ck = fname.find('ck')
