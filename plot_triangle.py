@@ -2,8 +2,12 @@ import numpy as np
 import matplotlib.pyplot as pl
 import triangle
 import h5py
+import acor
 
-fname = "HVF45"
+# fname = "HVF45"
+# fname = "CHVF45"
+# fname = "ACHF45irfm"
+fname = 'ACHPF45'
 
 print fname
 ck = fname.find('ck')
@@ -50,3 +54,6 @@ for i in range(ndim):
     pl.clf()
     pl.plot(samples[:, :, i].T, 'k-', alpha=0.3)
     pl.savefig("%s%s.png" %(i, fname))
+
+tau, mean, sigma = acor.acor(samples[:, :, 0])
+print tau

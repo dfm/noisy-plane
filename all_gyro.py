@@ -10,7 +10,6 @@ from mpl_toolkits.mplot3d import Axes3D
 import datetime
 from gyro_like import lnlike, period_model
 from no_sampling_like import nslnlike
-from cross_val import scoring
 
 ocols = ['#FF9933','#66CCCC' , '#FF33CC', '#3399FF', '#CC0066', '#99CC99', '#9933FF', '#CC0000']
 plotpar = {'axes.labelsize': 20,
@@ -68,7 +67,7 @@ def MCMC(fname, n, c, train, cv, sampling):
     pl.clf()
     pl.errorbar(age_obs, period_obs, xerr=age_err, yerr=period_err, fmt='k.',
                  capsize=0, ecolor='.8')
-    pl.show()
+#     pl.show()
 
     # Now generate samples
     nsamp = 50 # FIXME
@@ -97,14 +96,14 @@ def MCMC(fname, n, c, train, cv, sampling):
     sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args = args)
 
     print("Burn-in")
-#     p0, lp, state = sampler.run_mcmc(p0, 2000)
-    p0, lp, state = sampler.run_mcmc(p0, 300)
+    p0, lp, state = sampler.run_mcmc(p0, 5000)
+#     p0, lp, state = sampler.run_mcmc(p0, 300)
     sampler.reset()
     print("Production run")
-    nstep = 3000
-    nruns = 500.
-#     nstep = 20000
-#     nruns = 2000.
+#     nstep = 3000
+#     nruns = 500.
+    nstep = 20000
+    nruns = 2000.
 
     for j in range(int(nstep/nruns)):
 
@@ -148,26 +147,8 @@ def MCMC(fname, n, c, train, cv, sampling):
 
 if __name__ == "__main__":
 
-    # SKF tests
-#     fname = 'pg_ACNHPF45'
-#     fname = 'pg_ACHF45'
-#     fname = 'p_ACHF45'
-
     # proper runs
-#     fname = 'pg_ACHF45'
-#     fname = 'loo_1ACHF45'
-#     fname = 'loo_2ACHF45'
-#     fname = 'loo_3ACHF45'
-#     fname = 'loo_4ACHF45'
-#     fname = 'loo_5ACHF45'
-
-#     fname = "CF5"
-#     fname = "HF5"
-#     fname = "p_PF5"
-
-# The final run!
-#     fname = "HVF45"
-    fname = "ACHF45irfm"
+    fname = 'ACHPF45'
 
     print fname, "fname"
     MCMC(fname, '_', .45, False, False, True)

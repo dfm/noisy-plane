@@ -23,7 +23,7 @@ def load_dat(fname, tn, cv):
     g = data[8]
 
     # remove periods <= 0 and teff == 0 FIXME: why is this necessary?
-    l = (p > 0.)*(t > 100.)*(g > 0.)
+    l = (p > 0.)*(t > 100.)*(g > 0.)  # *(t<5800)
 
     KID = data[0][l]
     p = p[l]
@@ -94,22 +94,20 @@ def load_dat(fname, tn, cv):
     l = diff < 0
     a_err[l] = a_err[l] + diff[l] - np.finfo(float).eps
 
-#     LOO
-#     cv = True
-#     tn = np.ones_like(a)
-#     select = -5
-#     print select
-#     tn[select] = 0
-#     tn = tn==1
+    # LOO
+    if cv:
+        print 'cv', cv
+        tn = np.ones_like(a)
+        select = cv
+        print select
+        tn[select] = 0
+        tn = tn==1
+        print len(p), len(p[tn])
 
-#     print len(p), len(p[tn])
     if cv:
         return a[tn], a_err[tn], a_errp[tn], a_errm[tn], p[tn], p_err[tn], \
                 t[tn], t_err[tn], g[tn], g_err[tn], g_errp[tn], g_errm[tn], flag[tn]
     print len(p)
-
-    pl.plot(a, p, 'k.')
-    pl.savefig('testing')
 
     return a, a_err, a_errp, a_errm, p, p_err, t, t_err, g, g_err, g_errp, g_errm, flag
 
