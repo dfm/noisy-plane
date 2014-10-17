@@ -148,7 +148,7 @@ def MCMC(fname, n, c, train, cv, sampling):
 if __name__ == "__main__":
 
     # proper runs
-    fname = 'ACHPF45'
+    fname = 'ACHF4541'
 
     print fname, "fname"
     MCMC(fname, '_', .45, False, False, True)

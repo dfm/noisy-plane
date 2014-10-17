@@ -3,11 +3,13 @@ import matplotlib.pyplot as pl
 import triangle
 import h5py
 import acor
+import sys
 
 # fname = "HVF45"
 # fname = "CHVF45"
 # fname = "ACHF45irfm"
-fname = 'ACHPF45'
+# fname = 'ACHPF45'
+fname = sys.argv[1]
 
 print fname
 ck = fname.find('ck')
