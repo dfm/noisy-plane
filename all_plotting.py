@@ -52,7 +52,7 @@ def load_dat(fname, tn, cv):
     bv_obs, bv_err = teff2bv_err(t, g, feh, t_err, .5*(g_errp+g_errm), feh_err)
 
     # add clusters FIXME: reddening
-    data = np.genfromtxt("/Users/angusr/Python/Gyro/data/clusters.txt", skip_header=1).T
+    data = np.genfromtxt("/Users/angusr/Python/noisy-plane/clusters.txt", skip_header=1).T
     bv_obs = np.concatenate((bv_obs, data[0]))
     bv_err = np.concatenate((bv_err, data[1]))
     p = np.concatenate((p, data[2]))
