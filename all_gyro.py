@@ -70,7 +70,7 @@ def MCMC(fname, n, c, train, cv, sampling):
 #     pl.show()
 
     # Now generate samples
-    nsamp = 50 # FIXME
+    nsamp = 100 # FIXME
     np.random.seed(12)
     age_samp = np.vstack([x0+xe*np.random.randn(nsamp) for x0, xe in zip(age_obs, age_err)])
     np.random.seed(12)
@@ -148,7 +148,7 @@ def MCMC(fname, n, c, train, cv, sampling):
 if __name__ == "__main__":
 
     # proper runs
-    fname = 'ACHF4541'
+    fname = 'ACHF45_2'
 
     print fname, "fname"
     MCMC(fname, '_', .45, False, False, True)
