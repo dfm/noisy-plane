@@ -131,7 +131,7 @@ a_err.append(data[5])
 flag.append(8)
 
 # add 16cygB
-data = np.genfromtxt("/Users/angusr/Python/Gyro/data/16CygB.txt", skip_header=2).T
+data = np.genfromtxt("/Users/angusr/Python/Gyro/data/16CygB2.txt", skip_header=2).T
 bv.append(data[8])
 bv_err.append(data[9])
 p.append(data[2])
