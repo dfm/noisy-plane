@@ -152,15 +152,15 @@ a_err = np.array(a_err)
 logg = np.ones_like(bv)*g
 logg_err = np.ones_like(bv)*g_err
 
-logg[-5] = 4.57  # alpha cen b
-logg[-4] = 4.32  # alpha cen a
-logg[-3] = 4.41  # 18 Sco
-logg[-2] = 4.34  # 16 Cyg B
-logg[-1] = 4.44  # sun
-
-logg_err[-3] = 0.06  # 18 Sco
-logg_err[-2] = 0.07  # 16 Cyg B
-logg_err[-1] = 1e-5  # sun
+# logg[-5] = 4.57  # alpha cen b
+# logg[-4] = 4.32  # alpha cen a
+# logg[-3] = 4.41  # 18 Sco
+# logg[-2] = 4.34  # 16 Cyg B
+# logg[-1] = 4.44  # sun
+#
+# logg_err[-3] = 0.06  # 18 Sco
+# logg_err[-2] = 0.07  # 16 Cyg B
+# logg_err[-1] = 1e-5  # sun
 
 data = np.zeros((9, len(bv)+1))
 data[0,:-1] = bv
