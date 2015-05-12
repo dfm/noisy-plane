@@ -35,9 +35,9 @@ if __name__ == "__main__":
     print "production run..."
     sampler.run_mcmc(pos, 1000)
     samp = sampler.chain[:, 50:, :].reshape((-1, ndim))
-    m, c = map(lambda v: (v[1], v[2]-v[1], v[1]-v[0]),
+    m, c, sig = map(lambda v: (v[1], v[2]-v[1], v[1]-v[0]),
                zip(*np.percentile(samp, [16, 50, 84], axis=0)))
-    pars = [m[0], c[0]]
+    pars = [m[0], c[0], sig[0]]
 
     plt.clf()
     plt.errorbar(x, y, xerr=xerr, yerr=yerr, fmt="k.", capsize=0)

@@ -12,6 +12,7 @@ def lnprob(pars, samples, obs, u):
     return lnlikeH(pars, samples, obs, u) + lnprior(pars)
 
 if __name__ == "__main__":
+
     pars = [.5, 10, .1]
 
     # make fake data
@@ -23,12 +24,18 @@ if __name__ == "__main__":
     yerr = np.ones_like(y) * .5
     y += np.random.randn(nobs) * .5
 
+    pars_init = [.3, 12, .1]
+
+#     pars_init = [-.5, 3.6, .065]
+
+#     # load data. x = f, y = rho, z = teff
+#     x, xerr, y, yerr = np.genfromtxt("../flicker/data/flickers.dat").T
+#     x, xerr, y, yerr = x[:10], xerr[:10], y[:10], yerr[:10]
+
     obs = np.vstack((x, y))
     u = np.vstack((xerr, yerr))
     nsamp = 3
     s = generate_samples(obs, u, nsamp)
-
-    pars_init = [.3, 12, .1]
 
     ndim, nwalkers = len(pars_init), 32
     pos = [pars_init + 1e-4*np.random.randn(ndim) for i in range(nwalkers)]
@@ -41,9 +48,9 @@ if __name__ == "__main__":
     print "production run..."
     sampler.run_mcmc(pos, 1000)
     samp = sampler.chain[:, 50:, :].reshape((-1, ndim))
-    m, c = map(lambda v: (v[1], v[2]-v[1], v[1]-v[0]),
+    m, c, sig = map(lambda v: (v[1], v[2]-v[1], v[1]-v[0]),
                zip(*np.percentile(samp, [16, 50, 84], axis=0)))
-    pars = [m[0], c[0]]
+    pars = [m[0], c[0], sig[0]]
 
     plt.clf()
     plt.plot(s[0, :, :], s[1, :, :], "r.", markersize=2)

@@ -13,6 +13,13 @@ def generate_samples(obs, u, N):
     for i in range(ndims):
         samples[i, :, :] = np.vstack([x0+xe*np.random.randn(N) for x0, xe in \
                 zip(obs[i, :], u[i, :])])
+#     plt.clf()
+#     x, y = obs[0, :], obs[1, :]
+#     xerr, yerr = u[0, :], u[1, :]
+#     plt.plot(samples[0, :, :], samples[1, :, :], "r.", markersize=2, alpha=.3)
+#     plt.errorbar(x, y, xerr=xerr, yerr=yerr, fmt="k.", capsize=0, ecolor=".7")
+#     plt.show()
+#     assert 0
     return samples
 
 # n-D non-hierarchical log-likelihood
@@ -48,8 +55,37 @@ def lnlikeH(pars, samples, obs, u):
     zerr = u[1, :]
     ll = np.zeros((nobs, nsamp*nobs))
     for i in range(nobs):
-        inv_sigma2 = 1.0/(zerr[i] + pars[2])**2
+        inv_sigma2 = 1.0/(zerr[i]**2 + pars[2]**2)
         ll[i, :] = -.5*((zobs[i] - zpred)**2*inv_sigma2) + np.log(inv_sigma2)
+    loglike = np.sum(np.logaddexp.reduce(ll, axis=1))
+    return loglike
+
+# n-D, hierarchical, mixture-model log-likelihood
+def lnlikeHM(pars, samples, obs, u):
+    '''
+    Generic likelihood function for importance sampling with any number of
+    dimensions.
+    Now with added jitter parameter (hierarchical) and a mixture model.
+    obs should be a 2d array of observations. shape = (ndims, nobs)
+    u should be a 2d array of uncertainties. shape = (ndims, nobs)
+    samples is a 3d array of samples. shape = (ndims, nobs, nsamp)
+    Y and V are the mean and variance of the Gaussian.
+    P is the probability that a data point is drawn from the Gaussian
+    '''
+    ndims, nobs, nsamp = samples.shape
+    zpred = model(pars, samples)
+    zobs = obs[1, :]
+    zerr = u[1, :]
+    Y, V, P = pars[3:]
+    ll1 = np.zeros((nobs, nsamp*nobs))
+    ll2 = np.zeros((nobs, nsamp*nobs))
+    ll = np.zeros((nobs, nsamp*nobs))
+    for i in range(nobs):
+        inv_sigma21 = 1.0/(zerr[i]**2 + pars[2]**2)
+        inv_sigma22 = 1.0/(zerr[i]**2 + V)
+        ll1[i, :] = -.5*((zobs[i] - zpred)**2*inv_sigma21) + np.log(inv_sigma21)
+        ll2[i, :] = -.5*((zobs[i] - Y)**2*inv_sigma22) + np.log(inv_sigma22)
+        ll[i, :] = np.logaddexp(np.log(1-P) + ll1[i, :], np.log(P) + ll2[i, :])
     loglike = np.sum(np.logaddexp.reduce(ll, axis=1))
     return loglike
 
