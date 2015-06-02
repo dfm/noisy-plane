@@ -53,6 +53,31 @@ def lnlikeH(pars, samples, obs, u):
     loglike = np.sum(np.logaddexp.reduce(ll, axis=1))
     return loglike
 
+# n-D, hierarchical log-likelihood with sigma as a function of y
+def lnlikeHF(pars, samples, obs, u):
+    '''
+    Generic likelihood function for importance sampling with any number of
+    dimensions.
+    Now with added jitter parameter (hierarchical)
+    obs should be a 2d array of observations. shape = (ndims, nobs)
+    u should be a 2d array of uncertainties. shape = (ndims, nobs)
+    samples is a 3d array of samples. shape = (ndims, nobs, nsamp)
+    '''
+    ndims, nobs, nsamp = samples.shape
+    zpred = model(pars, samples)
+    zobs = obs[1, :]
+    zerr = u[1, :]
+    ll = np.zeros((nobs, nsamp*nobs))
+    ss = 0
+    for i in range(nobs):
+        inv_sigma2 = 1.0/(zerr[i]**2 + np.exp(pars[2])*zobs[i])
+        ss += inv_sigma2
+        ll[i, :] = -.5*((zobs[i] - zpred)**2*inv_sigma2) + np.log(inv_sigma2)
+    loglike = np.sum(np.logaddexp.reduce(ll, axis=1))
+    if np.isfinite(loglike):
+        return loglike
+    return -np.inf
+
 def generate_samples_log(obs, up, um, N):
     '''
     obs is a 2darray of observations. shape = (ndims, nobs)
