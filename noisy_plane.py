@@ -64,15 +64,17 @@ def lnlikeHF(pars, samples, obs, u):
     samples is a 3d array of samples. shape = (ndims, nobs, nsamp)
     '''
     ndims, nobs, nsamp = samples.shape
-    zpred = model(pars, samples)
-    zobs = obs[1, :]
-    zerr = u[1, :]
+    ypred = model(pars, samples)
+    yobs = obs[1, :]
+    xobs = obs[0, :]
+    yerr = u[1, :]
     ll = np.zeros((nobs, nsamp*nobs))
-    ss = 0
     for i in range(nobs):
-        inv_sigma2 = 1.0/(zerr[i]**2 + np.exp(pars[2])*zobs[i])
-        ss += inv_sigma2
-        ll[i, :] = -.5*((zobs[i] - zpred)**2*inv_sigma2) + np.log(inv_sigma2)
+        m = pars[2]
+        inv_sigma2 = 1.0/(yerr[i]**2 + m**2)
+#         inv_sigma2 = 1.0/(yerr[i]**2 + (m*model1(pars, xobs[i]))**2)
+#         inv_sigma2 = 1.0/(yerr[i]**2 + m/model1(pars, xobs[i]))
+        ll[i, :] = -.5*((yobs[i] - ypred)**2*inv_sigma2) + np.log(inv_sigma2)
     loglike = np.sum(np.logaddexp.reduce(ll, axis=1))
     if np.isfinite(loglike):
         return loglike
