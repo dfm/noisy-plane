@@ -70,8 +70,7 @@ def lnlikeHF(pars, samples, obs, u):
     yerr = u[1, :]
     ll = np.zeros((nobs, nsamp*nobs))
     for i in range(nobs):
-        m = pars[2]
-        inv_sigma2 = 1.0/(yerr[i]**2 + m**2)
+        inv_sigma2 = 1.0/(yerr[i]**2 + pars[2]**2 + pars[3]*model1(pars, xobs[i]))
 #         inv_sigma2 = 1.0/(yerr[i]**2 + (m*model1(pars, xobs[i]))**2)
 #         inv_sigma2 = 1.0/(yerr[i]**2 + m/model1(pars, xobs[i]))
         ll[i, :] = -.5*((yobs[i] - ypred)**2*inv_sigma2) + np.log(inv_sigma2)
